@@ -290,8 +290,8 @@
         <input id="nickname" maxlength="18" placeholder="Your name">
       </div>
       <div class="field full">
-        <label for="selfDescription">DESCRIBE YOURSELF</label>
-        <textarea id="selfDescription" maxlength="180" placeholder="For example: I like music, hiking, and cooking with friends."></textarea>
+        <label for="selfDescription">DESCRIBE YOURSELF (50–150 CHARACTERS)</label>
+        <textarea id="selfDescription" minlength="50" maxlength="150" required placeholder="For example: I like music, hiking, and cooking with friends."></textarea>
       </div>
       <div class="field full" id="iconField" style="display:none">
         <span class="sectionLabel">ICON</span>
@@ -1301,7 +1301,7 @@
     refreshIdentityMapping();
     completeLog.participant={
       name:participantName(),
-      self_description:el('selfDescription').value.trim().slice(0,180),
+      self_description:el('selfDescription').value.trim().slice(0,150),
       selected_color:selectedColor
     };
 
@@ -2006,6 +2006,48 @@
     showScreen('questionnaire1Screen');
   }
 
+  // ===================== REQUIRED QUESTIONS =====================
+  // Every input/select/textarea is required unless it is an explicitly optional
+  // open-text field. At the moment these are the two text boxes below.
+  const OPTIONAL_OPEN_TEXT_IDS = new Set(['ratingMessage','feedbackPlayerComment']);
+
+  function markRequiredFields(){
+    document.querySelectorAll('input, select, textarea').forEach(field=>{
+      if(field.type==='hidden')return;
+
+      const isOpenText = field.tagName==='TEXTAREA' ||
+        (field.tagName==='INPUT' && ['text','email','tel','url','search'].includes((field.type||'text').toLowerCase()));
+      const nearbyText = [
+        field.placeholder || '',
+        field.closest('.responseBox')?.innerText || '',
+        field.closest('.questionnaire-item')?.innerText || ''
+      ].join(' ');
+      const explicitlyOptional = isOpenText && (
+        OPTIONAL_OPEN_TEXT_IDS.has(field.id) || /\boptional\b/i.test(nearbyText)
+      );
+
+      field.required = !explicitlyOptional;
+    });
+  }
+
+  function validateRequiredFields(container){
+    if(!container)return true;
+    const requiredFields=[...container.querySelectorAll('input[required], select[required], textarea[required]')]
+      .filter(field=>!field.disabled);
+
+    for(const field of requiredFields){
+      if(!field.checkValidity()){
+        field.scrollIntoView({behavior:'smooth',block:'center'});
+        setTimeout(()=>{
+          try{field.focus({preventScroll:true});}catch(e){field.focus();}
+          field.reportValidity();
+        },120);
+        return false;
+      }
+    }
+    return true;
+  }
+
   // ===================== QUESTIONNAIRE PLACEHOLDER LOGGING =====================
   // Add normal <input>, <select>, and/or <textarea> elements inside each questionnaire.
   // IMPORTANT: give every question a unique name (for example name="SPIN_1").
@@ -2032,6 +2074,9 @@
 
   document.querySelectorAll('.questionnaireNext').forEach(btn=>{
     btn.addEventListener('click',()=>{
+      const currentScreen=btn.closest('.questionnaireScreen');
+      if(!validateRequiredFields(currentScreen))return;
+
       collectQuestionnaire(btn.dataset.current);
 
       if(btn.dataset.next==='COMPLETE'){
@@ -2415,7 +2460,7 @@
     const targetLength=CFG.simpleMode?Infinity:(phase==='free'?scoredRoundLength:null);
     state=freshState(phase,targetLength);
     const name=participantName();
-    participantDescription=el('selfDescription').value.trim().slice(0,180);
+    participantDescription=el('selfDescription').value.trim().slice(0,150);
     el('meName').textContent=name;
     el('meIcon').textContent=CFG.useIcons?selectedIcon:'';
     el('ME').style.background=selectedColor;
@@ -2451,8 +2496,37 @@
     }
   }
 
+  // Require a self-description between 50 and 150 characters.
+  const selfDescriptionField = el('selfDescription');
+  if (selfDescriptionField) {
+    selfDescriptionField.minLength = 50;
+    selfDescriptionField.maxLength = 150;
+    selfDescriptionField.required = true;
+
+    const validateSelfDescription = () => {
+      const length = selfDescriptionField.value.trim().length;
+      if (length > 0 && length < 50) {
+        selfDescriptionField.setCustomValidity('Please write at least 50 characters.');
+      } else {
+        selfDescriptionField.setCustomValidity('');
+      }
+    };
+
+    selfDescriptionField.addEventListener('input', () => {
+      if (selfDescriptionField.value.length > 150) {
+        selfDescriptionField.value = selfDescriptionField.value.slice(0, 150);
+      }
+      validateSelfDescription();
+    });
+  }
+
   el('profileNext').addEventListener('click',()=>{
-    participantDescription=el('selfDescription').value.trim().slice(0,180);
+    if(selfDescriptionField){
+      const length=selfDescriptionField.value.trim().length;
+      selfDescriptionField.setCustomValidity(length < 50 ? 'Please write at least 50 characters.' : '');
+    }
+    if(!validateRequiredFields(el('profileScreen')))return;
+    participantDescription=el('selfDescription').value.trim().slice(0,150);
     completeLog.participant={name:participantName(),self_description:participantDescription,selected_color:selectedColor,selected_icon:selectedIcon};
     checkpoint();
     showScreen('meetScreen');
@@ -2486,6 +2560,7 @@
     });
   }
 
+  markRequiredFields();
   initializeSession();
 })();
 </script>
