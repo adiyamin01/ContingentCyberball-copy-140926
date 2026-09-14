@@ -1,1 +1,1812 @@
+<!DOCTYPE html>
+<!-- saved from url=(0073)file:///C:/Users/user/Downloads/Cyberball_Return_Game___Reworked_V14.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cyberball Return Game — Reworked V6</title>
+<style>
+  :root{
+    --bg:#f5f4ef;
+    --card:#ffffff;
+    --ink:#1c2430;
+    --muted:#6c7480;
+    --line:#d9dde3;
+    --gain:#218739;
+    --loss:#c73737;
+    --special:#e4f7e7;
+    --shadow:0 16px 45px rgba(20,28,38,.12);
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;min-height:100vh;
+    background:radial-gradient(circle at top,#fff 0,#f5f4ef 58%,#eceae3 100%);
+    color:var(--ink);
+    font-family:Garamond, Georgia, 'Times New Roman', serif;
+    overflow:hidden;
+  }
+  button,input,textarea{font:inherit}
+  button{cursor:pointer}
+  .screen{display:none;min-height:100vh;align-items:center;justify-content:center;padding:28px}
+  .screen.active{display:flex}
+  .panel{
+    width:min(820px,95vw);max-height:94vh;overflow:auto;
+    background:rgba(255,255,255,.97);border:1px solid rgba(0,0,0,.06);
+    border-radius:28px;box-shadow:var(--shadow);padding:42px;text-align:center;
+  }
+  h1{font-size:clamp(36px,5vw,58px);margin:0 0 16px;line-height:1.04}
+  h2{font-size:clamp(30px,4vw,44px);margin:0 0 14px}
+  h3{font-size:24px;margin:8px 0 6px}
+  p{font-size:20px;line-height:1.48;margin:10px auto;color:#39414d;max-width:660px}
+  .eyebrow{font-size:14px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-family:Arial,sans-serif;font-weight:700;margin-bottom:13px}
+  .primary,.secondary{
+    border:0;border-radius:999px;padding:14px 30px;font-weight:700;font-size:18px;
+  }
+  .primary{background:#202733;color:#fff;box-shadow:0 8px 18px rgba(20,28,38,.16)}
+  .secondary{background:#eef0f3;color:#202733;margin-right:8px}
+  .primary:hover,.secondary:hover{transform:translateY(-1px)}
+  .primary:disabled{opacity:.42;cursor:not-allowed;transform:none}
+
+  /* PROFILE */
+  .profileGrid{display:grid;grid-template-columns:1fr 1fr;gap:22px;text-align:left;margin:24px auto 28px;max-width:680px}
+  .field.full{grid-column:1/-1}
+  .field label,.sectionLabel{display:block;font-size:14px;color:var(--muted);margin-bottom:9px;font-family:Arial,sans-serif;font-weight:800;letter-spacing:.02em}
+  .field input,.field textarea{width:100%;border:1px solid var(--line);border-radius:14px;padding:13px 15px;font-size:19px;outline:none;background:#fff}
+  .field textarea{resize:vertical;min-height:92px}
+  .field input:focus,.field textarea:focus{border-color:#8b93a1;box-shadow:0 0 0 3px rgba(80,90,110,.08)}
+  .choiceRow{display:flex;flex-wrap:wrap;gap:10px}
+  .iconChoice,.colorChoice{border:2px solid transparent;background:#f4f5f6;border-radius:15px;display:grid;place-items:center;transition:.15s ease;box-shadow:none}
+  .iconChoice{width:60px;height:60px;font-family:Arial,sans-serif;font-size:29px}
+  .colorChoice{width:44px;height:44px;border-radius:50%;border:4px solid #fff;outline:1px solid #d7dbe0}
+  .iconChoice.selected{border-color:#202733;background:#fff;transform:translateY(-2px)}
+  .colorChoice.selected{outline:3px solid #202733;outline-offset:2px}
+
+  /* MEET PLAYERS */
+  .playerCards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:26px auto 30px;max-width:760px}
+  .playerCard{border:1px solid var(--line);border-radius:22px;padding:22px 16px;background:#fff;min-height:245px}
+  .avatar{width:92px;height:92px;border-radius:50%;margin:0 auto 14px;display:grid;place-items:center;font-family:Arial,sans-serif;font-size:42px;border:5px solid #fff;box-shadow:0 8px 20px rgba(20,28,38,.12)}
+  .sentence{font-size:17px;line-height:1.38;color:#4b5360;margin-top:10px}
+
+  /* MEMORY */
+  .feedbackBlock{max-width:700px;margin:0 auto 8px}
+  .feedbackBlock .avatar{width:44px;height:44px;margin:0 auto 5px;border-width:3px;box-shadow:0 4px 11px rgba(20,28,38,.10)}
+  .feedbackBlock h3{margin:0;font-size:19px;color:#4a525e}
+  .fbScaleWrap{max-width:700px;margin:26px auto 0}
+  .fbMarkers{display:grid;grid-template-columns:repeat(10,1fr);gap:7px;margin-bottom:5px;min-height:38px;align-items:end}
+  .fbMarker{grid-row:1;text-align:center;font-family:Arial,sans-serif;font-size:13px;font-weight:800;color:#202733;white-space:nowrap;line-height:1.15}
+  .fbMarker .tick{display:block;font-size:13px;line-height:1;margin-top:1px}
+  .fbScale{display:grid;grid-template-columns:repeat(10,1fr);gap:7px}
+  .fbCell{border:1px solid var(--line);background:#fbfbfa;border-radius:12px;padding:13px 4px;font-family:Arial,sans-serif;font-weight:800;font-size:16px;text-align:center;color:#202733}
+  .fbCell.avg{border:1px dashed #202733;background:#fff}
+  .fbCell.band{background:#ebedf0;border-color:#dcdfe4;opacity:0;transition:opacity .45s ease}
+  .fbCell.band.show{opacity:1}
+  .fbCell.mark{background:#202733;color:#fff;border-color:#202733;opacity:0;transform:scale(.86);transition:opacity .3s ease,transform .3s cubic-bezier(.2,1.5,.4,1)}
+  .fbCell.mark.show{opacity:1;transform:scale(1)}
+  .fbMarker.participant{opacity:0;transform:translateY(-14px);transition:opacity .35s ease,transform .45s cubic-bezier(.2,1.2,.3,1)}
+  .fbMarker.participant.show{opacity:1;transform:translateY(0)}
+  .fbQuiz{margin:26px auto 0;max-width:520px;opacity:0;transition:opacity .4s ease;pointer-events:none}
+  .fbQuiz.show{opacity:1;pointer-events:auto}
+  .fbQuizPrompt{font-size:19px;font-weight:700;line-height:1.35;margin-bottom:14px;color:#202733}
+  .fbQuizOptions{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;max-width:400px;margin:0 auto}
+  .fbQuizBtn{border:1px solid var(--line);background:#fbfbfa;border-radius:12px;padding:13px 4px;font-family:Arial,sans-serif;font-weight:800;font-size:16px;color:#202733}
+  .fbQuizBtn:hover:not(:disabled){border-color:#8b93a1;background:#fff}
+  .fbQuizBtn.correct{background:#202733;color:#fff;border-color:#202733}
+  .fbQuizBtn.wrong{background:#fff;color:#a9b0ba;border-color:#e3e5e8;text-decoration:line-through}
+  .fbQuizBtn:disabled{cursor:default}
+  .fbQuizHint{min-height:20px;margin-top:12px;font-family:Arial,sans-serif;font-size:14px;font-weight:700;color:#6c7480}
+  .fbEnds{display:flex;justify-content:space-between;margin-top:9px;color:var(--muted);font-family:Arial,sans-serif;font-size:13px}
+  .feedbackCaption{margin:24px auto 0;max-width:580px;font-size:22px;font-weight:800;line-height:1.35;color:#202733;opacity:0;transition:opacity .45s ease}
+  .feedbackCaption.show{opacity:1}
+  .feedbackCaption.neutral{font-size:19px;font-weight:700;color:#4a525e}
+  .responseBox.quiet label{font-size:12px;color:#9aa1ac}
+  .responseBox.quiet textarea{min-height:72px;font-size:16px;background:#fbfbfa;border-color:#e9eaec}
+  .responseBox.quiet textarea:focus{background:#fff}
+  /* ---- seating task ---- */
+  .seatLegend{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin:14px 0 2px}
+  .seatLegendItem{display:flex;align-items:center;gap:8px;font-family:Arial,sans-serif;font-size:14px;font-weight:800}
+  .seatSwatch{width:20px;height:20px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px var(--line)}
+  .seatStage{position:relative;width:440px;height:440px;margin:16px auto 4px}
+  .seatTableTop{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:47%;height:47%;
+    border-radius:50%;background:#efe7d9;border:1px solid #ddd2bf;box-shadow:inset 0 2px 10px rgba(120,100,70,.14);
+    display:grid;place-items:center;font-family:Arial,sans-serif;font-size:12px;font-weight:800;
+    letter-spacing:.14em;text-transform:uppercase;color:#a2957e}
+  .seat{position:absolute;width:104px;height:104px;margin:-52px 0 0 -52px;border-radius:50%;
+    display:grid;place-items:center;align-content:center;border:2px solid var(--line);background:#fff;transition:.16s ease}
+  .seat .seatName{font-family:Arial,sans-serif;font-weight:800;font-size:15px;line-height:1.1;color:#202733}
+  .seat .seatNum{font-family:Arial,sans-serif;font-weight:800;font-size:11px;color:#98a0ab;margin-top:3px}
+  .seat.occupied{border-width:4px;box-shadow:0 6px 16px rgba(20,28,38,.12)}
+  .seat.empty{border:2px dashed #a9b1bd;background:#fbfbfa;cursor:pointer}
+  .seat.empty .seatName{color:#6c7480;font-size:13px}
+  .seat.empty:hover{border-color:#202733;background:#fff;transform:scale(1.05)}
+  .seat.empty.locked{cursor:default}
+  .seat.empty.locked:hover{border-color:#a9b1bd;background:#fbfbfa;transform:none}
+  .seat.chosen{border:4px solid #202733;background:#fff;cursor:default}
+  .seat.chosen .seatName{color:#202733;font-size:15px}
+  .seatPrompt{font-size:20px;font-weight:700;margin:2px auto 4px;max-width:520px}
+  @media (max-width:520px){
+    .seatStage{width:320px;height:320px}
+    .seat{width:80px;height:80px;margin:-40px 0 0 -40px}
+    .seat .seatName{font-size:12px}
+  }
+  .memoryBox{max-width:640px;margin:24px auto}
+  .memoryProgress{font-family:Arial,sans-serif;font-weight:800;color:var(--muted);font-size:14px;margin-bottom:12px}
+  .memoryPrompt{font-size:28px;line-height:1.25;font-weight:700;margin:14px auto 22px}
+  .memoryCue{display:flex;justify-content:center;align-items:center;gap:12px;margin:12px auto 18px}
+  .cueIcon{font-size:52px;font-family:Arial,sans-serif}
+  .cueColor{width:64px;height:64px;border-radius:50%;border:6px solid #fff;box-shadow:0 0 0 1px #cfd4db,0 8px 18px rgba(20,28,38,.10)}
+  .memoryOptions{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .memoryOption{min-height:112px;border:1px solid var(--line);border-radius:18px;background:#fbfbfa;font-weight:700;font-size:18px;padding:14px;display:flex;align-items:center;justify-content:center;gap:11px;text-align:left}
+  .memoryOption:hover{border-color:#8b93a1;background:#fff}
+  .memoryOption .smallIcon{font-family:Arial,sans-serif;font-size:34px;flex:0 0 auto}
+  .optionProfile{display:flex;align-items:center;gap:11px;width:100%}
+  .optionText{display:flex;flex-direction:column;gap:4px}
+  .optionName{font-family:Arial,sans-serif;font-size:17px;font-weight:900;color:#202733}
+  .optionSentence{font-family:Arial,sans-serif;font-size:13px;line-height:1.3;font-weight:500;color:#59616c}
+  .textCue{max-width:560px;margin:0 auto;border:1px solid var(--line);border-radius:18px;padding:16px 18px;background:#fbfbfa;font-size:18px;line-height:1.4;color:#39414d}
+  .resultBig{font-family:Arial,sans-serif;font-size:54px;font-weight:900;margin:18px 0 8px}
+
+  /* RATING */
+  .ratingIdentity{margin:22px auto 8px}
+  .ratingScale{display:grid;grid-template-columns:repeat(10,1fr);gap:7px;max-width:700px;margin:22px auto 10px}
+  .rateBtn{border:1px solid var(--line);background:#fbfbfa;border-radius:12px;padding:13px 4px;font-family:Arial,sans-serif;font-weight:800;font-size:16px}
+  .rateBtn.selected{background:#202733;color:#fff;border-color:#202733}
+  .scaleEnds{display:flex;justify-content:space-between;max-width:700px;margin:0 auto 26px;color:var(--muted);font-family:Arial,sans-serif;font-size:13px}
+
+  /* FEEDBACK */
+  .feedbackScore{font-family:Arial,sans-serif;font-size:78px;font-weight:900;line-height:1;margin:14px 0 6px}
+  .feedbackScore.pending{font-size:44px;color:var(--muted)}
+  .meanBox{margin:24px auto 0;max-width:430px;border-top:1px solid var(--line);padding-top:18px;font-family:Arial,sans-serif;color:#515966}
+  .responseBox{max-width:650px;margin:24px auto;text-align:left}
+  .responseBox label{display:block;font-family:Arial,sans-serif;font-size:14px;font-weight:800;color:var(--muted);margin-bottom:8px}
+  .responseBox textarea{width:100%;min-height:105px;resize:vertical;border:1px solid var(--line);border-radius:16px;padding:14px 16px;font-size:18px;outline:none;background:#fff}
+  .responseBox textarea:focus{border-color:#8b93a1;box-shadow:0 0 0 3px rgba(80,90,110,.08)}
+  .messageHint{font-family:Arial,sans-serif;font-size:13px;color:var(--muted);margin-top:7px}
+
+  /* RULES */
+  .ruleCard{margin:28px auto 30px;max-width:560px;border:1px solid var(--line);border-radius:22px;background:#fbfbfa;padding:24px 28px;display:flex;align-items:center;justify-content:center;gap:20px}
+  .ruleValue{font-family:Arial,sans-serif;font-size:44px;font-weight:900;min-width:92px}
+  .gain{color:var(--gain)}
+  .loss{color:var(--loss)}
+  .ruleText{text-align:left;font-size:20px;line-height:1.35}
+  .specialDemo{background:var(--special);border:1px solid #b7dfbd;border-radius:22px;padding:24px;margin:24px auto;max-width:580px}
+  .demoStar{width:54px;height:54px;margin:0 auto 12px;background:#232a35;clip-path:polygon(50% 0%,61% 35%,98% 35%,68% 56%,79% 94%,50% 72%,21% 94%,32% 56%,2% 35%,39% 35%)}
+
+  /* GAME */
+  #gameScreen{padding:0;position:relative}
+  #gameWrap{position:relative;width:100vw;height:100vh;min-height:620px;transition:background .25s ease}
+  #gameWrap.specialMode{background:radial-gradient(circle at center,#effaf0 0,#dff4e3 72%,#d4ecd9 100%)}
+  .hud{position:absolute;top:22px;left:50%;transform:translateX(-50%);z-index:20;background:rgba(255,255,255,.88);backdrop-filter:blur(8px);border:1px solid rgba(0,0,0,.06);border-radius:999px;padding:10px 18px;box-shadow:0 8px 24px rgba(20,28,38,.08);white-space:nowrap;font-family:Arial,sans-serif}
+  .hud strong{font-size:15px}
+  #instruction{position:absolute;top:78px;left:50%;transform:translateX(-50%);z-index:20;font-size:20px;font-weight:800;background:rgba(255,255,255,.90);padding:8px 16px;border-radius:12px;opacity:0;transition:opacity .25s ease;text-align:center;max-width:min(740px,88vw)}
+  #instruction.show{opacity:1}
+  #specialBanner{position:absolute;top:128px;left:50%;transform:translateX(-50%);z-index:20;font-family:Arial,sans-serif;font-weight:900;background:#ffffffd9;border:2px solid #9fd5a8;border-radius:14px;padding:9px 14px;opacity:0;transition:opacity .2s ease;pointer-events:none}
+  #specialBanner.show{opacity:1}
+  .player{position:absolute;width:136px;height:136px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 13px 30px rgba(20,28,38,.15);border:5px solid rgba(255,255,255,.96);transition:transform .2s ease,box-shadow .2s ease,filter .2s ease;user-select:none}
+  .player .icon{font-family:Arial,sans-serif;font-size:40px;line-height:1}
+  .player .icon:empty{display:none}
+  .player .name{font-size:22px;font-weight:700;margin-top:6px;max-width:112px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .player .tag{font-size:12px;opacity:.68;margin-top:2px;font-family:Arial,sans-serif}
+  .player.computer.clickable{cursor:pointer;transform:scale(1.06);box-shadow:0 17px 40px rgba(20,28,38,.22)}
+  .player.computer.clickable:hover{transform:scale(1.13)}
+  .player.holder{outline:5px solid #202733;outline-offset:7px}
+  .player.senderPulse{animation:pulse 550ms ease 1}
+  @keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.14)}100%{transform:scale(1)}}
+  #A{left:15%;top:18%}
+  #B{right:15%;top:18%}
+  #C{right:16%;bottom:12%}
+  #ME{left:16%;bottom:12%}
+  .scoreBadge{position:absolute;right:-46px;bottom:-8px;z-index:25;background:#fff;color:#202733;border:2px solid rgba(32,39,51,.14);border-radius:999px;padding:8px 12px;font-family:Arial,sans-serif;font-weight:800;font-size:15px;box-shadow:0 8px 20px rgba(20,28,38,.13);min-width:66px;text-align:center}
+  .scoreDelta{position:absolute;right:-54px;top:-15px;z-index:28;font-family:Arial,sans-serif;font-weight:900;font-size:25px;opacity:0;transform:translateY(6px) scale(.86);pointer-events:none;text-shadow:0 2px 0 #fff,0 0 8px #fff}
+  .scoreDelta.show{animation:scorePop .82s ease forwards}
+  #gameWrap.freeMode .scoreBadge{display:none}
+  @keyframes scorePop{0%{opacity:0;transform:translateY(8px) scale(.82)}22%{opacity:1;transform:translateY(0) scale(1.08)}70%{opacity:1;transform:translateY(-8px) scale(1)}100%{opacity:0;transform:translateY(-18px) scale(.96)}}
+  #ball{position:absolute;width:34px;height:34px;border-radius:50%;background:#232a35;box-shadow:0 7px 14px rgba(20,28,38,.25);z-index:12;transition:left .68s cubic-bezier(.22,.7,.24,1),top .68s cubic-bezier(.22,.7,.24,1),transform .68s ease;pointer-events:none}
+  #ball::after{content:"";position:absolute;width:10px;height:10px;border:2px solid rgba(255,255,255,.7);border-radius:50%;left:6px;top:5px}
+  #ball.star{border-radius:0;clip-path:polygon(50% 0%,61% 35%,98% 35%,68% 56%,79% 94%,50% 72%,21% 94%,32% 56%,2% 35%,39% 35%);transform:scale(1.2);background:#202733}
+  #ball.star::after{display:none}
+  .statsGrid{display:grid;grid-template-columns:1fr;gap:16px;margin:26px auto;max-width:270px}
+  .stat{border:1px solid var(--line);border-radius:18px;padding:18px;background:#fbfbfa}
+  .stat b{display:block;font-family:Arial,sans-serif;font-size:30px;margin-bottom:4px}
+
+  @media(max-width:760px){
+    .panel{padding:28px 18px}.profileGrid{grid-template-columns:1fr}.field.full{grid-column:auto}
+    .playerCards{grid-template-columns:1fr}.memoryOptions{grid-template-columns:1fr}.ratingScale{grid-template-columns:repeat(5,1fr)}
+    .fbScale,.fbMarkers{gap:4px}.fbCell{padding:10px 2px;font-size:14px}.fbMarker{font-size:10px}.feedbackCaption{font-size:19px}
+    .player{width:108px;height:108px}.player .icon{font-size:31px}.player .name{font-size:18px}
+    #A{left:6%;top:19%}#B{right:6%;top:19%}#C{right:7%;bottom:13%}#ME{left:7%;bottom:13%}
+    .scoreBadge{right:-35px;bottom:-17px;font-size:13px;padding:7px 9px}.scoreDelta{right:-40px;top:-20px;font-size:21px}
+    .hud{padding:8px 12px}.hud strong{font-size:13px}
+  }
+</style>
+</head>
+<body>
+
+<!-- PROFILE FIRST: other-player identities remain hidden here -->
+<section id="profileScreen" class="screen active">
+  <div class="panel">
+    <div class="eyebrow">Player setup</div>
+    <h1>Create your player</h1>
+    <p>Choose your name and color, and write a short description of yourself.</p>
+    <div class="profileGrid">
+      <div class="field full">
+        <label for="nickname">NAME</label>
+        <input id="nickname" maxlength="18" placeholder="Your name">
+      </div>
+      <div class="field full">
+        <label for="selfDescription">DESCRIBE YOURSELF</label>
+        <textarea id="selfDescription" maxlength="180" placeholder="For example: I like music, hiking, and cooking with friends."></textarea>
+      </div>
+      <div class="field full" id="iconField" style="display:none">
+        <span class="sectionLabel">ICON</span>
+        <div class="choiceRow" id="iconChoices"><button type="button" class="iconChoice selected" data-icon="🦋">🦋</button><button type="button" class="iconChoice" data-icon="🎮">🎮</button><button type="button" class="iconChoice" data-icon="🪐">🪐</button><button type="button" class="iconChoice" data-icon="🐿️">🐿️</button><button type="button" class="iconChoice" data-icon="🎵">🎵</button><button type="button" class="iconChoice" data-icon="🦉">🦉</button><button type="button" class="iconChoice" data-icon="🐬">🐬</button><button type="button" class="iconChoice" data-icon="🐦">🐦</button><button type="button" class="iconChoice" data-icon="📚">📚</button><button type="button" class="iconChoice" data-icon="🌿">🌿</button><button type="button" class="iconChoice" data-icon="🎹">🎹</button><button type="button" class="iconChoice" data-icon="🦔">🦔</button><button type="button" class="iconChoice" data-icon="🌙">🌙</button><button type="button" class="iconChoice" data-icon="🐸">🐸</button><button type="button" class="iconChoice" data-icon="📷">📷</button><button type="button" class="iconChoice" data-icon="🐶">🐶</button><button type="button" class="iconChoice" data-icon="🏀">🏀</button><button type="button" class="iconChoice" data-icon="🐨">🐨</button><button type="button" class="iconChoice" data-icon="⭐">⭐</button><button type="button" class="iconChoice" data-icon="🐙">🐙</button><button type="button" class="iconChoice" data-icon="🎈">🎈</button><button type="button" class="iconChoice" data-icon="☀️">☀️</button><button type="button" class="iconChoice" data-icon="🐻">🐻</button><button type="button" class="iconChoice" data-icon="🎭">🎭</button><button type="button" class="iconChoice" data-icon="🌸">🌸</button><button type="button" class="iconChoice" data-icon="🍀">🍀</button><button type="button" class="iconChoice" data-icon="🐱">🐱</button><button type="button" class="iconChoice" data-icon="🐰">🐰</button><button type="button" class="iconChoice" data-icon="🎧">🎧</button><button type="button" class="iconChoice" data-icon="🦊">🦊</button><button type="button" class="iconChoice" data-icon="🦒">🦒</button><button type="button" class="iconChoice" data-icon="🐵">🐵</button><button type="button" class="iconChoice" data-icon="🎨">🎨</button><button type="button" class="iconChoice" data-icon="🦓">🦓</button><button type="button" class="iconChoice" data-icon="🦁">🦁</button><button type="button" class="iconChoice" data-icon="🐧">🐧</button><button type="button" class="iconChoice" data-icon="🧩">🧩</button><button type="button" class="iconChoice" data-icon="🐯">🐯</button><button type="button" class="iconChoice" data-icon="⛵">⛵</button><button type="button" class="iconChoice" data-icon="🐘">🐘</button><button type="button" class="iconChoice" data-icon="🐳">🐳</button><button type="button" class="iconChoice" data-icon="🍎">🍎</button></div>
+      </div>
+      <div class="field full">
+        <span class="sectionLabel">COLOR</span>
+        <div class="choiceRow" id="colorChoices"><button type="button" class="colorChoice selected" data-color="#B3AFA6" aria-label="Color option 1" style="background: rgb(179, 175, 166);"></button><button type="button" class="colorChoice" data-color="#8CC98C" aria-label="Color option 2" style="background: rgb(140, 201, 140);"></button><button type="button" class="colorChoice" data-color="#DFD97A" aria-label="Color option 3" style="background: rgb(223, 217, 122);"></button><button type="button" class="colorChoice" data-color="#C9A57F" aria-label="Color option 4" style="background: rgb(201, 165, 127);"></button><button type="button" class="colorChoice" data-color="#B79BD6" aria-label="Color option 5" style="background: rgb(183, 155, 214);"></button><button type="button" class="colorChoice" data-color="#7FCFCF" aria-label="Color option 6" style="background: rgb(127, 207, 207);"></button></div>
+      </div>
+    </div>
+    <button class="primary" id="profileNext">Meet the players</button>
+  </div>
+</section>
+
+<section id="meetScreen" class="screen">
+  <div class="panel">
+    <div class="eyebrow">Meet the players</div>
+    <h2>Who are you playing with?</h2>
+    <p>Take a moment to get to know each player's <b>name, color, and description</b>.</p>
+    <div class="playerCards" id="meetCards"><div class="playerCard">
+      <div class="avatar" style="background:#7FB3D9"></div>
+      <h3>Blue</h3>
+      <div class="sentence">“I enjoy TV shows, movies, and books, and I really like animals.”</div>
+    </div><div class="playerCard">
+      <div class="avatar" style="background:#F0A868"></div>
+      <h3>Orange</h3>
+      <div class="sentence">“I love art and music, especially painting, museums, and visiting galleries.”</div>
+    </div><div class="playerCard">
+      <div class="avatar" style="background:#E2A6C4"></div>
+      <h3>Pink</h3>
+      <div class="sentence">“I love nature, visiting new places, and relaxing over coffee or a glass of wine.”</div>
+    </div></div>
+    <button class="primary" id="meetNext">Continue</button>
+  </div>
+</section>
+
+<section id="memoryScreen" class="screen">
+  <div class="panel">
+    <div class="eyebrow">Player memory</div>
+    <h2>Match the players</h2>
+    <p>Match each player's <b>name, icon, and description</b>. You need at least <b>16 correct out of 20</b> to continue.</p>
+    <div class="memoryBox">
+      <div class="memoryProgress" id="memoryProgress">Trial 1 of 20</div>
+      <div class="memoryPrompt" id="memoryPrompt"></div>
+      <div class="memoryCue" id="memoryCue"></div>
+      <div class="memoryOptions" id="memoryOptions"></div>
+    </div>
+  </div>
+</section>
+
+<section id="memoryResultScreen" class="screen">
+  <div class="panel">
+    <div class="eyebrow">Memory test complete</div>
+    <h2 id="memoryResultTitle">Nice work</h2>
+    <div class="resultBig" id="memoryResultScore">0 / 20</div>
+    <p id="memoryResultText"></p>
+    <div id="memoryResultButtons"></div>
+  </div>
+</section>
+
+<section id="ratingScreen" class="screen">
+  <div class="panel">
+    <div class="eyebrow" id="ratingEyebrow">Your impression</div>
+    <h2 id="ratingTitle">How nice does this person seem to you?</h2>
+    <div class="ratingIdentity" id="ratingIdentity"></div>
+    <div class="ratingScale" id="ratingScale"></div>
+    <div class="scaleEnds"><span>1 — Not nice</span><span>10 — Very nice</span></div>
+    <div class="responseBox" id="ratingMessageWrap" style="display:none">
+      <label id="ratingMessageLabel" for="ratingMessage">MESSAGE TO PLAYER</label>
+      <textarea id="ratingMessage" maxlength="300" placeholder="Write an optional message..."></textarea>
+      <div class="messageHint">Optional — this message is saved with your response.</div>
+    </div>
+    <button class="primary" id="ratingNext" disabled="">Continue</button>
+  </div>
+</section>
+
+<section id="feedbackScreen" class="screen">
+  <div class="panel">
+    <div class="eyebrow" id="feedbackEyebrow" style="display:none"></div>
+    <div class="feedbackBlock">
+      <div id="feedbackIdentity"></div>
+      <div class="fbScaleWrap">
+        <div class="fbMarkers" id="fbMarkers"></div>
+        <div class="fbScale" id="fbScale"></div>
+        <div class="fbEnds"><span>1 — Not nice</span><span>10 — Very nice</span></div>
+        <div class="fbQuiz" id="fbQuiz">
+          <div class="fbQuizPrompt" id="fbQuizPrompt"></div>
+          <div class="fbQuizOptions" id="fbQuizOptions"></div>
+          <div class="fbQuizHint" id="fbQuizHint"></div>
+        </div>
+      </div>
+      <div class="feedbackCaption" id="feedbackCaption"></div>
+      <div class="feedbackScore" id="feedbackScore" style="display:none"></div>
+    </div>
+    <p id="feedbackText" style="display:none"></p>
+    <div class="responseBox quiet" style="display:none">
+      <label id="feedbackPlayerCommentLabel" for="feedbackPlayerComment">YOUR COMMENT ABOUT THIS RATING</label>
+      <textarea id="feedbackPlayerComment" maxlength="500" placeholder="Optional — write a comment about this rating..."></textarea>
+    </div>
+    <button class="primary" id="feedbackNext">Continue</button>
+  </div>
+</section>
+
+
+<section id="rule1Screen" class="screen">
+  <div class="panel">
+    <div class="eyebrow">Game rule 1 of 3</div>
+    <h1>Reach 50 points</h1>
+    <p>The round continues until you reach <b>50 points</b>. Earn points by getting other players to <b>return the ball directly to you</b> after you throw it to them.</p>
+    <div class="ruleCard">
+      <div class="ruleValue gain">+1</div>
+      <div class="ruleText">Every time the player you chose <b>throws the ball straight back to you</b>, you gain one point.</div>
+    </div>
+    <p style="font-size:17px;color:#6c7480">A regular throw to you does not add a point.</p>
+    <button class="primary" id="rule1Next">Next</button>
+  </div>
+</section>
+
+<section id="rule2Screen" class="screen">
+  <div class="panel">
+    <div class="eyebrow">Game rule 2 of 3</div>
+    <h1>Do not repeat your choice</h1>
+    <p>You can choose any of the three players whenever you have the ball.</p>
+    <div class="ruleCard">
+      <div class="ruleValue loss">−2</div>
+      <div class="ruleText">If you choose the <b>same player on two consecutive choices</b>, you lose two points.</div>
+    </div>
+    <p style="font-size:17px;color:#6c7480">You may still choose the same player — the penalty will simply be applied.</p>
+    <button class="primary" id="rule2Next">Next</button>
+  </div>
+</section>
+
+<section id="rule3Screen" class="screen">
+  <div class="panel">
+    <div class="eyebrow">Game rule 3 of 3</div>
+    <h1>Special team throw</h1>
+    <p>Sometimes the background will turn <b>light green</b> and the ball will become a <b>star</b>.</p>
+    <div class="specialDemo"><div class="demoStar"></div><b style="font-family:Arial,sans-serif">SPECIAL THROW</b></div>
+    <div class="ruleCard">
+      <div class="ruleValue gain">+2</div>
+      <div class="ruleText">If you pass the star <b>back to the person who gave it to you</b>, every player receives +2 points.</div>
+    </div>
+    <div class="ruleCard">
+      <div class="ruleValue loss">−5</div>
+      <div class="ruleText">If you pass the star to <b>someone else</b>, you lose 5 points.</div>
+    </div>
+    <p style="font-size:18px;color:#39414d"><b>This special rule overrides Rule 1 and Rule 2.</b></p>
+    <p style="font-size:16px;color:#6c7480">On a green/star throw, neither the ordinary +1 return rule nor the repeated-choice −2 rule applies.</p>
+    <button class="primary" id="rule3Next">Start game</button>
+  </div>
+</section>
+
+<section id="gameScreen" class="screen">
+  <div id="gameWrap">
+    <div class="hud"><strong id="progressText">Your throws: 0 / 30</strong></div>
+    <div id="instruction">Choose a player</div>
+    <div id="specialBanner">★ SPECIAL THROW — return it to the sender</div>
+
+    <div id="A" class="player computer" style="background:#7FB3D9;"><div class="icon"></div><div class="name">Blue</div><div class="tag">Player</div><div class="scoreDelta" id="deltaA"></div></div>
+    <div id="B" class="player computer" style="background:#F0A868;"><div class="icon"></div><div class="name">Orange</div><div class="tag">Player</div><div class="scoreDelta" id="deltaB"></div></div>
+    <div id="C" class="player computer" style="background:#E2A6C4;"><div class="icon"></div><div class="name">Pink</div><div class="tag">Player</div><div class="scoreDelta" id="deltaC"></div></div>
+    <div id="ME" class="player">
+      <div class="icon" id="meIcon"></div>
+      <div class="name" id="meName">You</div>
+      <div class="tag">You</div>
+      <div class="scoreDelta" id="deltaME"></div>
+      <div class="scoreBadge"><span id="scoreME">0</span> pts</div>
+    </div>
+    <div id="ball"></div>
+  </div>
+</section>
+
+<section id="phase2Screen" class="screen">
+  <div class="panel">
+    <div class="eyebrow">Next phase</div>
+    <h2>Free game</h2>
+    <p>The points game is complete. Your score was:</p>
+    <div class="statsGrid"><div class="stat"><b id="phase1FinalScore">0</b><span>points</span></div></div>
+    <p>Now you will play another game with the same players. It will contain the <b>same number of received balls as Round 1</b>. There are <b>no points</b> and no repeat-choice rule.</p>
+    <div class="specialDemo"><div class="demoStar"></div><b style="font-family:Arial,sans-serif">ONLY RESTRICTION</b></div>
+    <p>When the background turns light green and the ball becomes a star, you <b>must return it to the player who sent it to you</b>. During that throw, the other players cannot be selected.</p>
+    <button class="primary" id="startFreeBtn">Start free game</button>
+  </div>
+</section>
+
+<section id="seatIntroScreen" class="screen">
+  <div class="panel">
+    <div class="eyebrow">One more task</div>
+    <h2>Where would you like to sit?</h2>
+    <p>You will now see a table with six seats. The other players are already seated, and three seats are free — the free seats are marked with a dashed outline.</p>
+    <p>On each table, click the seat you would most like to take. There are no right or wrong answers; choose the seat you would actually want.</p>
+    <div class="seatLegend" id="seatIntroLegend"></div>
+    <button class="primary" id="seatStartBtn">Start</button>
+  </div>
+</section>
+
+<section id="seatScreen" class="screen">
+  <div class="panel">
+    <div class="eyebrow" id="seatProgress">Table 1 of 10</div>
+    <div class="seatPrompt" id="seatPrompt">Click the seat you would like to take.</div>
+    <div class="seatLegend" id="seatLegend"></div>
+    <div class="seatStage" id="seatStage"><div class="seatTableTop">Table</div></div>
+    <button class="primary" id="seatNextBtn" disabled="">Next table</button>
+  </div>
+</section>
+
+<!-- =====================================================
+     QUESTIONNAIRES — EDIT THE QUESTIONS INSIDE EACH BLOCK
+     ===================================================== -->
+<section id="questionnaire1Screen" class="screen questionnaireScreen" data-questionnaire="SPIN">
+  <div class="panel">
+    <div class="eyebrow">Questionnaire 1 of 5</div>
+    <h2>SPIN</h2>
+    <div class="questionnaireQuestions" id="SPINQuestions">
+      <!-- ADD YOUR SPIN QUESTIONS HERE -->
+    </div>
+    <button class="primary questionnaireNext" data-current="SPIN" data-next="questionnaire2Screen">Continue</button>
+  </div>
+</section>
+
+<section id="questionnaire2Screen" class="screen questionnaireScreen" data-questionnaire="NPI">
+  <div class="panel">
+    <div class="eyebrow">Questionnaire 2 of 5</div>
+    <h2>NPI</h2>
+    <div class="questionnaireQuestions" id="NPIQuestions">
+      <!-- ADD YOUR NPI QUESTIONS HERE -->
+    </div>
+    <button class="primary questionnaireNext" data-current="NPI" data-next="questionnaire3Screen">Continue</button>
+  </div>
+</section>
+
+<section id="questionnaire3Screen" class="screen questionnaireScreen" data-questionnaire="Q3">
+  <div class="panel">
+    <div class="eyebrow">Questionnaire 3 of 5</div>
+    <h2>3Q</h2>
+    <div class="questionnaireQuestions" id="Q3Questions">
+      <!-- ADD YOUR 3Q QUESTIONS HERE -->
+    </div>
+    <button class="primary questionnaireNext" data-current="Q3" data-next="questionnaire4Screen">Continue</button>
+  </div>
+</section>
+
+<section id="questionnaire4Screen" class="screen questionnaireScreen" data-questionnaire="Demographic">
+  <div class="panel">
+    <div class="eyebrow">Questionnaire 4 of 5</div>
+    <h2>Demographic</h2>
+    <div class="questionnaireQuestions" id="DemographicQuestions">
+      <!-- ADD YOUR DEMOGRAPHIC QUESTIONS HERE -->
+    </div>
+    <button class="primary questionnaireNext" data-current="Demographic" data-next="questionnaire5Screen">Continue</button>
+  </div>
+</section>
+
+<section id="questionnaire5Screen" class="screen questionnaireScreen" data-questionnaire="Questionnaire_5">
+  <div class="panel">
+    <div class="eyebrow">Questionnaire 5 of 5</div>
+    <h2>Questionnaire 5</h2>
+    <div class="questionnaireQuestions" id="Questionnaire5Questions">
+      <!-- ADD YOUR FIFTH QUESTIONNAIRE HERE -->
+    </div>
+    <button class="primary questionnaireNext" data-current="Questionnaire_5" data-next="endScreen">Finish</button>
+  </div>
+</section>
+
+<section id="endScreen" class="screen">
+  <div class="panel">
+    <h2>Game complete</h2>
+    <p id="endText">Thank you — you have finished the game.</p>
+    <button class="primary" id="restartBtn">Play again</button>
+  </div>
+</section>
+
+<script>
+(() => {
+  const CFG = {
+    // Hidden experimental roles. The FIRST N=30 counted incoming throws use the
+    // original fixed 16/10/4 composition. After N, sender selection becomes
+    // probabilistic using the same 16:10:4 weights until the round ends.
+    targetToMe: { A:16, B:10, C:4 },
+    initialFixedN: 30,
+    scoredTarget: 50,
+
+    // Fixed-frequency return decks (not independent Bernoulli draws).
+    returnSuccessesPer10: { A:9, B:5, C:1 },
+
+    // Exactly four special incoming throws from each hidden role in EACH game phase,
+    // distributed within the fixed first N rather than concentrated at the beginning.
+    specialIncomingCounts: { A:4, B:4, C:4 },
+
+    moveMs:680,
+    pauseMs:360,
+    minBotPasses:1,
+    maxBotPasses:2,
+    memoryTrials:20,
+    memoryPass:16,
+    // Set to true to re-enable the player memory test (code retained below).
+    useMemoryTest:false,
+    // Set to true to show per-player icons alongside colors (code retained below).
+    useIcons:false,
+    // SIMPLE MODE: no rules, no points, no special/star throws. The round ends
+    // after the participant has thrown the ball userThrowTarget times.
+    // Set to false to restore the two-phase points game (code retained below).
+    simpleMode:true,
+    userThrowTarget:30,
+    // ---- Seating task (runs after the post-game ratings) ----
+    seatingEnabled:true,
+    seatingTrials:10,   // 10 of the 20 distinct configurations, balanced (see buildSeatingTrials)
+    seatingSeats:6,
+    seatingShowSeatNumbers:false
+  };
+
+  const ids=['A','B','C'];
+  const displayNames=['Blue','Orange','Pink'];
+  // Names, icons, descriptions, and hidden A/B/C roles are randomized independently.
+  // Opponent color is fixed to display name for the entire session.
+  const playerIconPool=['🩰','🐼','🚲'];
+  const playerSentencePool=[
+    'I love art and music, especially painting, museums, and visiting galleries.',
+    'I enjoy TV shows, movies, and books, and I really like animals.',
+    'I love nature, visiting new places, and relaxing over coffee or a glass of wine.'
+  ];
+  const userIconPool=[
+    '🌸','☀️','⛵','🌙','⭐','🍀','🎨','🎵','📚','🧩','🪐','🎈','🎧','🎮','🏀','🎹','📷','🌿','🎭','🍎',
+    '🐶','🐱','🐰','🦊','🐻','🐨','🐯','🦁','🐸','🐵','🐧','🐦','🦉','🦋','🐙','🐬','🐳','🦒','🦓','🐘','🦔','🐿️'
+  ];
+  // Colour now carries identity on its own (icons off), so the three opponent
+  // colours are drawn from the Okabe-Ito colour-blind-safe palette and differ in
+  // hue and in lightness. Dark text stays legible on all of them.
+  const nameColors={
+    Blue:'#7FB3D9',
+    Orange:'#F0A868',
+    Pink:'#E2A6C4'
+  };
+  // Participant options: clearly separable from the three opponent colours.
+  const colorPool=['#8CC98C','#B79BD6','#7FCFCF','#DFD97A','#B3AFA6','#C9A57F'];
+
+  const el=id=>document.getElementById(id);
+  const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+  const shuffle=arr=>{
+    const a=[...arr];
+    for(let i=a.length-1;i>0;i--){
+      const j=Math.floor(Math.random()*(i+1));
+      [a[i],a[j]]=[a[j],a[i]];
+    }
+    return a;
+  };
+
+  let identities={};
+  let selectedIcon='';
+  let selectedColor='';
+  let participantDescription='';
+  let memoryTrials=[];
+  let memoryIndex=0;
+  let memoryCorrect=0;
+  let ratingOrder=[];
+  let ratingIndex=0;
+  let ratingSelection=null;
+  let participantRatings={};
+  let ratingContext='pregame';
+  let roundRatings={scored:{},free:{}};
+  let roundMessages={scored:{},free:{}};
+  let feedbackOrder=[];
+  let feedbackIndex=0;
+  let feedbackComments={};
+  let scoredRoundLength=0;
+  let gamePositionByRole={};
+  let state=null;
+
+  // ===================== QUALTRICS / COMPLETE BEHAVIOR LOG =====================
+  const experimentStart=performance.now();
+  const completeLog={
+    version:'Cyberball Return Game — Reworked V6 + complete logging',
+    participant:{}, identity_mapping:{}, initial_ratings:[], feedback_comprehension:[],
+    feedback_comments:[], game_throws:[], postgame_ratings:[], seating_trials:[],
+    questionnaires:{SPIN:{},NPI:{},Q3:{},Demographic:{},Questionnaire_5:{}}
+  };
+  let ratingStart=0, feedbackAttemptStart=0, gameChoiceStart=0;
+  let gameThrowCounter=0, seatMouse=[];
+  let seatMouseLastSample=-Infinity;
+
+  function visibleName(role){
+    return role==='ME' ? participantName() : (identities[role]?.name || role);
+  }
+  function refreshIdentityMapping(){
+    completeLog.identity_mapping={};
+    ids.forEach(role=>{
+      const p=identities[role];
+      completeLog.identity_mapping[role]={visible_player:p.name,color:p.color,icon:p.icon,sentence:p.sentence};
+    });
+  }
+  function sendCompleteLog(){
+    refreshIdentityMapping();
+    completeLog.participant={
+      name:participantName(),
+      self_description:el('selfDescription').value.trim().slice(0,180),
+      selected_color:selectedColor,
+      selected_icon:selectedIcon
+    };
+
+    // Send each experiment section as its own Qualtrics Embedded Data column.
+    // Repeated records stay as JSON inside their section column.
+    const participantChoices=completeLog.game_throws.filter(x=>x.from_role==='ME');
+    const feedbackData={
+      comprehension:completeLog.feedback_comprehension,
+      comments:completeLog.feedback_comments
+    };
+    const fields={
+      Participant_Profile: JSON.stringify(completeLog.participant),
+      Identity_Mapping: JSON.stringify(completeLog.identity_mapping),
+      Initial_Ratings: JSON.stringify(completeLog.initial_ratings),
+      Feedback_Comprehension: JSON.stringify(feedbackData),
+      Game_Throws: JSON.stringify(completeLog.game_throws),
+      Game_Choices: JSON.stringify(participantChoices),
+      PostGame_Ratings: JSON.stringify(completeLog.postgame_ratings),
+      SPIN: JSON.stringify(completeLog.questionnaires.SPIN || {}),
+      NPI: JSON.stringify(completeLog.questionnaires.NPI || {}),
+      Q3: JSON.stringify(completeLog.questionnaires.Q3 || {}),
+      Demographic: JSON.stringify(completeLog.questionnaires.Demographic || {}),
+      Questionnaire_5: JSON.stringify(completeLog.questionnaires.Questionnaire_5 || {})
+    };
+
+    for(let i=1;i<=10;i++){
+      const trial=completeLog.seating_trials.find(x=>x.trial===i) || null;
+      fields['Table_'+i]=trial ? JSON.stringify(trial) : '';
+    }
+
+    window.parent.postMessage({type:'CyberballColumns',fields:fields},'*');
+    window.CyberballColumns=fields;
+    window.CyberballLog=completeLog; // local debugging backup only
+  }
+  function checkpoint(){ sendCompleteLog(); }
+
+  function participantName(){
+    return (el('nickname').value.trim()||'You').slice(0,18);
+  }
+
+  function showScreen(id){
+    if(id==='seatIntroScreen'){el('seatIntroLegend').innerHTML=seatLegendHTML();}
+    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+    el(id).classList.add('active');
+  }
+
+  function initializeSession(){
+    // Randomize the visible identity assigned to each hidden experimental role.
+    const names=shuffle(displayNames);
+    const icons=shuffle(playerIconPool);
+    const sentences=shuffle(playerSentencePool);
+
+    ids.forEach((role,i)=>{
+      identities[role]={
+        role,
+        name:names[i],
+        icon:icons[i],
+        color:nameColors[names[i]],
+        sentence:sentences[i]
+      };
+    });
+
+    // User choices deliberately exclude all three bot icons and the three fixed
+    // opponent colors, without revealing those opponent identities in setup.
+    const botIcons=icons;
+    const botColors=displayNames.map(name=>nameColors[name]);
+    const availableIcons=shuffle(userIconPool.filter(x=>!botIcons.includes(x)));
+    const availableColors=shuffle(colorPool.filter(x=>!botColors.includes(x)));
+    renderProfileChoices(availableIcons,availableColors);
+    selectedIcon=availableIcons[0];
+    selectedColor=availableColors[0];
+
+    renderMeetCards();
+    renderGameIdentities();
+  }
+
+  function renderProfileChoices(icons,colors){
+    const iconField=el('iconField');
+    if(iconField) iconField.style.display=CFG.useIcons?'':'none';
+    const iconWrap=el('iconChoices');
+    iconWrap.innerHTML='';
+    icons.forEach((icon,i)=>{
+      const b=document.createElement('button');
+      b.type='button';b.className='iconChoice'+(i===0?' selected':'');b.dataset.icon=icon;b.textContent=icon;
+      b.addEventListener('click',()=>{
+        document.querySelectorAll('.iconChoice').forEach(x=>x.classList.remove('selected'));
+        b.classList.add('selected');selectedIcon=icon;
+      });
+      iconWrap.appendChild(b);
+    });
+
+    const colorWrap=el('colorChoices');
+    colorWrap.innerHTML='';
+    colors.forEach((color,i)=>{
+      const b=document.createElement('button');
+      b.type='button';b.className='colorChoice'+(i===0?' selected':'');b.dataset.color=color;b.style.background=color;
+      b.setAttribute('aria-label',`Color option ${i+1}`);
+      b.addEventListener('click',()=>{
+        document.querySelectorAll('.colorChoice').forEach(x=>x.classList.remove('selected'));
+        b.classList.add('selected');selectedColor=color;
+      });
+      colorWrap.appendChild(b);
+    });
+  }
+
+  function identityCardHTML(p,compact=false){
+    return `<div class="${compact?'':'playerCard'}">
+      <div class="avatar" style="background:${p.color}">${CFG.useIcons?p.icon:''}</div>
+      <h3>${p.name}</h3>
+      ${compact?'':`<div class="sentence">“${p.sentence}”</div>`}
+    </div>`;
+  }
+
+  function renderMeetCards(){
+    const ordered=displayNames.map(n=>Object.values(identities).find(p=>p.name===n));
+    el('meetCards').innerHTML=ordered.map(p=>identityCardHTML(p)).join('');
+  }
+
+  function renderGameIdentities(){
+    ids.forEach(role=>{
+      const p=identities[role];
+      const node=el(role);
+      node.style.background=p.color;
+      node.querySelector('.icon').textContent=CFG.useIcons?p.icon:'';
+      node.querySelector('.name').textContent=p.name;
+    });
+  }
+
+
+  function randomizeGamePositions(){
+    // Re-randomize hidden A/B/C roles across the three visible opponent slots
+    // at the start of every game phase. No role has a fixed screen location.
+    const slots=shuffle(['topLeft','topRight','bottomRight']);
+    ids.forEach((role,i)=>{ gamePositionByRole[role]=slots[i]; });
+    applyGamePositions();
+  }
+
+  function applyGamePositions(){
+    const mobile=window.innerWidth<=760;
+    const slotStyles=mobile ? {
+      topLeft:{left:'6%',right:'auto',top:'19%',bottom:'auto'},
+      topRight:{left:'auto',right:'6%',top:'19%',bottom:'auto'},
+      bottomRight:{left:'auto',right:'7%',top:'auto',bottom:'13%'}
+    } : {
+      topLeft:{left:'15%',right:'auto',top:'18%',bottom:'auto'},
+      topRight:{left:'auto',right:'15%',top:'18%',bottom:'auto'},
+      bottomRight:{left:'auto',right:'16%',top:'auto',bottom:'12%'}
+    };
+
+    ids.forEach(role=>{
+      const node=el(role);
+      const style=slotStyles[gamePositionByRole[role]];
+      if(!style)return;
+      node.style.left=style.left;
+      node.style.right=style.right;
+      node.style.top=style.top;
+      node.style.bottom=style.bottom;
+    });
+  }
+
+  function buildMemoryTrials(){
+    // No color trials. The 20 trials test three directions of the same identity binding:
+    // name -> icon+description, icon -> name+description, description -> name+icon.
+    const typeDeck=[
+      ...Array(7).fill('nameToIconText'),
+      ...Array(7).fill('iconToNameText'),
+      ...Array(6).fill('textToNameIcon')
+    ];
+    const roleDeck=shuffle([...Array(7).fill('A'),...Array(7).fill('B'),...Array(6).fill('C')]);
+    return shuffle(typeDeck.map((type,i)=>({type,role:roleDeck[i]})));
+  }
+
+  function startMemoryTest(){
+    memoryTrials=buildMemoryTrials();
+    memoryIndex=0;memoryCorrect=0;
+    showScreen('memoryScreen');
+    renderMemoryTrial();
+  }
+
+  function optionIconText(q){
+    return `<div class="optionProfile"><span class="smallIcon">${q.icon}</span><div class="optionText"><span class="optionSentence">“${q.sentence}”</span></div></div>`;
+  }
+
+  function optionNameText(q){
+    return `<div class="optionText"><span class="optionName">${q.name}</span><span class="optionSentence">“${q.sentence}”</span></div>`;
+  }
+
+  function optionNameIcon(q){
+    return `<div class="optionProfile"><span class="smallIcon">${q.icon}</span><div class="optionText"><span class="optionName">${q.name}</span></div></div>`;
+  }
+
+  function renderMemoryTrial(){
+    const t=memoryTrials[memoryIndex];
+    const p=identities[t.role];
+    el('memoryProgress').textContent=`Trial ${memoryIndex+1} of ${CFG.memoryTrials}`;
+    el('memoryCue').innerHTML='';
+    const options=el('memoryOptions');options.innerHTML='';
+
+    if(t.type==='nameToIconText'){
+      el('memoryPrompt').textContent=`Which icon and description belong to ${p.name}?`;
+      shuffle(ids).forEach(role=>addMemoryOption(optionIconText(identities[role]),role===t.role));
+    }else if(t.type==='iconToNameText'){
+      el('memoryPrompt').textContent='Which name and description belong to this icon?';
+      el('memoryCue').innerHTML=`<span class="cueIcon">${p.icon}</span>`;
+      shuffle(ids).forEach(role=>addMemoryOption(optionNameText(identities[role]),role===t.role));
+    }else{
+      el('memoryPrompt').textContent='Which name and icon belong to this description?';
+      el('memoryCue').innerHTML=`<div class="textCue">“${p.sentence}”</div>`;
+      shuffle(ids).forEach(role=>addMemoryOption(optionNameIcon(identities[role]),role===t.role));
+    }
+  }
+
+  function addMemoryOption(html,isCorrect){
+    const b=document.createElement('button');
+    b.type='button';b.className='memoryOption';b.innerHTML=html;
+    b.addEventListener('click',()=>answerMemory(isCorrect));
+    el('memoryOptions').appendChild(b);
+  }
+
+  function answerMemory(correct){
+    if(correct)memoryCorrect++;
+    memoryIndex++;
+    if(memoryIndex>=CFG.memoryTrials){
+      showMemoryResult();
+    }else{
+      renderMemoryTrial();
+    }
+  }
+
+  function showMemoryResult(){
+    showScreen('memoryResultScreen');
+    el('memoryResultScore').textContent=`${memoryCorrect} / ${CFG.memoryTrials}`;
+    const passed=memoryCorrect>=CFG.memoryPass;
+    el('memoryResultTitle').textContent=passed?'Memory check passed':'Review the players';
+    el('memoryResultText').innerHTML=passed
+      ?'You matched the players accurately enough to continue.'
+      :`You need at least ${CFG.memoryPass} correct answers. Review the players and then try the 20-trial test again.`;
+    el('memoryResultButtons').innerHTML='';
+    const b=document.createElement('button');
+    b.className='primary';b.type='button';
+    b.textContent=passed?'Rate the players':'Review players';
+    b.addEventListener('click',()=>{
+      if(passed)startRatings(); else showScreen('meetScreen');
+    });
+    el('memoryResultButtons').appendChild(b);
+  }
+
+  function startRatings(context='pregame'){
+    ratingContext=context;
+    ratingOrder=shuffle(ids);
+    ratingIndex=0;
+    ratingSelection=null;
+    if(context==='pregame') participantRatings={};
+    showScreen('ratingScreen');
+    renderRating();
+  }
+
+  function renderRating(){
+    const role=ratingOrder[ratingIndex];
+    const p=identities[role];
+    ratingSelection=null;
+    ratingStart=performance.now();
+    const isPost=ratingContext!=='pregame';
+    const roundLabel=ratingContext==='scored'?'After Round 1':'After Free Game';
+    el('ratingEyebrow').textContent=isPost
+      ?`${roundLabel} — ${ratingIndex+1} of 3`
+      :`Your impression — ${ratingIndex+1} of 3`;
+    el('ratingTitle').textContent=isPost
+      ?`After this round, how nice does ${p.name} seem to you?`
+      :`How nice does ${p.name} seem to you?`;
+    el('ratingIdentity').innerHTML=identityCardHTML(p,true);
+    el('ratingScale').innerHTML='';
+    for(let n=1;n<=10;n++){
+      const b=document.createElement('button');
+      b.type='button';b.className='rateBtn';b.textContent=n;
+      b.addEventListener('click',()=>{
+        document.querySelectorAll('.rateBtn').forEach(x=>x.classList.remove('selected'));
+        b.classList.add('selected');ratingSelection=n;el('ratingNext').disabled=false;
+      });
+      el('ratingScale').appendChild(b);
+    }
+    el('ratingMessageWrap').style.display=isPost?'block':'none';
+    el('ratingMessage').value='';
+    el('ratingMessageLabel').textContent=`OPTIONAL MESSAGE TO ${p.name.toUpperCase()}`;
+    el('ratingNext').disabled=true;
+    if(ratingIndex===2){
+      el('ratingNext').textContent=ratingContext==='pregame'
+        ?'See how they rated you'
+        :(ratingContext==='scored'?'Continue to next phase':'Finish');
+    }else{
+      el('ratingNext').textContent='Continue';
+    }
+  }
+
+  function saveRatingAndContinue(){
+    if(ratingSelection==null)return;
+    const role=ratingOrder[ratingIndex];
+    const p=identities[role];
+    const rt=Math.round(performance.now()-ratingStart);
+    if(ratingContext==='pregame'){
+      participantRatings[role]=ratingSelection;
+      completeLog.initial_ratings.push({role,visible_player:p.name,rating:ratingSelection,hesitation_ms:rt});
+    }else{
+      const message=el('ratingMessage').value.trim().slice(0,300);
+      roundRatings[ratingContext][role]=ratingSelection;
+      roundMessages[ratingContext][role]=message;
+      completeLog.postgame_ratings.push({context:ratingContext,role,visible_player:p.name,rating:ratingSelection,hesitation_ms:rt,message});
+    }
+    checkpoint();
+    ratingIndex++;
+    if(ratingIndex<ratingOrder.length){renderRating();return;}
+    if(ratingContext==='pregame'){
+      startFeedback();
+    }else if(ratingContext==='scored'){
+      showScreen('phase2Screen');
+    }else{
+      if(CFG.seatingEnabled){showScreen('seatIntroScreen');}
+      else{showScreen('endScreen');}
+    }
+  }
+
+  function startFeedback(){
+    // Keep the hidden-role outcomes fixed while randomizing which visible person has each role.
+    feedbackOrder=shuffle(ids);
+    feedbackIndex=0;
+    showScreen('feedbackScreen');
+    renderFeedback();
+  }
+
+  function renderFeedback(){
+    const role=feedbackOrder[feedbackIndex];
+    const p=identities[role];
+    el('feedbackEyebrow').textContent=`How they rated you — ${feedbackIndex+1} of 3`;
+    el('feedbackIdentity').innerHTML=identityCardHTML(p,true);
+
+    // Hidden-role ratings: A rates low, C rates high, B has not responded.
+    const rating = role==='A' ? 2 : (role==='C' ? 8 : null);
+    renderFeedbackScale(rating);
+
+    const cap=el('feedbackCaption');
+    el('feedbackScore').textContent = rating==null ? 'No rating yet' : `${rating} / 10`;
+    el('feedbackText').innerHTML = rating==null
+      ? `${p.name} <b>has not rated you yet</b>.`
+      : `${p.name} rated you <b>${rating} out of 10</b>.`;
+    if(rating==null){
+      cap.className='feedbackCaption neutral';
+      cap.textContent=`${p.name} has not rated you yet.`;
+    }else{
+      // Filled in once the comprehension question is answered correctly.
+      cap.className='feedbackCaption';
+      cap.textContent='';
+    }
+    el('feedbackPlayerCommentLabel').textContent=`YOUR COMMENT ABOUT ${p.name.toUpperCase()}'S RATING`;
+    el('feedbackPlayerComment').value=feedbackComments[role] || '';
+    el('feedbackNext').textContent=feedbackIndex===2?(CFG.simpleMode?'Start the game':'Continue to game rules'):'Continue';
+  }
+
+  let feedbackRevealTimers=[];
+
+  function renderFeedbackScale(rating){
+    // Cancel any reveal still running from the previous player.
+    feedbackRevealTimers.forEach(clearTimeout);
+    feedbackRevealTimers=[];
+
+    const AVG=5;
+    const lo=rating==null?null:Math.min(AVG,rating);
+    const hi=rating==null?null:Math.max(AVG,rating);
+
+    const scale=el('fbScale');
+    scale.innerHTML='';
+    const bandCells=[];
+    let markCell=null;
+    for(let n=1;n<=10;n++){
+      const d=document.createElement('div');
+      let cls='fbCell';
+      if(rating===n){cls+=' mark';}
+      else if(n===AVG){cls+=' avg';}
+      else if(lo!=null && n>lo && n<hi){cls+=' band';bandCells.push(d);}
+      d.className=cls;
+      d.textContent=n;
+      if(rating===n)markCell=d;
+      scale.appendChild(d);
+    }
+
+    const m=el('fbMarkers');
+    m.innerHTML='';
+    const addMarker=(col,text,isParticipant)=>{
+      const d=document.createElement('div');
+      d.className='fbMarker'+(isParticipant?' participant':'');
+      d.style.gridColumn=String(col);
+      d.innerHTML=`${text}<span class="tick">&#9662;</span>`;
+      m.appendChild(d);
+      return d;
+    };
+    addMarker(AVG,'Average player',false);
+    const meMarker = rating==null ? null : addMarker(rating,participantName(),true);
+
+    const quiz=el('fbQuiz');
+    const cap=el('feedbackCaption');
+    quiz.classList.remove('show');
+    cap.classList.remove('show');
+    el('fbQuizOptions').innerHTML='';
+    el('fbQuizHint').textContent='';
+    el('fbQuizPrompt').textContent='';
+
+    if(rating==null){
+      el('feedbackNext').disabled=false;
+      feedbackRevealTimers.push(setTimeout(()=>cap.classList.add('show'),450));
+      return;
+    }
+
+    // The participant must read the distance off the scale before the
+    // interpretive sentence is shown.
+    el('feedbackNext').disabled=true;
+    const diff=Math.abs(rating-AVG);
+    const dir=rating>AVG?'above':'below';
+
+    // Staged reveal: the scale settles, the marker lands, the band fills the
+    // distance, then the comprehension question appears.
+    feedbackRevealTimers.push(setTimeout(()=>{
+      if(meMarker)meMarker.classList.add('show');
+      if(markCell)markCell.classList.add('show');
+    },520));
+    feedbackRevealTimers.push(setTimeout(()=>{
+      bandCells.forEach(c=>c.classList.add('show'));
+    },1050));
+    feedbackRevealTimers.push(setTimeout(()=>{
+      buildFeedbackQuiz(diff,dir);
+      feedbackAttemptStart=performance.now();
+      quiz.classList.add('show');
+    },1350));
+  }
+
+  function buildFeedbackQuiz(diff,dir){
+    const p=identities[feedbackOrder[feedbackIndex]];
+    el('fbQuizPrompt').textContent=`How many points ${dir} the average player did ${p.name} rate you?`;
+    const wrap=el('fbQuizOptions');
+    wrap.innerHTML='';
+    for(let n=0;n<=5;n++){
+      const b=document.createElement('button');
+      b.type='button';b.className='fbQuizBtn';b.textContent=n;
+      b.addEventListener('click',()=>answerFeedbackQuiz(b,n,diff,dir,p.name));
+      wrap.appendChild(b);
+    }
+  }
+
+  function answerFeedbackQuiz(btn,choice,diff,dir,playerName){
+    if(btn.disabled)return;
+    const role=feedbackOrder[feedbackIndex];
+    const rt=Math.round(performance.now()-feedbackAttemptStart);
+    completeLog.feedback_comprehension.push({
+      role,visible_player:playerName,answer:choice,correct_answer:diff,correct:choice===diff,
+      direction:dir,hesitation_ms:rt,attempt:completeLog.feedback_comprehension.filter(x=>x.role===role).length+1
+    });
+    checkpoint();
+    feedbackAttemptStart=performance.now();
+    if(choice!==diff){
+      btn.classList.add('wrong');
+      btn.disabled=true;
+      el('fbQuizHint').textContent='Not quite — count the steps on the scale and try again.';
+      return;
+    }
+    btn.classList.add('correct');
+    document.querySelectorAll('.fbQuizBtn').forEach(b=>b.disabled=true);
+    el('fbQuizHint').textContent='Correct.';
+    const cap=el('feedbackCaption');
+    cap.textContent = dir==='above'
+      ? `${playerName} likes you more than the average player!`
+      : `${playerName} likes you less than the average player.`;
+    feedbackRevealTimers.push(setTimeout(()=>{
+      cap.classList.add('show');
+      el('feedbackNext').disabled=false;
+    },320));
+  }
+
+
+  /* =====================================================================
+     SEATING TASK
+     Six seats evenly spaced around a round table. Distance between two seats
+     is the number of steps around the circle: 1 (adjacent), 2, or 3 (opposite).
+     ===================================================================== */
+  let seatTrials=[], seatIndex=0, seatResults=[], seatStart=0, seatAnswered=false;
+
+  function trackSeatMouse(e){
+    if(seatAnswered)return;
+    const now=performance.now();
+    if(now-seatMouseLastSample<16)return; // ~60 Hz max
+    seatMouseLastSample=now;
+    const r=el('seatStage').getBoundingClientRect();
+    if(!r.width||!r.height)return;
+    seatMouse.push({
+      t:Math.round(now-seatStart),
+      x:+Math.max(0,Math.min(1,(e.clientX-r.left)/r.width)).toFixed(4),
+      y:+Math.max(0,Math.min(1,(e.clientY-r.top)/r.height)).toFixed(4)
+    });
+  }
+
+  function seatDistance(a,b){
+    const n=CFG.seatingSeats, d=Math.abs(a-b);
+    return Math.min(d,n-d);
+  }
+
+  // All ways of seating three players in three of six seats: 6*5*4 = 120.
+  // Rotating the table does not change the arrangement, so one representative
+  // per rotation class is kept -> 20 distinct configurations.
+  function allSeatConfigs(){
+    const n=CFG.seatingSeats, seen=new Map();
+    for(let a=0;a<n;a++)for(let b=0;b<n;b++)for(let c=0;c<n;c++){
+      if(a===b||b===c||a===c)continue;
+      let best=null;
+      for(let r=0;r<n;r++){
+        const key=[(a+r)%n,(b+r)%n,(c+r)%n].join(',');
+        if(best===null||key<best)best=key;
+      }
+      if(!seen.has(best))seen.set(best,[a,b,c]);
+    }
+    return Array.from(seen.values());
+  }
+
+  // Counts of (player, distance) over the three free seats of one configuration.
+  function seatProfile(cfg){
+    const n=CFG.seatingSeats,out={};
+    for(let e=0;e<n;e++){
+      if(cfg.indexOf(e)>=0)continue;
+      cfg.forEach((pl,i)=>{const k=i+'|'+seatDistance(e,pl);out[k]=(out[k]||0)+1;});
+    }
+    return out;
+  }
+
+  // Gap pattern of the occupied seats, up to rotation — used so the ten tables
+  // are not all the same shape.
+  function seatOccType(cfg){
+    const n=CFG.seatingSeats,srt=cfg.slice().sort((x,y)=>x-y),gaps=[];
+    for(let i=0;i<3;i++)gaps.push(((srt[(i+1)%3]-srt[i])+n)%n);
+    let best=null;
+    for(let i=0;i<3;i++){
+      const k=gaps.slice(i).concat(gaps.slice(0,i)).join(',');
+      if(best===null||k<best)best=k;
+    }
+    return best;
+  }
+
+  // Draw a subset of CFG.seatingTrials configurations that is balanced: across
+  // the whole set each player is equally often at distance 1, 2 and 3 from a
+  // free seat, and the four table shapes appear in proportion. Falls back to the
+  // most balanced subset found if the search does not land on a perfect one.
+  function buildSeatingTrials(){
+    const configs=allSeatConfigs();
+    const k=Math.min(CFG.seatingTrials,configs.length);
+    const profiles=configs.map(seatProfile);
+    const typeOf=configs.map(seatOccType);
+    const allTypes={};
+    typeOf.forEach(t=>{allTypes[t]=(allTypes[t]||0)+1;});
+    const wantType={};
+    Object.keys(allTypes).forEach(t=>{wantType[t]=Math.round(allTypes[t]*k/configs.length);});
+
+    function score(idx){
+      const tot={},tcount={};
+      idx.forEach(i=>{
+        const pr=profiles[i];
+        Object.keys(pr).forEach(key=>{tot[key]=(tot[key]||0)+pr[key];});
+        tcount[typeOf[i]]=(tcount[typeOf[i]]||0)+1;
+      });
+      let sc=0;
+      for(let d=1;d<=3;d++){
+        const v=[0,1,2].map(i=>tot[i+'|'+d]||0);
+        sc+=Math.max.apply(null,v)-Math.min.apply(null,v);
+      }
+      Object.keys(wantType).forEach(t=>{sc+=Math.abs((tcount[t]||0)-wantType[t]);});
+      return sc;
+    }
+
+    let best=null,bestSc=Infinity;
+    for(let attempt=0;attempt<4000;attempt++){
+      const idx=shuffle(configs.map((_,i)=>i)).slice(0,k);
+      const sc=score(idx);
+      if(sc<bestSc){bestSc=sc;best=idx;if(sc===0)break;}
+    }
+    return shuffle(best).map(i=>{
+      // Random rotation so the same relative arrangement is not always in the
+      // same seats on screen.
+      const r=Math.floor(Math.random()*CFG.seatingSeats);
+      return configs[i].map(x=>(x+r)%CFG.seatingSeats);
+    });
+  }
+
+  function seatLegendHTML(){
+    return ids.map(role=>{
+      const p=identities[role];
+      return `<div class="seatLegendItem"><span class="seatSwatch" style="background:${p.color}"></span>${p.name}</div>`;
+    }).join('')+
+    `<div class="seatLegendItem"><span class="seatSwatch" style="background:#fbfbfa;border-style:dashed;border-color:#a9b1bd"></span>Free seat</div>`;
+  }
+
+  // Seat 0 is at the top of the table; seats run clockwise.
+  function seatPosition(i,size){
+    const ang=(-90+i*(360/CFG.seatingSeats))*Math.PI/180, rad=size*0.355;
+    return {x:size/2+rad*Math.cos(ang), y:size/2+rad*Math.sin(ang)};
+  }
+
+  function startSeatingTask(){
+    seatTrials=buildSeatingTrials();
+    seatIndex=0;seatResults=[];
+    showScreen('seatScreen');
+    renderSeatTrial();
+  }
+
+  function renderSeatTrial(){
+    seatAnswered=false;
+    el('seatNextBtn').disabled=true;
+    el('seatNextBtn').textContent=(seatIndex===seatTrials.length-1)?'Finish':'Next table';
+    el('seatPrompt').textContent='Click the seat you would like to take.';
+    el('seatProgress').textContent=`Table ${seatIndex+1} of ${seatTrials.length}`;
+    el('seatLegend').innerHTML=seatLegendHTML();
+
+    const stage=el('seatStage');
+    stage.querySelectorAll('.seat').forEach(n=>n.remove());
+    const size=stage.getBoundingClientRect().width||440;
+    const cfg=seatTrials[seatIndex];          // index i -> seat of ids[i]
+    const occupant={};
+    cfg.forEach((seat,i)=>{occupant[seat]=i;});
+
+    for(let sIdx=0;sIdx<CFG.seatingSeats;sIdx++){
+      const pos=seatPosition(sIdx,size);
+      const node=document.createElement('div');
+      node.style.left=pos.x+'px';node.style.top=pos.y+'px';
+      const numHTML=CFG.seatingShowSeatNumbers?`<div class="seatNum">seat ${sIdx+1}</div>`:'';
+      if(occupant[sIdx]!==undefined){
+        const p=identities[ids[occupant[sIdx]]];
+        node.className='seat occupied';
+        node.style.borderColor=p.color;
+        node.style.background=p.color+'2e';
+        node.innerHTML=`<div class="seatName">${p.name}</div>${numHTML}`;
+      }else{
+        node.className='seat empty';
+        node.innerHTML=`<div class="seatName">Sit here</div>${numHTML}`;
+        node.addEventListener('click',()=>chooseSeat(sIdx,node));
+      }
+      stage.appendChild(node);
+    }
+    seatMouse=[];
+    seatMouseLastSample=-Infinity;
+    seatStart=performance.now();
+    stage.removeEventListener('mousemove',trackSeatMouse);
+    stage.addEventListener('mousemove',trackSeatMouse);
+  }
+
+  function chooseSeat(seat,node){
+    if(seatAnswered)return;
+    seatAnswered=true;
+    const rt=Math.round(performance.now()-seatStart);
+    const cfg=seatTrials[seatIndex];
+
+    document.querySelectorAll('#seatStage .seat.empty').forEach(n=>n.classList.add('locked'));
+    node.className='seat chosen';
+    node.style.borderColor='#202733';
+    node.style.background=selectedColor+'88';
+    node.innerHTML=`<div class="seatName">${participantName()}</div>`+
+      (CFG.seatingShowSeatNumbers?`<div class="seatNum">seat ${seat+1}</div>`:'');
+
+    el('seatStage').removeEventListener('mousemove',trackSeatMouse);
+    const row={trial:seatIndex+1,chosen_seat:seat+1,hesitation_ms:rt,rt_ms:rt,mouse_trajectory:seatMouse.slice(),configuration:{}};
+    const dists=[];
+    cfg.forEach((s,i)=>{
+      const p=identities[ids[i]];
+      const d=seatDistance(seat,s);
+      row['seat_'+p.name]=s+1;
+      row['dist_'+p.name]=d;
+      row['role_'+p.name]=ids[i];   // hidden role A / B / C
+      row.configuration[ids[i]]={visible_player:p.name,seat:s+1};
+      dists.push({name:p.name,d:d});
+    });
+    const minD=Math.min.apply(null,dists.map(x=>x.d));
+    const near=dists.filter(x=>x.d===minD).map(x=>x.name);
+    row.nearest=near.length===1?near[0]:'tie:'+near.join('+');
+    seatResults.push(row);
+    completeLog.seating_trials.push(row);
+    checkpoint();
+
+    el('seatPrompt').textContent='Seat taken.';
+    el('seatNextBtn').disabled=false;
+  }
+
+  function nextSeatTrial(){
+    seatIndex++;
+    if(seatIndex>=seatTrials.length){showSeatingSummary();return;}
+    renderSeatTrial();
+  }
+
+  function showSeatingSummary(){
+    const lines=ids.map(role=>{
+      const p=identities[role];
+      const v=seatResults.map(r=>r['dist_'+p.name]);
+      const m=v.reduce((a,b)=>a+b,0)/v.length;
+      const closest=seatResults.filter(r=>r.nearest===p.name).length;
+      return `${p.name}: mean distance ${m.toFixed(2)}, closest on ${closest} of ${seatResults.length} tables`;
+    });
+    // Kept out of the participant's view; available in the console and in the export.
+    console.log('Seating results:',seatResults);
+    console.log(lines.join('\n'));
+    window.seatingData=seatResults;
+    sendCompleteLog();
+    showScreen('questionnaire1Screen');
+  }
+
+  // ===================== QUESTIONNAIRE PLACEHOLDER LOGGING =====================
+  // Add normal <input>, <select>, and/or <textarea> elements inside each questionnaire.
+  // IMPORTANT: give every question a unique name (for example name="SPIN_1").
+  // The code below automatically saves those answers into that questionnaire's Qualtrics column.
+  function collectQuestionnaire(name){
+    const screen=document.querySelector(`.questionnaireScreen[data-questionnaire="${name}"]`);
+    const answers={};
+    if(!screen)return answers;
+    screen.querySelectorAll('input, select, textarea').forEach((field,index)=>{
+      const key=field.name || field.id || `Q${index+1}`;
+      if(field.type==='radio'){
+        if(field.checked)answers[key]=field.value;
+      }else if(field.type==='checkbox'){
+        if(!Array.isArray(answers[key]))answers[key]=[];
+        if(field.checked)answers[key].push(field.value);
+      }else{
+        answers[key]=field.value;
+      }
+    });
+    completeLog.questionnaires[name]=answers;
+    checkpoint();
+    return answers;
+  }
+
+  document.querySelectorAll('.questionnaireNext').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      collectQuestionnaire(btn.dataset.current);
+      showScreen(btn.dataset.next);
+    });
+  });
+
+  function nextFeedback(){
+    const role=feedbackOrder[feedbackIndex];
+    feedbackComments[role]=el('feedbackPlayerComment').value.trim().slice(0,500);
+    completeLog.feedback_comments.push({role,visible_player:identities[role].name,comment:feedbackComments[role]});
+    checkpoint();
+    feedbackIndex++;
+    if(feedbackIndex<feedbackOrder.length){renderFeedback();return;}
+    if(CFG.simpleMode){beginGamePhase('free');return;}
+    showScreen('rule1Screen');
+  }
+
+  function newReturnDeck(role){
+    const yes=CFG.returnSuccessesPer10[role];
+    return shuffle([...Array(yes).fill(true),...Array(10-yes).fill(false)]);
+  }
+
+  function newSpecialDeck(role){
+    const total=CFG.targetToMe[role];
+    // Simple mode has no rules to explain, so no star/special throws are dealt.
+    const yes=CFG.simpleMode?0:Math.min(CFG.specialIncomingCounts[role],total);
+
+    // Exact fixed-frequency special throws. Spread them as evenly as possible
+    // across this role's appearances in the initial N, with random placement
+    // inside each stratum so they are not front-loaded.
+    if(yes<=0)return Array(total).fill(false);
+    if(yes>=total)return Array(total).fill(true);
+
+    const specialPositions=new Set();
+    for(let k=0;k<yes;k++){
+      const start=Math.floor(k*total/yes);
+      const end=Math.max(start,Math.floor((k+1)*total/yes)-1);
+      const pos=start+Math.floor(Math.random()*(end-start+1));
+      specialPositions.add(pos);
+    }
+    return Array.from({length:total},(_,i)=>specialPositions.has(i));
+  }
+
+  function freshState(phase='scored',targetLength=null){
+    return {
+      phase,
+      received:{A:0,B:0,C:0},
+      remaining:{...CFG.targetToMe},
+      probabilityMode:false,
+      targetReached:false,
+      targetLength,
+      currentHolder:null,
+      userCanChoose:false,
+      totalReceived:0,
+      throwsMade:0,
+      scores:{ME:0,A:0,B:0,C:0},
+      lastChoice:null,
+      // Track bot-to-bot destinations so each bot distributes its passes as
+      // evenly as possible between the other two bots.
+      botRouteCounts:{
+        A:{B:0,C:0},
+        B:{A:0,C:0},
+        C:{A:0,B:0}
+      },
+      returnDecks:{A:newReturnDeck('A'),B:newReturnDeck('B'),C:newReturnDeck('C')},
+      specialDecks:{A:newSpecialDeck('A'),B:newSpecialDeck('B'),C:newSpecialDeck('C')},
+      specialDelivered:{A:0,B:0,C:0},
+      activeSpecial:false,
+      specialSender:null,
+      pendingEnd:false
+    };
+  }
+
+  function nextGiveBack(role){
+    if(!state.returnDecks[role].length)state.returnDecks[role]=newReturnDeck(role);
+    return state.returnDecks[role].shift();
+  }
+
+  function centerOf(id){
+    const wrap=el('gameWrap').getBoundingClientRect();
+    const r=el(id).getBoundingClientRect();
+    return {x:r.left-wrap.left+r.width/2-17,y:r.top-wrap.top+r.height/2-17};
+  }
+
+  function placeBall(id,instant=false){
+    const p=centerOf(id),b=el('ball');
+    if(instant){
+      const old=b.style.transition;b.style.transition='none';
+      b.style.left=p.x+'px';b.style.top=p.y+'px';
+      requestAnimationFrame(()=>b.style.transition=old);
+    }else{
+      b.style.left=p.x+'px';b.style.top=p.y+'px';
+    }
+  }
+
+  function setHolder(id){
+    ['A','B','C','ME'].forEach(x=>el(x).classList.toggle('holder',x===id));
+    state.currentHolder=id;
+  }
+
+  async function toss(from,to){
+    gameThrowCounter++;
+    completeLog.game_throws.push({
+      throw:gameThrowCounter,
+      from_role:from,from_player:visibleName(from),
+      to_role:to,to_player:visibleName(to),
+      participant_choice:from==='ME',
+      hesitation_ms:from==='ME' ? Math.round(performance.now()-gameChoiceStart) : null,
+      timestamp_ms:Math.round(performance.now()-experimentStart),
+      phase:state?.phase || null
+    });
+    checkpoint();
+    setHolder(from);await sleep(110);
+    el(from).classList.add('senderPulse');
+    setTimeout(()=>el(from).classList.remove('senderPulse'),550);
+    placeBall(to);await sleep(CFG.moveMs);setHolder(to);await sleep(CFG.pauseMs);
+  }
+
+  function weightedRemaining(exclude=null){
+    if(state.phase==='free' && state.totalReceived>=state.targetLength)return null;
+
+    // FIRST N: sample without replacement from the remaining 16/10/4 quota.
+    if(!state.probabilityMode){
+      const fixedPool=[];
+      ids.forEach(id=>{
+        if(id===exclude)return;
+        for(let i=0;i<state.remaining[id];i++)fixedPool.push(id);
+      });
+      if(fixedPool.length)return fixedPool[Math.floor(Math.random()*fixedPool.length)];
+      state.probabilityMode=true;
+      if(state.phase==='scored' && state.targetReached)state.pendingEnd=true;
+    }
+
+    // AFTER N: continue immediately with probabilistic sender selection using
+    // the same relative 16:10:4 weights. No new special throws are introduced.
+    const probabilityPool=[];
+    ids.forEach(id=>{
+      if(id===exclude)return;
+      for(let i=0;i<CFG.targetToMe[id];i++)probabilityPool.push(id);
+    });
+    if(!probabilityPool.length && exclude){
+      ids.forEach(id=>{for(let i=0;i<CFG.targetToMe[id];i++)probabilityPool.push(id)});
+    }
+    return probabilityPool.length?probabilityPool[Math.floor(Math.random()*probabilityPool.length)]:null;
+  }
+
+  function balancedOther(holder){
+    const others=ids.filter(x=>x!==holder);
+    const counts=state.botRouteCounts[holder];
+    const minCount=Math.min(...others.map(x=>counts[x]||0));
+    const candidates=others.filter(x=>(counts[x]||0)===minCount);
+    const next=candidates[Math.floor(Math.random()*candidates.length)];
+    counts[next]=(counts[next]||0)+1;
+    return next;
+  }
+
+  function showInstruction(on,allowedRoles=null){
+    el('instruction').classList.toggle('show',on);
+    ids.forEach(id=>{
+      const allowed=on && (!allowedRoles || allowedRoles.includes(id));
+      el(id).classList.toggle('clickable',allowed);
+    });
+    state.userCanChoose=on;
+    if(on)gameChoiceStart=performance.now();
+  }
+
+  function setSpecialVisual(on,sender=null){
+    state.activeSpecial=on;
+    state.specialSender=on?sender:null;
+    el('gameWrap').classList.toggle('specialMode',on);
+    el('ball').classList.toggle('star',on);
+    el('specialBanner').classList.toggle('show',on);
+    if(on){
+      const senderName=identities[sender].name;
+      if(state.phase==='free'){
+        el('instruction').textContent=`Special throw: you must return the star to ${senderName}`;
+        el('specialBanner').textContent=`★ SPECIAL THROW — only ${senderName} can be selected`;
+      }else{
+        el('instruction').textContent=`Special throw: pass the star back to ${senderName}`;
+        el('specialBanner').textContent='★ SPECIAL THROW — return it to the sender';
+      }
+    }else{
+      el('instruction').textContent='Choose a player';
+      el('specialBanner').textContent='★ SPECIAL THROW — return it to the sender';
+    }
+  }
+
+  function updateHud(){
+    if(CFG.simpleMode){
+      el('progressText').textContent=`Your throws: ${state.throwsMade} / ${CFG.userThrowTarget}`;
+    }else if(state.phase==='free'){
+      el('progressText').textContent=`Free game: ${state.totalReceived} / ${state.targetLength}`;
+    }else{
+      el('progressText').textContent=`Points game — goal: ${CFG.scoredTarget} points`;
+    }
+    el('scoreME').textContent=state.scores.ME;
+  }
+
+  function flashPlayerDelta(id,delta,label=null){
+    const d=el('delta'+id);
+    d.classList.remove('show','gain','loss');void d.offsetWidth;
+    d.textContent=label || (delta>0?`+${delta}`:`${delta}`);
+    d.classList.add(delta>=0?'gain':'loss','show');
+  }
+
+  function changeUserScore(delta,label=null){
+    if(state.phase!=='scored')return;
+    state.scores.ME+=delta;updateHud();flashPlayerDelta('ME',delta,label);
+    state.targetReached=state.scores.ME>=CFG.scoredTarget;
+    // During the fixed first N, reaching 50 does not truncate the planned block.
+    // Once probability mode has begun, end only while the score is actually >= 50.
+    state.pendingEnd=state.probabilityMode && state.targetReached;
+  }
+
+  function rewardAllPlayers(delta){
+    if(state.phase!=='scored')return;
+    ['ME','A','B','C'].forEach(id=>state.scores[id]+=delta);
+    updateHud();
+    ['ME','A','B','C'].forEach(id=>flashPlayerDelta(id,delta));
+    state.targetReached=state.scores.ME>=CFG.scoredTarget;
+    state.pendingEnd=state.probabilityMode && state.targetReached;
+  }
+
+  function consumeIncoming(sender){
+    if(state.phase==='free' && state.totalReceived>=state.targetLength)return null;
+
+    let isSpecial=false;
+    if(!state.probabilityMode){
+      if(state.remaining[sender]<=0)return null;
+      isSpecial=state.specialDecks[sender].shift()===true;
+      if(isSpecial)state.specialDelivered[sender]++;
+      state.remaining[sender]--;
+    }
+
+    state.received[sender]++;
+    state.totalReceived++;
+
+    // As soon as the fixed N is completed, switch seamlessly to probability mode.
+    if(!state.probabilityMode && state.totalReceived>=CFG.initialFixedN){
+      state.probabilityMode=true;
+      if(state.phase==='scored' && state.targetReached)state.pendingEnd=true;
+    }
+
+    if(state.phase==='free' && state.totalReceived>=state.targetLength)state.pendingEnd=true;
+    updateHud();
+    return isSpecial;
+  }
+
+  async function incomingToUser(sender){
+    const isSpecial=consumeIncoming(sender);
+    if(isSpecial===null)return false;
+    setSpecialVisual(isSpecial,sender);
+    await toss(sender,'ME');
+    if(isSpecial && state.phase==='free') showInstruction(true,[sender]);
+    else showInstruction(true);
+    return true;
+  }
+
+  async function routeBotsUntilNextIncoming(holder){
+    const passes=CFG.minBotPasses+Math.floor(Math.random()*(CFG.maxBotPasses-CFG.minBotPasses+1));
+    let h=holder;
+
+    // All bot-to-bot passes use balanced routing: for each sender, the two
+    // possible bot recipients stay equal (or differ by at most one).
+    for(let i=0;i<passes;i++){
+      const next=balancedOther(h);await toss(h,next);h=next;
+    }
+
+    const sender=weightedRemaining();
+    if(!sender){finishCurrentPhase();return;}
+
+    // Reach the scheduled sender using only the same balanced bot-to-bot rule,
+    // rather than forcing a direct transition that could bias one recipient.
+    let safety=0;
+    while(h!==sender && safety<20){
+      const next=balancedOther(h);
+      await toss(h,next);
+      h=next;
+      safety++;
+    }
+    if(h!==sender){
+      // Extremely unlikely safety fallback. Count the transition so future
+      // routing compensates for it and restores balance.
+      state.botRouteCounts[h][sender]=(state.botRouteCounts[h][sender]||0)+1;
+      await toss(h,sender);h=sender;
+    }
+    await incomingToUser(sender);
+  }
+
+  async function handleUserChoice(recipient){
+    if(!state?.userCanChoose)return;
+    if(state.phase==='free' && state.activeSpecial && recipient!==state.specialSender)return;
+    showInstruction(false);
+
+    const wasSpecial=state.activeSpecial;
+    const specialSender=state.specialSender;
+    const endFreeAfterChoice=state.phase==='free' && state.pendingEnd;
+
+    // In the points game, a special throw overrides BOTH ordinary scoring rules
+    // for that throw: no +1 return reward and no −2 repetition penalty. However,
+    // the special choice DOES become the previous choice used by Rule 2 on the
+    // participant's next throw.
+    if(state.phase==='scored'){
+      if(wasSpecial){
+        if(recipient===specialSender)rewardAllPlayers(+2);
+        else changeUserScore(-5);
+        state.lastChoice=recipient;
+        setSpecialVisual(false);
+        await sleep(430);
+      }else{
+        const repeated=state.lastChoice===recipient;
+        state.lastChoice=recipient;
+        if(repeated){changeUserScore(-2);await sleep(450);}
+      }
+    }else if(wasSpecial){
+      // In free play the special throw is a restriction, not a scoring event.
+      setSpecialVisual(false);
+    }
+
+    await toss('ME',recipient);
+
+    if(CFG.simpleMode){
+      state.throwsMade++;
+      updateHud();
+      if(state.throwsMade>=CFG.userThrowTarget){
+        await sleep(300);finishCurrentPhase();return;
+      }
+    }
+
+    if(endFreeAfterChoice){
+      await sleep(250);finishCurrentPhase();return;
+    }
+
+    // If the scored target was reached by the participant's decision itself (e.g., +2 special),
+    // finish after that throw has visibly resolved.
+    if(state.phase==='scored' && state.pendingEnd){
+      await sleep(250);finishCurrentPhase();return;
+    }
+
+    const giveBack=nextGiveBack(recipient);
+
+    if(giveBack){
+      // Ordinary +1 return scoring is suppressed for any response that began as a special throw.
+      if(state.probabilityMode || state.remaining[recipient]>0){
+        const incomingPromise=incomingToUser(recipient);
+        if(state.phase==='scored' && !wasSpecial)changeUserScore(+1);
+        await incomingPromise;
+      }else{
+        await toss(recipient,'ME');
+        if(state.phase==='scored' && !wasSpecial)changeUserScore(+1);
+      }
+
+      if(state.phase==='scored' && state.pendingEnd){
+        await sleep(300);finishCurrentPhase();return;
+      }
+      if(state.phase==='free' && state.pendingEnd){
+        // Let the participant respond to the final received ball before ending.
+        if(state.currentHolder==='ME')showInstruction(true);
+        return;
+      }
+      if(state.currentHolder==='ME'){
+        if(state.activeSpecial && state.phase==='free')showInstruction(true,[state.specialSender]);
+        else showInstruction(true);
+      }
+    }else{
+      if(state.phase==='free' && state.pendingEnd){await sleep(300);finishCurrentPhase();return;}
+      await routeBotsUntilNextIncoming(recipient);
+    }
+  }
+
+  async function beginGamePhase(phase){
+    // In simple mode the round is ended by the participant's throw count, so the
+    // received-ball target is disabled.
+    const targetLength=CFG.simpleMode?Infinity:(phase==='free'?scoredRoundLength:null);
+    state=freshState(phase,targetLength);
+    const name=participantName();
+    participantDescription=el('selfDescription').value.trim().slice(0,180);
+    el('meName').textContent=name;
+    el('meIcon').textContent=CFG.useIcons?selectedIcon:'';
+    el('ME').style.background=selectedColor;
+    renderGameIdentities();
+    randomizeGamePositions();
+    el('gameWrap').classList.toggle('freeMode',phase==='free');
+    showScreen('gameScreen');updateHud();setSpecialVisual(false);
+    await sleep(140);
+    const startHolder=ids[Math.floor(Math.random()*ids.length)];
+    placeBall(startHolder,true);setHolder(startHolder);
+    await sleep(500);
+    const first=weightedRemaining();
+    await incomingToUser(first);
+  }
+
+  function startScoredGame(){
+    beginGamePhase('scored');
+  }
+
+  function startFreeGame(){
+    beginGamePhase('free');
+  }
+
+  function finishCurrentPhase(){
+    if(!state)return;
+    showInstruction(false);setSpecialVisual(false);
+    if(state.phase==='scored'){
+      scoredRoundLength=state.totalReceived;
+      el('phase1FinalScore').textContent=state.scores.ME;
+      startRatings('scored');
+    }else{
+      startRatings('free');
+    }
+  }
+
+  el('profileNext').addEventListener('click',()=>{
+    participantDescription=el('selfDescription').value.trim().slice(0,180);
+    completeLog.participant={name:participantName(),self_description:participantDescription,selected_color:selectedColor,selected_icon:selectedIcon};
+    checkpoint();
+    showScreen('meetScreen');
+  });
+  el('seatStartBtn').addEventListener('click',startSeatingTask);
+  el('seatNextBtn').addEventListener('click',nextSeatTrial);
+  el('meetNext').addEventListener('click',()=>{
+    if(CFG.useMemoryTest) startMemoryTest(); else startRatings();
+  });
+  el('ratingNext').addEventListener('click',saveRatingAndContinue);
+  el('feedbackNext').addEventListener('click',nextFeedback);
+  el('rule1Next').addEventListener('click',()=>showScreen('rule2Screen'));
+  el('rule2Next').addEventListener('click',()=>showScreen('rule3Screen'));
+  el('rule3Next').addEventListener('click',startScoredGame);
+  el('startFreeBtn').addEventListener('click',startFreeGame);
+
+  ids.forEach(id=>el(id).addEventListener('click',()=>handleUserChoice(id)));
+  window.addEventListener('resize',()=>{
+    applyGamePositions();
+    if(state?.currentHolder)placeBall(state.currentHolder,true);
+  });
+
+  el('restartBtn').addEventListener('click',()=>{
+    state=null;memoryTrials=[];participantRatings={};roundRatings={scored:{},free:{}};roundMessages={scored:{},free:{}};feedbackComments={};scoredRoundLength=0;
+    completeLog.participant={};completeLog.identity_mapping={};completeLog.initial_ratings=[];completeLog.feedback_comprehension=[];completeLog.feedback_comments=[];completeLog.game_throws=[];completeLog.postgame_ratings=[];completeLog.seating_trials=[];gameThrowCounter=0;
+    el('nickname').value='';el('selfDescription').value='';
+    initializeSession();
+    showScreen('profileScreen');
+  });
+
+  initializeSession();
+})();
+</script>
+
+
+</body></html>
