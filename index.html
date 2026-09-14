@@ -445,7 +445,7 @@
      ===================================================== -->
 <section id="questionnaire1Screen" class="screen questionnaireScreen" data-questionnaire="SPIN">
   <div class="panel">
-    <div class="eyebrow">Questionnaire 1 of 5</div>
+    <div class="eyebrow">Questionnaire 1 of 4</div>
     <h2>SPIN</h2>
     <div class="questionnaireQuestions" id="SPINQuestions">
       <!-- ADD YOUR SPIN QUESTIONS HERE -->
@@ -456,7 +456,7 @@
 
 <section id="questionnaire2Screen" class="screen questionnaireScreen" data-questionnaire="NPI">
   <div class="panel">
-    <div class="eyebrow">Questionnaire 2 of 5</div>
+    <div class="eyebrow">Questionnaire 2 of 4</div>
     <h2>NPI</h2>
     <div class="questionnaireQuestions" id="NPIQuestions">
       <!-- ADD YOUR NPI QUESTIONS HERE -->
@@ -465,20 +465,92 @@
   </div>
 </section>
 
-<section id="questionnaire3Screen" class="screen questionnaireScreen" data-questionnaire="Q3">
+<section id="questionnaire3Screen"
+         class="screen questionnaireScreen"
+         data-questionnaire="Q3">
+
   <div class="panel">
-    <div class="eyebrow">Questionnaire 3 of 5</div>
-    <h2>3Q</h2>
+
+    <div class="eyebrow">Questionnaire 3 of 4</div>
+    <h2>Q3</h2>
+
     <div class="questionnaireQuestions" id="Q3Questions">
-      <!-- ADD YOUR 3Q QUESTIONS HERE -->
+
+      <!-- INSTRUCTIONS -->
+      <div class="questionnaire-instructions">
+        <!-- ADD Q3 INSTRUCTIONS HERE -->
+      </div>
+
+      <!-- Q3 MATRIX -->
+      <table class="questionnaire-matrix">
+
+        <thead>
+          <tr>
+            <th></th>
+            <th>Never</th>
+            <th>Once</th>
+            <th>2 or 3 times</th>
+            <th>More than 3 times</th>
+            <th>Multiple times</th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          <!-- Q3 ITEM 1 -->
+          <tr>
+            <td class="Has anyone ever spread harmful information, lies, or rumors about you? (For example: gossip or sharing your personal information)">
+              <!-- ADD ITEM 1 HERE -->
+            </td>
+            <td><input type="radio" name="Q3_1" value="1"></td>
+            <td><input type="radio" name="Q3_1" value="2"></td>
+            <td><input type="radio" name="Q3_1" value="3"></td>
+            <td><input type="radio" name="Q3_1" value="4"></td>
+            <td><input type="radio" name="Q3_1" value="5"></td>
+          </tr>
+
+          <!-- Q3 ITEM 2 -->
+          <tr>
+            <td class="Have you ever been left out, excluded, ignored, or ostracized?">
+              <!-- ADD ITEM 2 HERE -->
+            </td>
+            <td><input type="radio" name="Q3_2" value="1"></td>
+            <td><input type="radio" name="Q3_2" value="2"></td>
+            <td><input type="radio" name="Q3_2" value="3"></td>
+            <td><input type="radio" name="Q3_2" value="4"></td>
+            <td><input type="radio" name="Q3_2" value="5"></td>
+          </tr>
+
+          <!-- Q3 ITEM 3 -->
+          <tr>
+            <td class="Has anyone ever bullied you, mocked you, laughed at you, or humiliated you?">
+              <!-- ADD ITEM 3 HERE -->
+            </td>
+            <td><input type="radio" name="Q3_3" value="1"></td>
+            <td><input type="radio" name="Q3_3" value="2"></td>
+            <td><input type="radio" name="Q3_3" value="3"></td>
+            <td><input type="radio" name="Q3_3" value="4"></td>
+            <td><input type="radio" name="Q3_3" value="5"></td>
+          </tr>
+
+        </tbody>
+
+      </table>
+
     </div>
-    <button class="primary questionnaireNext" data-current="Q3" data-next="questionnaire4Screen">Continue</button>
+
+    <button
+      class="primary questionnaireNext"
+      data-current="Q3"
+      data-next="questionnaire4Screen">
+      Continue
+    </button>
+
   </div>
 </section>
-
 <section id="questionnaire4Screen" class="screen questionnaireScreen" data-questionnaire="Demographic">
   <div class="panel">
-    <div class="eyebrow">Questionnaire 4 of 5</div>
+    <div class="eyebrow">Questionnaire 4 of 4</div>
     <h2>Demographic</h2>
     <div class="questionnaireQuestions" id="DemographicQuestions">
       <!-- ADD YOUR DEMOGRAPHIC QUESTIONS HERE -->
