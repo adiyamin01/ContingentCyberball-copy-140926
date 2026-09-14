@@ -216,6 +216,64 @@
     .scoreBadge{right:-35px;bottom:-17px;font-size:13px;padding:7px 9px}.scoreDelta{right:-40px;top:-20px;font-size:21px}
     .hud{padding:8px 12px}.hud strong{font-size:13px}
   }
+
+  /* Questionnaire matrix layout */
+  .questionnaire-instructions{
+    text-align:left;
+    margin:0 0 22px;
+    line-height:1.55;
+  }
+  .questionnaire-matrix{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:18px;
+    table-layout:fixed;
+  }
+  .questionnaire-matrix th,
+  .questionnaire-matrix td{
+    padding:12px 8px;
+    text-align:center;
+    vertical-align:middle;
+    border-bottom:1px solid #ddd;
+  }
+  .questionnaire-matrix th:first-child,
+  .questionnaire-matrix td:first-child{
+    width:32%;
+    text-align:left;
+  }
+  .questionnaire-matrix th:not(:first-child),
+  .questionnaire-matrix td:not(:first-child){
+    width:13.6%;
+  }
+  .questionnaire-matrix th{
+    font-weight:500;
+    font-size:14px;
+  }
+  .questionnaire-matrix .question-text{
+    line-height:1.4;
+  }
+  .questionnaire-matrix input[type="radio"]{
+    width:18px;
+    height:18px;
+    cursor:pointer;
+  }
+  .questionnaire-item{
+    text-align:left;
+    margin:18px 0;
+  }
+  .questionnaire-item label{
+    display:block;
+    margin:8px 0;
+  }
+  .questionnaire-item input[type="text"],
+  .questionnaire-item input[type="number"],
+  .questionnaire-item select,
+  .questionnaire-item textarea{
+    width:100%;
+    box-sizing:border-box;
+    margin-top:8px;
+  }
+
 </style>
 </head>
 <body>
@@ -441,15 +499,42 @@
 </section>
 
 <!-- =====================================================
-     QUESTIONNAIRES — EDIT THE QUESTIONS INSIDE EACH BLOCK
+     QUESTIONNAIRES — 4 BLOCKS
+     Fill in the item text where indicated.
      ===================================================== -->
+
 <section id="questionnaire1Screen" class="screen questionnaireScreen" data-questionnaire="SPIN">
   <div class="panel">
     <div class="eyebrow">Questionnaire 1 of 4</div>
     <h2>SPIN</h2>
+
     <div class="questionnaireQuestions" id="SPINQuestions">
-      <!-- ADD YOUR SPIN QUESTIONS HERE -->
+      <div class="questionnaire-instructions">
+        <!-- ADD SPIN INSTRUCTIONS HERE -->
+      </div>
+
+      <table class="questionnaire-matrix">
+        <thead>
+          <tr>
+            <th></th>
+            <!-- EDIT RESPONSE LABELS IF NEEDED -->
+            <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- COPY THIS <tr> BLOCK FOR AS MANY SPIN ITEMS AS YOU NEED -->
+          <tr>
+            <td class="question-text"><!-- ADD SPIN ITEM 1 HERE --></td>
+            <td><input type="radio" name="SPIN_1" value="1"></td>
+            <td><input type="radio" name="SPIN_1" value="2"></td>
+            <td><input type="radio" name="SPIN_1" value="3"></td>
+            <td><input type="radio" name="SPIN_1" value="4"></td>
+            <td><input type="radio" name="SPIN_1" value="5"></td>
+          </tr>
+        </tbody>
+      </table>
     </div>
+
     <button class="primary questionnaireNext" data-current="SPIN" data-next="questionnaire2Screen">Continue</button>
   </div>
 </section>
@@ -458,32 +543,57 @@
   <div class="panel">
     <div class="eyebrow">Questionnaire 2 of 4</div>
     <h2>NPI</h2>
+
     <div class="questionnaireQuestions" id="NPIQuestions">
-      <!-- ADD YOUR NPI QUESTIONS HERE -->
+      <div class="questionnaire-instructions">
+        <!-- ADD NPI INSTRUCTIONS HERE -->
+      </div>
+
+      <table class="questionnaire-matrix">
+        <thead>
+          <tr>
+            <th></th>
+            <!-- EDIT RESPONSE LABELS IF NEEDED -->
+            <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- COPY THIS <tr> BLOCK FOR AS MANY NPI ITEMS AS YOU NEED -->
+          <tr>
+            <td class="question-text"><!-- ADD NPI ITEM 1 HERE --></td>
+            <td><input type="radio" name="NPI_1" value="1"></td>
+            <td><input type="radio" name="NPI_1" value="2"></td>
+            <td><input type="radio" name="NPI_1" value="3"></td>
+            <td><input type="radio" name="NPI_1" value="4"></td>
+            <td><input type="radio" name="NPI_1" value="5"></td>
+          </tr>
+        </tbody>
+      </table>
     </div>
+
     <button class="primary questionnaireNext" data-current="NPI" data-next="questionnaire3Screen">Continue</button>
   </div>
 </section>
 
-<section id="questionnaire3Screen"
-         class="screen questionnaireScreen"
-         data-questionnaire="Q3">
-
+<section id="questionnaire3Screen" class="screen questionnaireScreen" data-questionnaire="Q3">
   <div class="panel">
-
     <div class="eyebrow">Questionnaire 3 of 4</div>
     <h2>Q3</h2>
 
     <div class="questionnaireQuestions" id="Q3Questions">
-
-      <!-- INSTRUCTIONS -->
       <div class="questionnaire-instructions">
-        <!-- ADD Q3 INSTRUCTIONS HERE -->
+        <p>
+          Below is a short list of events.<br>
+          Please indicate which of the following events have happened to you in relation to
+          <u>friends, colleagues, or peers</u> in your lifetime.
+        </p>
+        <p>
+          <strong>Note:</strong> Please do not include events that occurred with family members
+          or romantic partners.
+        </p>
       </div>
 
-      <!-- Q3 MATRIX -->
       <table class="questionnaire-matrix">
-
         <thead>
           <tr>
             <th></th>
@@ -494,13 +604,11 @@
             <th>Multiple times</th>
           </tr>
         </thead>
-
         <tbody>
-
-          <!-- Q3 ITEM 1 -->
           <tr>
-            <td class="Has anyone ever spread harmful information, lies, or rumors about you? (For example: gossip or sharing your personal information)">
-              <!-- ADD ITEM 1 HERE -->
+            <td class="question-text">
+              Has anyone ever spread harmful information, lies, or rumors about you?
+              (For example: gossip or sharing your personal information)
             </td>
             <td><input type="radio" name="Q3_1" value="1"></td>
             <td><input type="radio" name="Q3_1" value="2"></td>
@@ -509,10 +617,9 @@
             <td><input type="radio" name="Q3_1" value="5"></td>
           </tr>
 
-          <!-- Q3 ITEM 2 -->
           <tr>
-            <td class="Have you ever been left out, excluded, ignored, or ostracized?">
-              <!-- ADD ITEM 2 HERE -->
+            <td class="question-text">
+              Have you ever been left out, excluded, ignored, or ostracized?
             </td>
             <td><input type="radio" name="Q3_2" value="1"></td>
             <td><input type="radio" name="Q3_2" value="2"></td>
@@ -521,10 +628,9 @@
             <td><input type="radio" name="Q3_2" value="5"></td>
           </tr>
 
-          <!-- Q3 ITEM 3 -->
           <tr>
-            <td class="Has anyone ever bullied you, mocked you, laughed at you, or humiliated you?">
-              <!-- ADD ITEM 3 HERE -->
+            <td class="question-text">
+              Has anyone ever bullied you, mocked you, laughed at you, or humiliated you?
             </td>
             <td><input type="radio" name="Q3_3" value="1"></td>
             <td><input type="radio" name="Q3_3" value="2"></td>
@@ -532,49 +638,49 @@
             <td><input type="radio" name="Q3_3" value="4"></td>
             <td><input type="radio" name="Q3_3" value="5"></td>
           </tr>
-
         </tbody>
-
       </table>
-
     </div>
 
-    <button
-      class="primary questionnaireNext"
-      data-current="Q3"
-      data-next="questionnaire4Screen">
-      Continue
-    </button>
-
+    <button class="primary questionnaireNext" data-current="Q3" data-next="questionnaire4Screen">Continue</button>
   </div>
 </section>
+
 <section id="questionnaire4Screen" class="screen questionnaireScreen" data-questionnaire="Demographic">
   <div class="panel">
     <div class="eyebrow">Questionnaire 4 of 4</div>
     <h2>Demographic</h2>
-    <div class="questionnaireQuestions" id="DemographicQuestions">
-      <!-- ADD YOUR DEMOGRAPHIC QUESTIONS HERE -->
-    </div>
-    <button class="primary questionnaireNext" data-current="Demographic" data-next="questionnaire5Screen">Continue</button>
-  </div>
-</section>
 
-<section id="questionnaire5Screen" class="screen questionnaireScreen" data-questionnaire="Questionnaire_5">
-  <div class="panel">
-    <div class="eyebrow">Questionnaire 5 of 5</div>
-    <h2>Questionnaire 5</h2>
-    <div class="questionnaireQuestions" id="Questionnaire5Questions">
-      <!-- ADD YOUR FIFTH QUESTIONNAIRE HERE -->
+    <div class="questionnaireQuestions" id="DemographicQuestions">
+      <!-- SIMPLE PLACEHOLDERS — EDIT / ADD QUESTIONS AS NEEDED -->
+
+      <div class="questionnaire-instructions">
+        <!-- ADD DEMOGRAPHIC INSTRUCTIONS HERE -->
+      </div>
+
+      <div class="questionnaire-item">
+        <label for="Demographic_1"><strong><!-- ADD DEMOGRAPHIC QUESTION 1 HERE --></strong></label>
+        <input id="Demographic_1" name="Demographic_1" type="text">
+      </div>
+
+      <!-- Example multiple-choice structure:
+      <div class="questionnaire-item">
+        <p><strong>ADD QUESTION HERE</strong></p>
+        <label><input type="radio" name="Demographic_2" value="1"> OPTION 1</label>
+        <label><input type="radio" name="Demographic_2" value="2"> OPTION 2</label>
+        <label><input type="radio" name="Demographic_2" value="3"> OPTION 3</label>
+      </div>
+      -->
     </div>
-    <button class="primary questionnaireNext" data-current="Questionnaire_5" data-next="endScreen">Finish</button>
+
+    <button class="primary questionnaireNext" data-current="Demographic" data-next="COMPLETE">Finish</button>
   </div>
 </section>
 
 <section id="endScreen" class="screen">
   <div class="panel">
-    <h2>Game complete</h2>
-    <p id="endText">Thank you — you have finished the game.</p>
-    <button class="primary" id="restartBtn">Play again</button>
+    <h2>Thank you</h2>
+    <p id="endText">You have completed the study.</p>
   </div>
 </section>
 
@@ -680,7 +786,7 @@
     version:'Cyberball Return Game — Reworked V6 + complete logging',
     participant:{}, identity_mapping:{}, initial_ratings:[], feedback_comprehension:[],
     feedback_comments:[], game_throws:[], postgame_ratings:[], seating_trials:[],
-    questionnaires:{SPIN:{},NPI:{},Q3:{},Demographic:{},Questionnaire_5:{}}
+    questionnaires:{SPIN:{},NPI:{},Q3:{},Demographic:{}}
   };
   let ratingStart=0, feedbackAttemptStart=0, gameChoiceStart=0;
   let gameThrowCounter=0, seatMouse=[];
@@ -693,7 +799,7 @@
     completeLog.identity_mapping={};
     ids.forEach(role=>{
       const p=identities[role];
-      completeLog.identity_mapping[role]={visible_player:p.name,color:p.color,icon:p.icon,sentence:p.sentence};
+      completeLog.identity_mapping[role]={visible_player:p.name,color:p.color,sentence:p.sentence};
     });
   }
   function sendCompleteLog(){
@@ -701,8 +807,7 @@
     completeLog.participant={
       name:participantName(),
       self_description:el('selfDescription').value.trim().slice(0,180),
-      selected_color:selectedColor,
-      selected_icon:selectedIcon
+      selected_color:selectedColor
     };
 
     // Send each experiment section as its own Qualtrics Embedded Data column.
@@ -723,8 +828,7 @@
       SPIN: JSON.stringify(completeLog.questionnaires.SPIN || {}),
       NPI: JSON.stringify(completeLog.questionnaires.NPI || {}),
       Q3: JSON.stringify(completeLog.questionnaires.Q3 || {}),
-      Demographic: JSON.stringify(completeLog.questionnaires.Demographic || {}),
-      Questionnaire_5: JSON.stringify(completeLog.questionnaires.Questionnaire_5 || {})
+      Demographic: JSON.stringify(completeLog.questionnaires.Demographic || {})
     };
 
     for(let i=1;i<=10;i++){
@@ -1434,6 +1538,14 @@
   document.querySelectorAll('.questionnaireNext').forEach(btn=>{
     btn.addEventListener('click',()=>{
       collectQuestionnaire(btn.dataset.current);
+
+      if(btn.dataset.next==='COMPLETE'){
+        sendCompleteLog();
+        window.parent.postMessage({type:'CyberballComplete'},'*');
+        showScreen('endScreen');
+        return;
+      }
+
       showScreen(btn.dataset.next);
     });
   });
