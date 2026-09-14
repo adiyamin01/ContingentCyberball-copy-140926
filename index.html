@@ -1166,7 +1166,7 @@
 
     <button class="primary questionnaireNext"
             data-current="Demographic"
-            data-next="endScreen">
+            data-next="COMPLETE">
       Finish
     </button>
   </div>
@@ -2475,13 +2475,16 @@
     if(state?.currentHolder)placeBall(state.currentHolder,true);
   });
 
-  el('restartBtn').addEventListener('click',()=>{
-    state=null;memoryTrials=[];participantRatings={};roundRatings={scored:{},free:{}};roundMessages={scored:{},free:{}};feedbackComments={};scoredRoundLength=0;
-    completeLog.participant={};completeLog.identity_mapping={};completeLog.initial_ratings=[];completeLog.feedback_comprehension=[];completeLog.feedback_comments=[];completeLog.game_throws=[];completeLog.postgame_ratings=[];completeLog.seating_trials=[];gameThrowCounter=0;
-    el('nickname').value='';el('selfDescription').value='';
-    initializeSession();
-    showScreen('profileScreen');
-  });
+  const restartBtn = el('restartBtn');
+  if(restartBtn){
+    restartBtn.addEventListener('click',()=>{
+      state=null;memoryTrials=[];participantRatings={};roundRatings={scored:{},free:{}};roundMessages={scored:{},free:{}};feedbackComments={};scoredRoundLength=0;
+      completeLog.participant={};completeLog.identity_mapping={};completeLog.initial_ratings=[];completeLog.feedback_comprehension=[];completeLog.feedback_comments=[];completeLog.game_throws=[];completeLog.postgame_ratings=[];completeLog.seating_trials=[];gameThrowCounter=0;
+      el('nickname').value='';el('selfDescription').value='';
+      initializeSession();
+      showScreen('profileScreen');
+    });
+  }
 
   initializeSession();
 })();
