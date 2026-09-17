@@ -1164,7 +1164,7 @@
 
     <button class="primary questionnaireNext"
             data-current="Demographic"
-            data-next="endScreen">
+            data-next="COMPLETE">
       Finish
     </button>
   </div>
@@ -1289,6 +1289,8 @@
   let activeFeedbackPageLogIndex=null;
   let activePostSeatingRatingLogIndex=null;
   let activeSeatingPageLogIndex=null;
+  let experimentComplete=false;
+  let experimentCompletedAtMs=null;
 
   function visibleName(role){
     return role==='ME' ? participantName() : (identities[role]?.name || role);
@@ -1331,7 +1333,9 @@
       SPIN: JSON.stringify(completeLog.questionnaires.SPIN || {}),
       NPI: JSON.stringify(completeLog.questionnaires.NPI || {}),
       Q3: JSON.stringify(completeLog.questionnaires.Q3 || {}),
-      Demographic: JSON.stringify(completeLog.questionnaires.Demographic || {})
+      Demographic: JSON.stringify(completeLog.questionnaires.Demographic || {}),
+      Experiment_Complete: experimentComplete ? '1' : '0',
+      Experiment_Completed_At_ms: experimentCompletedAtMs==null ? '' : String(experimentCompletedAtMs)
     };
 
     for(let i=1;i<=CFG.seatingTrials;i++){
@@ -2211,11 +2215,18 @@
       collectQuestionnaire(btn.dataset.current);
 
       if(btn.dataset.next==='COMPLETE'){
+        experimentComplete=true;
+        experimentCompletedAtMs=experimentMs();
+        
         sendCompleteLog();
-        window.parent.postMessage({type:'CyberballComplete'},'*');
-        showScreen('endScreen');
-        return;
-      }
+        
+        window.parent.postMessage({
+          type:'CyberballComplete',
+          completed_at_ms:experimentCompletedAtMs
+        },'*');
+      showScreen('endScreen');
+      return;
+    }
 
       showScreen(btn.dataset.next);
     });
