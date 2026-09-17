@@ -359,6 +359,13 @@
     <div class="ratingIdentity" id="ratingIdentity"></div>
     <div class="ratingScale" id="ratingScale"></div>
     <div class="scaleEnds"><span>1 — Not nice</span><span>10 — Very nice</span></div>
+
+    <div id="ratingConfidenceWrap" style="display:none;margin-top:30px;">
+      <label style="display:block;font-weight:bold;margin-bottom:8px;">How confident are you in your rating?</label>
+      <div class="ratingScale" id="ratingConfidenceScale"></div>
+      <div class="scaleEnds"><span>1 — Not At All Confident</span><span>10 — Very Confident</span></div>
+    </div>
+
     <div class="responseBox" id="ratingMessageWrap" style="display:none">
       <label id="ratingMessageLabel" for="ratingMessage">MESSAGE TO PLAYER</label>
       <textarea id="ratingMessage" maxlength="300" placeholder="Write an optional message..."></textarea>
@@ -480,12 +487,14 @@
 
 <section id="seatIntroScreen" class="screen">
   <div class="panel">
-    <div class="eyebrow">One more task</div>
-    <h2>Where would you like to sit?</h2>
-    <p>You will now see a table with six seats. The other players are already seated, and three seats are free — the free seats are marked with a dashed outline.</p>
-    <p>On each table, click the seat you would most like to take. There are no right or wrong answers; choose the seat you would actually want.</p>
+    <h2>Seating Task</h2>
+    <p>You have now completed the ball-tossing task.</p>
+    <p>Now, imagine that you and the other players are entering a room and choosing where to sit.</p>
+    <p>In the next task, you will see the other players and several available chairs.</p>
+    <p>Please choose the chair where you would most prefer to sit, based on your experience with the players so far. There are no right or wrong choices. Simply choose the seat that feels most natural to you.</p>
+    <p>Click Continue when you are ready.</p>
     <div class="seatLegend" id="seatIntroLegend"></div>
-    <button class="primary" id="seatStartBtn">Start</button>
+    <button class="primary" id="seatStartBtn">Continue</button>
   </div>
 </section>
 
@@ -496,6 +505,28 @@
     <div class="seatLegend" id="seatLegend"></div>
     <div class="seatStage" id="seatStage"><div class="seatTableTop">Table</div></div>
     <button class="primary" id="seatNextBtn" disabled="">Next table</button>
+  </div>
+</section>
+
+<section id="postSeatingImpressionsIntroScreen" class="screen">
+  <div class="panel">
+    <h2>Your Impressions of the Players</h2>
+    <p>Next, we will ask you a few brief questions about the other players based on your experience with them so far.</p>
+    <p>Please answer based on your own impressions. There are no right or wrong answers.</p>
+    <button class="primary" id="postSeatingImpressionsIntroNextBtn">Continue</button>
+  </div>
+</section>
+
+<section id="economicTaskIntroScreen" class="screen">
+  <div class="panel">
+    <h2>Next: An Economic Decision-Making Task</h2>
+    <p>You have now had several opportunities to interact with the other players and get to know them.</p>
+    <p>You will now take part in a short economic decision-making game with these players.</p>
+    <p>In this game, you will first choose which player you would prefer to play with.</p>
+    <p>The player you choose may affect the offer you receive and therefore the additional bonus payment you can earn.</p>
+    <p>Please make your choice based on your own preferences and your experience with the players.</p>
+    <p>Click Continue to begin.</p>
+    <button class="primary" id="economicTaskIntroNextBtn">Continue</button>
   </div>
 </section>
 
@@ -1262,6 +1293,7 @@
   let ratingOrder=[];
   let ratingIndex=0;
   let ratingSelection=null;
+  let confidenceSelection=null;
   let participantRatings={};
   let ratingContext='pregame';
   let roundRatings={scored:{},free:{},post_seating:{}};
@@ -1379,18 +1411,19 @@
   function beginPostSeatingRatingLog(role,p){
     const row={
       player_index:ratingIndex+1, role, visible_player:p.name, context:'post_seating',
-      entered_at_ms:experimentMs(), duration_ms:null, rating:null
+      entered_at_ms:experimentMs(), duration_ms:null, rating:null, confidence_rating:null
     };
     completeLog.post_seating_rating_views.push(row);
     activePostSeatingRatingLogIndex=completeLog.post_seating_rating_views.length-1;
   }
 
-  function endPostSeatingRatingLog(rating){
+  function endPostSeatingRatingLog(rating,confidenceRating=null){
     if(activePostSeatingRatingLogIndex==null)return;
     const row=completeLog.post_seating_rating_views[activePostSeatingRatingLogIndex];
     if(row && row.duration_ms==null){
       row.duration_ms=experimentMs()-row.entered_at_ms;
       row.rating=rating;
+      row.confidence_rating=confidenceRating;
     }
     activePostSeatingRatingLogIndex=null;
   }
@@ -1639,10 +1672,16 @@
     renderRating();
   }
 
+  function updateRatingNextState(){
+    const ready = ratingSelection!=null && (ratingContext!=='post_seating' || confidenceSelection!=null);
+    el('ratingNext').disabled=!ready;
+  }
+
   function renderRating(){
     const role=ratingOrder[ratingIndex];
     const p=identities[role];
     ratingSelection=null;
+    confidenceSelection=null;
     ratingStart=performance.now();
     const isPost=ratingContext!=='pregame';
     const roundLabel=ratingContext==='scored'
@@ -1652,21 +1691,47 @@
       ?`${roundLabel} — ${ratingIndex+1} of 3`
       :`Your impression — ${ratingIndex+1} of 3`;
     el('ratingTitle').textContent=ratingContext==='post_seating'
-      ?`After the seating task, how nice does ${p.name} seem to you?`
+      ?`How nice does ${p.name} seem to you?`
       :(isPost
         ?`After this round, how nice does ${p.name} seem to you?`
         :`How nice does ${p.name} seem to you?`);
     el('ratingIdentity').innerHTML=identityCardHTML(p,true);
-    el('ratingScale').innerHTML='';
+
+    const niceScale=el('ratingScale');
+    niceScale.innerHTML='';
     for(let n=1;n<=10;n++){
       const b=document.createElement('button');
       b.type='button';b.className='rateBtn';b.textContent=n;
       b.addEventListener('click',()=>{
-        document.querySelectorAll('.rateBtn').forEach(x=>x.classList.remove('selected'));
-        b.classList.add('selected');ratingSelection=n;el('ratingNext').disabled=false;
+        niceScale.querySelectorAll('.rateBtn').forEach(x=>x.classList.remove('selected'));
+        b.classList.add('selected');
+        ratingSelection=n;
+        updateRatingNextState();
       });
-      el('ratingScale').appendChild(b);
+      niceScale.appendChild(b);
     }
+
+    const confidenceWrap=el('ratingConfidenceWrap');
+    const confidenceScale=el('ratingConfidenceScale');
+    if(ratingContext==='post_seating'){
+      confidenceWrap.style.display='block';
+      confidenceScale.innerHTML='';
+      for(let n=1;n<=10;n++){
+        const b=document.createElement('button');
+        b.type='button';b.className='rateBtn';b.textContent=n;
+        b.addEventListener('click',()=>{
+          confidenceScale.querySelectorAll('.rateBtn').forEach(x=>x.classList.remove('selected'));
+          b.classList.add('selected');
+          confidenceSelection=n;
+          updateRatingNextState();
+        });
+        confidenceScale.appendChild(b);
+      }
+    }else{
+      confidenceWrap.style.display='none';
+      confidenceScale.innerHTML='';
+    }
+
     el('ratingMessageWrap').style.display=isPost?'block':'none';
     el('ratingMessage').value='';
     el('ratingMessageLabel').textContent=`OPTIONAL MESSAGE TO ${p.name.toUpperCase()}`;
@@ -1683,6 +1748,7 @@
 
   function saveRatingAndContinue(){
     if(ratingSelection==null)return;
+    if(ratingContext==='post_seating' && confidenceSelection==null)return;
     const role=ratingOrder[ratingIndex];
     const p=identities[role];
     const rt=Math.round(performance.now()-ratingStart);
@@ -1695,8 +1761,10 @@
       if(!roundMessages[ratingContext])roundMessages[ratingContext]={};
       roundRatings[ratingContext][role]=ratingSelection;
       roundMessages[ratingContext][role]=message;
-      completeLog.postgame_ratings.push({context:ratingContext,role,visible_player:p.name,rating:ratingSelection,hesitation_ms:rt,message});
-      if(ratingContext==='post_seating')endPostSeatingRatingLog(ratingSelection);
+      const record={context:ratingContext,role,visible_player:p.name,rating:ratingSelection,hesitation_ms:rt,message};
+      if(ratingContext==='post_seating')record.confidence_rating=confidenceSelection;
+      completeLog.postgame_ratings.push(record);
+      if(ratingContext==='post_seating')endPostSeatingRatingLog(ratingSelection,confidenceSelection);
     }
     checkpoint();
     ratingIndex++;
@@ -1709,7 +1777,7 @@
       if(CFG.seatingEnabled){showScreen('seatIntroScreen');}
       else{showScreen('questionnaire1Screen');}
     }else if(ratingContext==='post_seating'){
-      showScreen('questionnaire1Screen');
+      showScreen('economicTaskIntroScreen');
     }
   }
 
@@ -2138,7 +2206,7 @@
     console.log(lines.join('\n'));
     window.seatingData=seatResults;
     sendCompleteLog();
-    startRatings('post_seating');
+    showScreen('postSeatingImpressionsIntroScreen');
   }
 
   // ===================== REQUIRED QUESTIONS =====================
@@ -2705,6 +2773,8 @@
     showScreen('meetScreen');
   });
   el('seatStartBtn').addEventListener('click',startSeatingTask);
+  el('postSeatingImpressionsIntroNextBtn').addEventListener('click',()=>startRatings('post_seating'));
+  el('economicTaskIntroNextBtn').addEventListener('click',()=>showScreen('questionnaire1Screen'));
   el('seatNextBtn').addEventListener('click',nextSeatTrial);
   el('meetNext').addEventListener('click',()=>{
     if(CFG.useMemoryTest) startMemoryTest(); else startRatings();
