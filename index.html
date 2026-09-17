@@ -507,7 +507,6 @@
 <section id="questionnaire1Screen" class="screen questionnaireScreen" data-questionnaire="SPIN">
   <div class="panel">
     <div class="eyebrow">Questionnaire 1 of 4</div>
-    <h2>SPIN</h2>
 
     <div class="questionnaireQuestions" id="SPINQuestions">
       <div class="questionnaire-instructions">
@@ -700,7 +699,6 @@
   <div class="panel">
 
     <div class="eyebrow">Questionnaire 2 of 4</div>
-    <h2>NPI</h2>
 
     <div class="questionnaireQuestions" id="NPIQuestions">
 
@@ -1057,7 +1055,6 @@
 <section id="questionnaire3Screen" class="screen questionnaireScreen" data-questionnaire="Q3">
   <div class="panel">
     <div class="eyebrow">Questionnaire 3 of 4</div>
-    <h2>Q3</h2>
 
     <div class="questionnaireQuestions" id="Q3Questions">
       <div class="questionnaire-instructions">
@@ -1214,7 +1211,7 @@
     userThrowTarget:30,
     // ---- Seating task (runs after the post-game ratings) ----
     seatingEnabled:true,
-    seatingTrials:10,   // 10 of the 20 distinct configurations, balanced (see buildSeatingTrials)
+    seatingTrials:30,   // 30 tables: three adjacent players, balanced around the circle and within the trio
     seatingSeats:6,
     seatingShowSeatNumbers:false
   };
@@ -1271,7 +1268,7 @@
   let roundMessages={scored:{},free:{}};
   let feedbackOrder=[];
   let feedbackIndex=0;
-  let feedbackPage=1;
+  let feedbackPage=1; // 1=rating reveal, 2=comprehension question, 3=verbal interpretation
   let feedbackComments={};
   let scoredRoundLength=0;
   let gamePositionByRole={};
@@ -1633,41 +1630,92 @@
     renderFeedback();
   }
 
+  function currentFeedbackRating(){
+    const role=feedbackOrder[feedbackIndex];
+    return role==='A' ? 2 : (role==='C' ? 8 : null);
+  }
+
   function renderFeedback(){
     const role=feedbackOrder[feedbackIndex];
     const p=identities[role];
+    const rating=currentFeedbackRating();
+
     el('feedbackEyebrow').textContent=`How they rated you — ${feedbackIndex+1} of 3`;
+    el('feedbackEyebrow').style.display=feedbackPage===1?'':'none';
     el('feedbackIdentity').innerHTML=identityCardHTML(p,true);
-
-    // Hidden-role ratings: A rates low, C rates high, B has not responded.
-    const rating = role==='A' ? 2 : (role==='C' ? 8 : null);
-    renderFeedbackScale(rating);
-
-    const cap=el('feedbackCaption');
     el('feedbackScore').textContent = rating==null ? 'No rating yet' : `${rating} / 10`;
     el('feedbackText').innerHTML = rating==null
       ? `${p.name} <b>has not rated you yet</b>.`
       : `${p.name} rated you <b>${rating} out of 10</b>.`;
-    if(rating==null){
-      cap.className='feedbackCaption neutral';
-      cap.textContent=`${p.name} has not rated you yet.`;
-    }else{
-      // Filled in once the comprehension question is answered correctly.
-      cap.className='feedbackCaption';
-      cap.textContent='';
-    }
     el('feedbackPlayerCommentLabel').textContent=`YOUR COMMENT ABOUT ${p.name.toUpperCase()}'S RATING`;
     el('feedbackPlayerComment').value=feedbackComments[role] || '';
-    el('feedbackNext').textContent=feedbackIndex===2?(CFG.simpleMode?'Start the game':'Continue to game rules'):'Continue';
+
+    renderFeedbackPage(rating,p);
   }
 
   let feedbackRevealTimers=[];
 
-  function renderFeedbackScale(rating){
-    // Cancel any reveal still running from the previous player.
+  function setFeedbackVisibility({identity=false,scale=false,quiz=false,caption=false}){
+    el('feedbackIdentity').style.display=identity?'':'none';
+    // feedbackScore was hidden in the original version and stays hidden.
+    el('feedbackScore').style.display='none';
+    const scaleWrap=document.querySelector('#feedbackScreen .fbScaleWrap');
+    scaleWrap.style.display=(scale||quiz)?'':'none';
+    el('fbMarkers').style.display=scale?'':'none';
+    el('fbScale').style.display=scale?'':'none';
+    document.querySelector('#feedbackScreen .fbEnds').style.display=scale?'':'none';
+    el('fbQuiz').style.display=quiz?'':'none';
+    el('feedbackCaption').style.display=caption?'':'none';
+  }
+
+  function renderFeedbackPage(rating,p){
     feedbackRevealTimers.forEach(clearTimeout);
     feedbackRevealTimers=[];
 
+    const back=el('feedbackBack');
+    const next=el('feedbackNext');
+    back.style.display='none';
+    next.disabled=false;
+
+    if(feedbackPage===1){
+      // Page 1: keep the ORIGINAL rating scale/reveal exactly as before.
+      // The only change is that the comprehension question and the
+      // above/below interpretation are no longer shown on this page.
+      setFeedbackVisibility({identity:true,scale:true,quiz:false,caption:rating==null});
+      next.textContent=feedbackIndex===2 && rating==null
+        ? (CFG.simpleMode?'Start the game':'Continue to game rules')
+        : 'Continue';
+      renderFeedbackScalePage1(rating,p);
+      return;
+    }
+
+    if(feedbackPage===2){
+      // Page 2: ONLY the original comprehension question.
+      setFeedbackVisibility({identity:false,scale:false,quiz:true,caption:false});
+      back.style.display='inline-block';
+      next.textContent='Continue';
+      next.disabled=true;
+      const diff=Math.abs(rating-5);
+      const dir=rating>5?'above':'below';
+      buildFeedbackQuiz(diff,dir);
+      feedbackAttemptStart=performance.now();
+      el('fbQuiz').classList.add('show');
+      return;
+    }
+
+    // Page 3: ONLY the original verbal interpretation.
+    setFeedbackVisibility({identity:false,scale:false,quiz:false,caption:true});
+    const cap=el('feedbackCaption');
+    cap.className='feedbackCaption show';
+    cap.textContent = rating>5
+      ? `${p.name} likes you more than the average player!`
+      : `${p.name} likes you less than the average player.`;
+    next.textContent=feedbackIndex===2?(CFG.simpleMode?'Start the game':'Continue to game rules'):'Continue';
+  }
+
+  function renderFeedbackScalePage1(rating,p){
+    // This is the original scale-rendering logic, unchanged up to the point
+    // where the original version would have displayed the question.
     const AVG=5;
     const lo=rating==null?null:Math.min(AVG,rating);
     const hi=rating==null?null:Math.max(AVG,rating);
@@ -1710,19 +1758,14 @@
     el('fbQuizPrompt').textContent='';
 
     if(rating==null){
-      el('feedbackNext').disabled=false;
+      // Preserve the original no-rating presentation.
+      cap.className='feedbackCaption neutral';
+      cap.textContent=`${p.name} has not rated you yet.`;
       feedbackRevealTimers.push(setTimeout(()=>cap.classList.add('show'),450));
       return;
     }
 
-    // The participant must read the distance off the scale before the
-    // interpretive sentence is shown.
-    el('feedbackNext').disabled=true;
-    const diff=Math.abs(rating-AVG);
-    const dir=rating>AVG?'above':'below';
-
-    // Staged reveal: the scale settles, the marker lands, the band fills the
-    // distance, then the comprehension question appears.
+    // Original staged visual reveal: participant marker first, then the band.
     feedbackRevealTimers.push(setTimeout(()=>{
       if(meMarker)meMarker.classList.add('show');
       if(markCell)markCell.classList.add('show');
@@ -1730,11 +1773,7 @@
     feedbackRevealTimers.push(setTimeout(()=>{
       bandCells.forEach(c=>c.classList.add('show'));
     },1050));
-    feedbackRevealTimers.push(setTimeout(()=>{
-      buildFeedbackQuiz(diff,dir);
-      feedbackAttemptStart=performance.now();
-      quiz.classList.add('show');
-    },1350));
+    // Deliberately stop here. The original question is now page 2.
   }
 
   function buildFeedbackQuiz(diff,dir){
@@ -1742,6 +1781,7 @@
     el('fbQuizPrompt').textContent=`How many points ${dir} the average player did ${p.name} rate you?`;
     const wrap=el('fbQuizOptions');
     wrap.innerHTML='';
+    el('fbQuizHint').textContent='';
     for(let n=0;n<=5;n++){
       const b=document.createElement('button');
       b.type='button';b.className='fbQuizBtn';b.textContent=n;
@@ -1769,14 +1809,8 @@
     btn.classList.add('correct');
     document.querySelectorAll('.fbQuizBtn').forEach(b=>b.disabled=true);
     el('fbQuizHint').textContent='Correct.';
-    const cap=el('feedbackCaption');
-    cap.textContent = dir==='above'
-      ? `${playerName} likes you more than the average player!`
-      : `${playerName} likes you less than the average player.`;
-    feedbackRevealTimers.push(setTimeout(()=>{
-      cap.classList.add('show');
-      el('feedbackNext').disabled=false;
-    },320));
+    // The verbal interpretation is intentionally deferred to page 3.
+    el('feedbackNext').disabled=false;
   }
 
 
@@ -1851,44 +1885,47 @@
   // free seat, and the four table shapes appear in proportion. Falls back to the
   // most balanced subset found if the search does not land on a perfect one.
   function buildSeatingTrials(){
-    const configs=allSeatConfigs();
-    const k=Math.min(CFG.seatingTrials,configs.length);
-    const profiles=configs.map(seatProfile);
-    const typeOf=configs.map(seatOccType);
-    const allTypes={};
-    typeOf.forEach(t=>{allTypes[t]=(allTypes[t]||0)+1;});
-    const wantType={};
-    Object.keys(allTypes).forEach(t=>{wantType[t]=Math.round(allTypes[t]*k/configs.length);});
+    // Three players always occupy three consecutive seats.
+    // Exact balance across 30 trials:
+    // - each of the 6 possible trio start positions appears exactly 5 times;
+    // - each of the 6 player orders within the trio appears exactly 5 times;
+    // - each player occupies each of the 3 relative positions exactly 10 times;
+    // - each player occupies each of the 6 absolute seats exactly 5 times.
+    const n=CFG.seatingSeats;
+    const permutations=[
+      [0,1,2], [0,2,1], [1,0,2],
+      [1,2,0], [2,0,1], [2,1,0]
+    ];
 
-    function score(idx){
-      const tot={},tcount={};
-      idx.forEach(i=>{
-        const pr=profiles[i];
-        Object.keys(pr).forEach(key=>{tot[key]=(tot[key]||0)+pr[key];});
-        tcount[typeOf[i]]=(tcount[typeOf[i]]||0)+1;
-      });
-      let sc=0;
-      for(let d=1;d<=3;d++){
-        const v=[0,1,2].map(i=>tot[i+'|'+d]||0);
-        sc+=Math.max.apply(null,v)-Math.min.apply(null,v);
+    // For each trio start, omit one different permutation. This specific
+    // one-to-one omission pattern gives exact balance both within the trio
+    // and around the full six-seat circle.
+    const omittedPermutationByStart=[0,4,2,5,1,3];
+    const trials=[];
+
+    for(let start=0;start<n;start++){
+      const trio=[start,(start+1)%n,(start+2)%n];
+
+      for(let pi=0;pi<permutations.length;pi++){
+        if(pi===omittedPermutationByStart[start])continue;
+
+        const order=permutations[pi];
+        const cfg=Array(3);
+
+        // order[positionWithinTrio] = player index
+        // cfg[player index] = absolute seat
+        for(let pos=0;pos<3;pos++){
+          cfg[order[pos]]=trio[pos];
+        }
+
+        trials.push(cfg);
       }
-      Object.keys(wantType).forEach(t=>{sc+=Math.abs((tcount[t]||0)-wantType[t]);});
-      return sc;
     }
 
-    let best=null,bestSc=Infinity;
-    for(let attempt=0;attempt<4000;attempt++){
-      const idx=shuffle(configs.map((_,i)=>i)).slice(0,k);
-      const sc=score(idx);
-      if(sc<bestSc){bestSc=sc;best=idx;if(sc===0)break;}
-    }
-    return shuffle(best).map(i=>{
-      // Random rotation so the same relative arrangement is not always in the
-      // same seats on screen.
-      const r=Math.floor(Math.random()*CFG.seatingSeats);
-      return configs[i].map(x=>(x+r)%CFG.seatingSeats);
-    });
+    // Randomize presentation order without changing the exact balance.
+    return shuffle(trials);
   }
+
 
   function seatLegendHTML(){
     return ids.map(role=>{
@@ -2093,15 +2130,42 @@
     });
   });
 
-  function nextFeedback(){
+  function finishFeedbackPlayer(){
     const role=feedbackOrder[feedbackIndex];
     feedbackComments[role]=el('feedbackPlayerComment').value.trim().slice(0,500);
     completeLog.feedback_comments.push({role,visible_player:identities[role].name,comment:feedbackComments[role]});
     checkpoint();
     feedbackIndex++;
+    feedbackPage=1;
     if(feedbackIndex<feedbackOrder.length){renderFeedback();return;}
     if(CFG.simpleMode){beginGamePhase('free');return;}
     showScreen('rule1Screen');
+  }
+
+  function nextFeedback(){
+    const rating=currentFeedbackRating();
+
+    if(feedbackPage===1){
+      // In the original logic, a player with no rating had no comprehension
+      // question or above/below interpretation, so preserve that flow.
+      if(rating==null){finishFeedbackPlayer();return;}
+      feedbackPage=2;
+      renderFeedback();
+      return;
+    }
+    if(feedbackPage===2){
+      feedbackPage=3;
+      renderFeedback();
+      return;
+    }
+
+    finishFeedbackPlayer();
+  }
+
+  function previousFeedbackPage(){
+    if(feedbackPage!==2)return;
+    feedbackPage=1;
+    renderFeedback();
   }
 
   function newReturnDeck(role){
@@ -2540,6 +2604,7 @@
     if(CFG.useMemoryTest) startMemoryTest(); else startRatings();
   });
   el('ratingNext').addEventListener('click',saveRatingAndContinue);
+  el('feedbackBack').addEventListener('click',previousFeedbackPage);
   el('feedbackNext').addEventListener('click',nextFeedback);
   el('rule1Next').addEventListener('click',()=>showScreen('rule2Screen'));
   el('rule2Next').addEventListener('click',()=>showScreen('rule3Screen'));
@@ -2555,7 +2620,7 @@
   const restartBtn = el('restartBtn');
   if (restartBtn) {
     restartBtn.addEventListener('click',()=>{
-      state=null;memoryTrials=[];participantRatings={};roundRatings={scored:{},free:{}};roundMessages={scored:{},free:{}};feedbackComments={};scoredRoundLength=0;
+      state=null;memoryTrials=[];participantRatings={};roundRatings={scored:{},free:{}};roundMessages={scored:{},free:{}};feedbackComments={};feedbackPage=1;scoredRoundLength=0;
       completeLog.participant={};completeLog.identity_mapping={};completeLog.initial_ratings=[];completeLog.feedback_comprehension=[];completeLog.feedback_comments=[];completeLog.game_throws=[];completeLog.postgame_ratings=[];completeLog.seating_trials=[];gameThrowCounter=0;
       el('nickname').value='';el('selfDescription').value='';
       initializeSession();
