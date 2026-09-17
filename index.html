@@ -529,6 +529,54 @@
   </div>
 </section>
 
+<section id="ultimatumChoiceScreen" class="screen">
+  <div class="panel">
+    <h2>Ultimatum Game – Player Choice</h2>
+    <p id="ultimatumChoicePrompt">Please select the player you would <b>like to play the economic game with the most</b>.</p>
+    <div class="choiceRow" id="ultimatumChoiceButtons" style="justify-content:center;margin:28px auto 18px;"></div>
+    <p id="ultimatumPairText"></p>
+    <button class="primary" id="ultimatumChoiceContinueBtn" style="display:none">Continue</button>
+  </div>
+</section>
+
+<section id="ultimatumFirstOfferScreen" class="screen">
+  <div class="panel">
+    <h2>Economic Offer</h2>
+    <div class="ratingIdentity">
+      <div class="avatar" id="ultimatumFirstPlayerAvatar"></div>
+      <h3 id="ultimatumFirstPlayerName"></h3>
+    </div>
+    <p>This player has proposed the following division of <b>$1.00</b>:</p>
+    <p><b>Player receives: $0.60</b></p>
+    <p><b>You receive: $0.40</b></p>
+    <p>You may now decide whether to <b>accept or reject</b> this offer.</p>
+    <p>If you <b>accept</b>, the money will be divided as shown above, and you will receive <b>$0.40 as an additional bonus</b>.</p>
+    <p>If you <b>reject</b>, neither you nor the other player will receive the money from this offer.</p>
+    <p><b>What would you like to do?</b></p>
+    <button class="primary" id="ultimatumFirstAcceptBtn">Accept the offer</button>
+    <button class="secondary" id="ultimatumFirstRejectBtn">Reject the offer</button>
+  </div>
+</section>
+
+<section id="ultimatumSecondOfferScreen" class="screen">
+  <div class="panel">
+    <h2>Economic Offer</h2>
+    <div class="ratingIdentity">
+      <div class="avatar" id="ultimatumSecondPlayerAvatar"></div>
+      <h3 id="ultimatumSecondPlayerName"></h3>
+    </div>
+    <p>This player has proposed the following division of <b>$1.00</b>:</p>
+    <p><b>Player receives: $0.80</b></p>
+    <p><b>You receive: $0.20</b></p>
+    <p>You may now decide whether to <b>accept or reject</b> this offer.</p>
+    <p>If you <b>accept</b>, the money will be divided as shown above, and you will receive <b>$0.20 as an additional bonus</b>.</p>
+    <p>If you <b>reject</b>, neither you nor the other player will receive the money from this offer.</p>
+    <p><b>What would you like to do?</b></p>
+    <button class="primary" id="ultimatumSecondAcceptBtn">Accept the offer</button>
+    <button class="secondary" id="ultimatumSecondRejectBtn">Reject the offer</button>
+  </div>
+</section>
+
 <!-- =====================================================
      QUESTIONNAIRES — 4 BLOCKS
      Fill in the item text where indicated.
@@ -536,6 +584,7 @@
 
 <section id="questionnaireIntroScreen" class="screen">
   <div class="panel">
+    <h2>Questionnaires</h2>
     <p>In the next section, you will be asked to complete several questionnaires related to emotions, thoughts, and behaviors.</p>
     <p>Please read the instructions for each questionnaire carefully and respond according to the given guidelines.</p>
     <button class="primary" id="questionnaireIntroNextBtn">Continue</button>
@@ -1315,6 +1364,7 @@
     participant:{}, identity_mapping:{}, initial_ratings:[], feedback_comprehension:[],
     feedback_comments:[], feedback_page_views:[], game_throws:[], postgame_ratings:[],
     post_seating_rating_views:[], seating_trials:[], seating_page_views:[],
+    ultimatum_game:{},
     questionnaires:{SPIN:{},NPI:{},Q3:{},Demographic:{}}
   };
   let ratingStart=0, feedbackAttemptStart=0, gameChoiceStart=0;
@@ -1325,6 +1375,10 @@
   let activeSeatingPageLogIndex=null;
   let experimentComplete=false;
   let experimentCompletedAtMs=null;
+  let ultimatumChoiceStage=0;
+  let ultimatumSelectedRoles=[null,null];
+  let ultimatumChoiceStart=0;
+  let ultimatumOfferStart=0;
 
   function visibleName(role){
     return role==='ME' ? participantName() : (identities[role]?.name || role);
@@ -1364,6 +1418,7 @@
       PostSeating_Rating_Views: JSON.stringify(completeLog.post_seating_rating_views),
       Seating_Trials: JSON.stringify(completeLog.seating_trials),
       Seating_Page_Views: JSON.stringify(completeLog.seating_page_views),
+      Ultimatum_Game: JSON.stringify(completeLog.ultimatum_game || {}),
       SPIN: JSON.stringify(completeLog.questionnaires.SPIN || {}),
       NPI: JSON.stringify(completeLog.questionnaires.NPI || {}),
       Q3: JSON.stringify(completeLog.questionnaires.Q3 || {}),
@@ -2168,26 +2223,21 @@
 
     el('seatStage').removeEventListener('mousemove',trackSeatMouse);
     const row={trial:seatIndex+1,chosen_seat:seat+1,hesitation_ms:rt,rt_ms:rt,mouse_trajectory:seatMouse.slice(),configuration:{}};
-   const dists=[];
-  cfg.forEach((s,i)=>{
-    const role=ids[i];
-    const p=identities[role];
-    const d=seatDistance(seat,s);
-
-  row['seat_'+role]=s+1;
-  row['dist_'+role]=d;
-
-  row.configuration[role]={
-    visible_player:p.name,
-    seat:s+1
-  };
-
-  dists.push({role,d});
-});
-
-const minD=Math.min.apply(null,dists.map(x=>x.d));
-const near=dists.filter(x=>x.d===minD).map(x=>x.role);
-row.nearest=near.length===1 ? near[0] : 'tie:'+near.join('+');
+    const dists=[];
+    cfg.forEach((s,i)=>{
+      const role=ids[i];
+      const p=identities[role];
+      const d=seatDistance(seat,s);
+      // Analytical identity is ALWAYS the hidden role A / B / C.
+      // Visible color/name is metadata only and is stored in Identity_Mapping/configuration.
+      row['seat_'+role]=s+1;
+      row['dist_'+role]=d;
+      row.configuration[role]={visible_player:p.name,seat:s+1};
+      dists.push({role,d});
+    });
+    const minD=Math.min.apply(null,dists.map(x=>x.d));
+    const near=dists.filter(x=>x.d===minD).map(x=>x.role);
+    row.nearest=near.length===1?near[0]:'tie:'+near.join('+');
     seatResults.push(row);
     completeLog.seating_trials.push(row);
     checkpoint();
@@ -2205,10 +2255,10 @@ row.nearest=near.length===1 ? near[0] : 'tie:'+near.join('+');
   function showSeatingSummary(){
     const lines=ids.map(role=>{
       const p=identities[role];
-      const v=seatResults.map(r=>r['dist_'+p.name]);
+      const v=seatResults.map(r=>r['dist_'+role]);
       const m=v.reduce((a,b)=>a+b,0)/v.length;
-      const closest=seatResults.filter(r=>r.nearest===p.name).length;
-      return `${p.name}: mean distance ${m.toFixed(2)}, closest on ${closest} of ${seatResults.length} tables`;
+      const closest=seatResults.filter(r=>r.nearest===role).length;
+      return `${role} (${p.name}): mean distance ${m.toFixed(2)}, closest on ${closest} of ${seatResults.length} tables`;
     });
     // Kept out of the participant's view; available in the console and in the export.
     console.log('Seating results:',seatResults);
@@ -2258,6 +2308,171 @@ row.nearest=near.length===1 ? near[0] : 'tie:'+near.join('+');
       }
     }
     return true;
+  }
+
+  // ===================== ULTIMATUM GAME =====================
+  // The participant makes two separate pairwise choices in a fixed order:
+  // first A vs B, then B vs C. Visible identities remain randomized, while
+  // all analytic coding is saved by hidden role A/B/C.
+  function startUltimatumGame(){
+    ultimatumChoiceStage=0;
+    ultimatumSelectedRoles=[null,null];
+
+    completeLog.ultimatum_game={
+      choice_1:{
+        pair_roles:['A','B'],
+        pair_visible_players:['A','B'].map(role=>visibleName(role)),
+        selected_role:null,
+        selected_visible_player:null,
+        rt_ms:null
+      },
+      choice_2:{
+        pair_roles:['B','C'],
+        pair_visible_players:['B','C'].map(role=>visibleName(role)),
+        selected_role:null,
+        selected_visible_player:null,
+        rt_ms:null
+      },
+      offer_1:null,
+      offer_2:null,
+      total_bonus:0
+    };
+
+    renderUltimatumChoice();
+    checkpoint();
+    showScreen('ultimatumChoiceScreen');
+  }
+
+  function renderUltimatumChoice(){
+    const pairs=[['A','B'],['B','C']];
+    const pair=pairs[ultimatumChoiceStage];
+    const wrap=el('ultimatumChoiceButtons');
+    wrap.innerHTML='';
+    el('ultimatumChoiceContinueBtn').style.display='none';
+
+    if(ultimatumChoiceStage===0){
+      el('ultimatumChoicePrompt').innerHTML='Please select which player you would <b>prefer to play with</b>.';
+      el('ultimatumPairText').textContent='Choice 1: select between these two players.';
+    }else{
+      el('ultimatumChoicePrompt').innerHTML='Please make one more choice. Select which player you would <b>prefer to play with</b>.';
+      el('ultimatumPairText').textContent='Choice 2: select between these two players.';
+    }
+
+    pair.forEach(role=>{
+      const p=identities[role];
+      const btn=document.createElement('button');
+      btn.type='button';
+      btn.className='primary';
+      btn.textContent=p.name;
+      btn.style.background=p.color;
+      btn.style.color='#202733';
+      btn.dataset.role=role;
+      btn.addEventListener('click',()=>chooseUltimatumPlayer(role));
+      wrap.appendChild(btn);
+    });
+
+    ultimatumChoiceStart=performance.now();
+  }
+
+  function chooseUltimatumPlayer(role){
+    const pairs=[['A','B'],['B','C']];
+    const pair=pairs[ultimatumChoiceStage];
+    if(!pair.includes(role))return;
+
+    const choiceKey=ultimatumChoiceStage===0?'choice_1':'choice_2';
+    ultimatumSelectedRoles[ultimatumChoiceStage]=role;
+    completeLog.ultimatum_game[choiceKey].selected_role=role;
+    completeLog.ultimatum_game[choiceKey].selected_visible_player=visibleName(role);
+    completeLog.ultimatum_game[choiceKey].rt_ms=Math.round(performance.now()-ultimatumChoiceStart);
+    checkpoint();
+
+    if(ultimatumChoiceStage===0){
+      ultimatumChoiceStage=1;
+      renderUltimatumChoice();
+      return;
+    }
+
+    const first=ultimatumSelectedRoles[0];
+    const second=ultimatumSelectedRoles[1];
+    el('ultimatumChoiceButtons').innerHTML='';
+    el('ultimatumChoicePrompt').innerHTML='Your choices are complete.';
+    el('ultimatumPairText').textContent=`You selected ${visibleName(first)} in the first choice and ${visibleName(second)} in the second choice.`;
+    el('ultimatumChoiceContinueBtn').style.display='inline-block';
+  }
+
+  function beginUltimatumOffers(){
+    const selectedRoles=[...new Set(ultimatumSelectedRoles.filter(Boolean))];
+    const unchosenRoles=ids.filter(role=>!selectedRoles.includes(role));
+    if(!selectedRoles.length || !unchosenRoles.length)return;
+
+    // The 60/40 offer always comes from a player the participant selected.
+    // The 80/20 offer always comes from a player the participant did NOT select.
+    // If more than one player is eligible in either group, select one at random.
+    const chosenOfferRole=selectedRoles[Math.floor(Math.random()*selectedRoles.length)];
+    const unchosenOfferRole=unchosenRoles[Math.floor(Math.random()*unchosenRoles.length)];
+
+    completeLog.ultimatum_game.offer_assignment={
+      selected_roles_unique:selectedRoles.slice(),
+      unchosen_roles:unchosenRoles.slice(),
+      chosen_offer_role:chosenOfferRole,
+      chosen_offer_visible_player:visibleName(chosenOfferRole),
+      unchosen_offer_role:unchosenOfferRole,
+      unchosen_offer_visible_player:visibleName(unchosenOfferRole)
+    };
+
+    el('ultimatumFirstPlayerName').textContent=visibleName(chosenOfferRole);
+    el('ultimatumFirstPlayerAvatar').style.background=identities[chosenOfferRole].color;
+    ultimatumOfferStart=performance.now();
+    checkpoint();
+    showScreen('ultimatumFirstOfferScreen');
+  }
+
+  function saveUltimatumFirstOffer(decision){
+    const role=completeLog.ultimatum_game.offer_assignment?.chosen_offer_role;
+    if(!role)return;
+    const accepted=decision==='accept';
+    completeLog.ultimatum_game.offer_1={
+      source_category:'selected_player',
+      role,
+      visible_player:visibleName(role),
+      player_share:0.60,
+      participant_share:0.40,
+      decision,
+      accepted,
+      participant_bonus:accepted?0.40:0,
+      rt_ms:Math.round(performance.now()-ultimatumOfferStart)
+    };
+
+    const role2=completeLog.ultimatum_game.offer_assignment?.unchosen_offer_role;
+    if(!role2)return;
+    el('ultimatumSecondPlayerName').textContent=visibleName(role2);
+    el('ultimatumSecondPlayerAvatar').style.background=identities[role2].color;
+    ultimatumOfferStart=performance.now();
+    checkpoint();
+    showScreen('ultimatumSecondOfferScreen');
+  }
+
+  function saveUltimatumSecondOffer(decision){
+    const role=completeLog.ultimatum_game.offer_assignment?.unchosen_offer_role;
+    if(!role)return;
+    const accepted=decision==='accept';
+    completeLog.ultimatum_game.offer_2={
+      source_category:'unchosen_player',
+      role,
+      visible_player:visibleName(role),
+      player_share:0.80,
+      participant_share:0.20,
+      decision,
+      accepted,
+      participant_bonus:accepted?0.20:0,
+      rt_ms:Math.round(performance.now()-ultimatumOfferStart)
+    };
+
+    const bonus1=completeLog.ultimatum_game.offer_1?.participant_bonus || 0;
+    const bonus2=completeLog.ultimatum_game.offer_2?.participant_bonus || 0;
+    completeLog.ultimatum_game.total_bonus=Number((bonus1+bonus2).toFixed(2));
+    checkpoint();
+    showScreen('questionnaireIntroScreen');
   }
 
   // ===================== QUESTIONNAIRE PLACEHOLDER LOGGING =====================
@@ -2783,7 +2998,12 @@ row.nearest=near.length===1 ? near[0] : 'tie:'+near.join('+');
   });
   el('seatStartBtn').addEventListener('click',startSeatingTask);
   el('postSeatingImpressionsIntroNextBtn').addEventListener('click',()=>startRatings('post_seating'));
-  el('economicTaskIntroNextBtn').addEventListener('click',()=>showScreen('questionnaireIntroScreen'));
+  el('economicTaskIntroNextBtn').addEventListener('click',startUltimatumGame);
+  el('ultimatumChoiceContinueBtn').addEventListener('click',beginUltimatumOffers);
+  el('ultimatumFirstAcceptBtn').addEventListener('click',()=>saveUltimatumFirstOffer('accept'));
+  el('ultimatumFirstRejectBtn').addEventListener('click',()=>saveUltimatumFirstOffer('reject'));
+  el('ultimatumSecondAcceptBtn').addEventListener('click',()=>saveUltimatumSecondOffer('accept'));
+  el('ultimatumSecondRejectBtn').addEventListener('click',()=>saveUltimatumSecondOffer('reject'));
   el('questionnaireIntroNextBtn').addEventListener('click',()=>showScreen('questionnaire1Screen'));
   el('seatNextBtn').addEventListener('click',nextSeatTrial);
   el('meetNext').addEventListener('click',()=>{
@@ -2807,7 +3027,7 @@ row.nearest=near.length===1 ? near[0] : 'tie:'+near.join('+');
   if (restartBtn) {
     restartBtn.addEventListener('click',()=>{
       state=null;memoryTrials=[];participantRatings={};roundRatings={scored:{},free:{},post_seating:{}};roundMessages={scored:{},free:{},post_seating:{}};feedbackComments={};feedbackPage=1;scoredRoundLength=0;
-      completeLog.participant={};completeLog.identity_mapping={};completeLog.initial_ratings=[];completeLog.feedback_comprehension=[];completeLog.feedback_comments=[];completeLog.feedback_page_views=[];completeLog.game_throws=[];completeLog.postgame_ratings=[];completeLog.post_seating_rating_views=[];completeLog.seating_trials=[];completeLog.seating_page_views=[];activeFeedbackPageLogIndex=null;activePostSeatingRatingLogIndex=null;activeSeatingPageLogIndex=null;gameThrowCounter=0;
+      completeLog.participant={};completeLog.identity_mapping={};completeLog.initial_ratings=[];completeLog.feedback_comprehension=[];completeLog.feedback_comments=[];completeLog.feedback_page_views=[];completeLog.game_throws=[];completeLog.postgame_ratings=[];completeLog.post_seating_rating_views=[];completeLog.seating_trials=[];completeLog.seating_page_views=[];completeLog.ultimatum_game={};activeFeedbackPageLogIndex=null;activePostSeatingRatingLogIndex=null;activeSeatingPageLogIndex=null;gameThrowCounter=0;ultimatumChoiceStage=0;ultimatumSelectedRoles=[null,null];
       el('nickname').value='';el('selfDescription').value='';
       initializeSession();
       showScreen('profileScreen');
