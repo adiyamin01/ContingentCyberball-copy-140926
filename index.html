@@ -534,13 +534,21 @@
      Fill in the item text where indicated.
      ===================================================== -->
 
+<section id="questionnaireIntroScreen" class="screen">
+  <div class="panel">
+    <h2>Questionnaires</h2>
+    <p>In the next section, you will be asked to complete several questionnaires related to emotions, thoughts, and behaviors.</p>
+    <p>Please read the instructions for each questionnaire carefully and respond according to the given guidelines.</p>
+    <button class="primary" id="questionnaireIntroNextBtn">Continue</button>
+  </div>
+</section>
+
 <section id="questionnaire1Screen" class="screen questionnaireScreen" data-questionnaire="SPIN">
   <div class="panel">
 
     <div class="questionnaireQuestions" id="SPINQuestions">
       <div class="questionnaire-instructions">
-        In the next section, you will be asked to complete several questionnaires related to emotions, thoughts, and behaviors.
-        Please read the instructions for each questionnaire carefully and respond according to the given guidelines.
+        Please indicate how much each of the following problems has bothered you during the past week.
       </div>
 
       <!-- SPIN CODING:
@@ -1770,7 +1778,7 @@
       showScreen('phase2Screen');
     }else if(ratingContext==='free'){
       if(CFG.seatingEnabled){showScreen('seatIntroScreen');}
-      else{showScreen('questionnaire1Screen');}
+      else{showScreen('questionnaireIntroScreen');}
     }else if(ratingContext==='post_seating'){
       showScreen('economicTaskIntroScreen');
     }
@@ -2769,7 +2777,8 @@
   });
   el('seatStartBtn').addEventListener('click',startSeatingTask);
   el('postSeatingImpressionsIntroNextBtn').addEventListener('click',()=>startRatings('post_seating'));
-  el('economicTaskIntroNextBtn').addEventListener('click',()=>showScreen('questionnaire1Screen'));
+  el('economicTaskIntroNextBtn').addEventListener('click',()=>showScreen('questionnaireIntroScreen'));
+  el('questionnaireIntroNextBtn').addEventListener('click',()=>showScreen('questionnaire1Screen'));
   el('seatNextBtn').addEventListener('click',nextSeatTrial);
   el('meetNext').addEventListener('click',()=>{
     if(CFG.useMemoryTest) startMemoryTest(); else startRatings();
