@@ -2169,19 +2169,26 @@
 
     el('seatStage').removeEventListener('mousemove',trackSeatMouse);
     const row={trial:seatIndex+1,chosen_seat:seat+1,hesitation_ms:rt,rt_ms:rt,mouse_trajectory:seatMouse.slice(),configuration:{}};
-    const dists=[];
-    cfg.forEach((s,i)=>{
-      const p=identities[ids[i]];
-      const d=seatDistance(seat,s);
-      row['seat_'+p.name]=s+1;
-      row['dist_'+p.name]=d;
-      row['role_'+p.name]=ids[i];   // hidden role A / B / C
-      row.configuration[ids[i]]={visible_player:p.name,seat:s+1};
-      dists.push({name:p.name,d:d});
-    });
-    const minD=Math.min.apply(null,dists.map(x=>x.d));
-    const near=dists.filter(x=>x.d===minD).map(x=>x.name);
-    row.nearest=near.length===1?near[0]:'tie:'+near.join('+');
+   const dists=[];
+  cfg.forEach((s,i)=>{
+    const role=ids[i];
+    const p=identities[role];
+    const d=seatDistance(seat,s);
+
+  row['seat_'+role]=s+1;
+  row['dist_'+role]=d;
+
+  row.configuration[role]={
+    visible_player:p.name,
+    seat:s+1
+  };
+
+  dists.push({role,d});
+});
+
+const minD=Math.min.apply(null,dists.map(x=>x.d));
+const near=dists.filter(x=>x.d===minD).map(x=>x.role);
+row.nearest=near.length===1 ? near[0] : 'tie:'+near.join('+');
     seatResults.push(row);
     completeLog.seating_trials.push(row);
     checkpoint();
