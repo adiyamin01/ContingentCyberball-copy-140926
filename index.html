@@ -522,7 +522,7 @@
 
 <section id="gameScreen" class="screen">
   <div id="gameWrap">
-    <div class="hud"><strong id="progressText">Your throws: 0 / 30</strong></div>
+    <div class="hud"><strong id="progressText">Balls/Throws Returned: 0 / 30</strong></div>
     <div id="instruction">Choose a player</div>
     <div id="specialBanner">★ SPECIAL THROW — return it to the sender</div>
 
@@ -1365,10 +1365,11 @@
     // Set to true to show per-player icons alongside colors (code retained below).
     useIcons:false,
     // SIMPLE MODE: no rules, no points, no special/star throws. The round ends
-    // after the participant has thrown the ball userThrowTarget times.
+    // only after 30 DIRECT returns: the same player the participant threw to
+    // returns the ball directly to the participant. Other incoming balls do not count.
     // Set to false to restore the two-phase points game (code retained below).
     simpleMode:true,
-    userThrowTarget:30,
+    directReturnTarget:30,
     // ---- Seating task (runs after the post-game ratings) ----
     seatingEnabled:true,
     seatingTrials:30,   // 30 tables: three adjacent players, balanced around the circle and within the trio
@@ -2770,6 +2771,7 @@
       userCanChoose:false,
       totalReceived:0,
       throwsMade:0,
+      directReturns:0,
       scores:{ME:0,A:0,B:0,C:0},
       lastChoice:null,
       // Track bot-to-bot destinations so each bot distributes its passes as
@@ -2904,7 +2906,7 @@
 
   function updateHud(){
     if(CFG.simpleMode){
-      el('progressText').textContent=`Your throws: ${state.throwsMade} / ${CFG.userThrowTarget}`;
+      el('progressText').textContent=`Balls/Throws Returned: ${state.directReturns} / ${CFG.directReturnTarget}`;
     }else if(state.phase==='free'){
       el('progressText').textContent=`Free game: ${state.totalReceived} / ${state.targetLength}`;
     }else{
@@ -3037,11 +3039,9 @@
     await toss('ME',recipient);
 
     if(CFG.simpleMode){
+      // Keep the participant's number of throws internally for the log,
+      // but do NOT use it as the stopping rule.
       state.throwsMade++;
-      updateHud();
-      if(state.throwsMade>=CFG.userThrowTarget){
-        await sleep(300);finishCurrentPhase();return;
-      }
     }
 
     if(endFreeAfterChoice){
@@ -3062,9 +3062,27 @@
         const incomingPromise=incomingToUser(recipient);
         if(state.phase==='scored' && !wasSpecial)changeUserScore(+1);
         await incomingPromise;
+        if(CFG.simpleMode){
+          state.directReturns++;
+          updateHud();
+          if(state.directReturns>=CFG.directReturnTarget){
+            await sleep(300);
+            finishCurrentPhase();
+            return;
+          }
+        }
       }else{
         await toss(recipient,'ME');
         if(state.phase==='scored' && !wasSpecial)changeUserScore(+1);
+        if(CFG.simpleMode){
+          state.directReturns++;
+          updateHud();
+          if(state.directReturns>=CFG.directReturnTarget){
+            await sleep(300);
+            finishCurrentPhase();
+            return;
+          }
+        }
       }
 
       if(state.phase==='scored' && state.pendingEnd){
