@@ -386,6 +386,16 @@
   </div>
 </section>
 
+<section id="metaperceptionPreScreen" class="screen">
+  <div class="panel">
+    <div class="eyebrow">Before the task</div>
+    <h2>How much do you expect to be liked by this group?</h2>
+    <div class="ratingScale" id="metaperceptionPreScale"></div>
+    <div class="scaleEnds"><span>1 — Not at all</span><span>10 — Very much</span></div>
+    <button class="primary" id="metaperceptionPreNext" disabled>Continue</button>
+  </div>
+</section>
+
 <section id="memoryScreen" class="screen">
   <div class="panel">
     <div class="eyebrow">Player memory</div>
@@ -572,6 +582,16 @@
     <p>Next, we will ask you a few brief questions about the other players based on your experience with them so far.</p>
     <p>Please answer based on your own impressions. There are no right or wrong answers.</p>
     <button class="primary" id="postSeatingImpressionsIntroNextBtn">Continue</button>
+  </div>
+</section>
+
+<section id="metaperceptionPostScreen" class="screen">
+  <div class="panel">
+    <div class="eyebrow">Before the economic game</div>
+    <h2>How much do you feel liked by the group?</h2>
+    <div class="ratingScale" id="metaperceptionPostScale"></div>
+    <div class="scaleEnds"><span>1 — Not at all</span><span>10 — Very much</span></div>
+    <button class="primary" id="metaperceptionPostNext" disabled>Continue</button>
   </div>
 </section>
 
@@ -1423,6 +1443,7 @@
     feedback_comments:[], feedback_page_views:[], game_throws:[], postgame_ratings:[],
     post_seating_rating_views:[], seating_trials:[], seating_page_views:[],
     ultimatum_game:{},
+    metaperception:{pre:null,post:null},
     questionnaires:{SPIN:{},NPI:{},Q3:{},Demographic:{}}
   };
   let ratingStart=0, feedbackAttemptStart=0, gameChoiceStart=0;
@@ -1437,6 +1458,11 @@
   let ultimatumDisplayOrder=[];
   let ultimatumOfferPlan=[];
   let ultimatumOfferStart=0;
+  let metaperceptionPreSelection=null;
+  let metaperceptionPostSelection=null;
+  let metaperceptionPreStart=0;
+  let metaperceptionPostStart=0;
+  let metaperceptionPreDone=false;
 
   function visibleName(role){
     return role==='ME' ? participantName() : (identities[role]?.name || role);
@@ -1477,6 +1503,7 @@
       Seating_Trials: JSON.stringify(completeLog.seating_trials),
       Seating_Page_Views: JSON.stringify(completeLog.seating_page_views),
       Ultimatum_Game: JSON.stringify(completeLog.ultimatum_game || {}),
+      Metaperception: JSON.stringify(completeLog.metaperception || {}),
       SPIN: JSON.stringify(completeLog.questionnaires.SPIN || {}),
       NPI: JSON.stringify(completeLog.questionnaires.NPI || {}),
       Q3: JSON.stringify(completeLog.questionnaires.Q3 || {}),
@@ -1777,6 +1804,71 @@
     el('memoryResultButtons').appendChild(b);
   }
 
+  function renderMetaperceptionScale(scaleId, nextId, selectedValue, onSelect){
+    const scale=el(scaleId);
+    scale.innerHTML='';
+    for(let n=1;n<=10;n++){
+      const b=document.createElement('button');
+      b.type='button';
+      b.className='rateBtn'+(selectedValue===n?' selected':'');
+      b.textContent=n;
+      b.addEventListener('click',()=>{
+        scale.querySelectorAll('.rateBtn').forEach(x=>x.classList.remove('selected'));
+        b.classList.add('selected');
+        onSelect(n);
+        el(nextId).disabled=false;
+      });
+      scale.appendChild(b);
+    }
+  }
+
+  function startMetaperceptionPre(){
+    metaperceptionPreSelection=null;
+    metaperceptionPreStart=performance.now();
+    renderMetaperceptionScale(
+      'metaperceptionPreScale',
+      'metaperceptionPreNext',
+      metaperceptionPreSelection,
+      n=>{metaperceptionPreSelection=n;}
+    );
+    el('metaperceptionPreNext').disabled=true;
+    showScreen('metaperceptionPreScreen');
+  }
+
+  function saveMetaperceptionPre(){
+    if(metaperceptionPreSelection==null)return;
+    completeLog.metaperception.pre={
+      rating:metaperceptionPreSelection,
+      rt_ms:Math.round(performance.now()-metaperceptionPreStart)
+    };
+    metaperceptionPreDone=true;
+    checkpoint();
+    if(CFG.useMemoryTest) startMemoryTest(); else startRatings();
+  }
+
+  function startMetaperceptionPost(){
+    metaperceptionPostSelection=null;
+    metaperceptionPostStart=performance.now();
+    renderMetaperceptionScale(
+      'metaperceptionPostScale',
+      'metaperceptionPostNext',
+      metaperceptionPostSelection,
+      n=>{metaperceptionPostSelection=n;}
+    );
+    el('metaperceptionPostNext').disabled=true;
+    showScreen('metaperceptionPostScreen');
+  }
+
+  function saveMetaperceptionPost(){
+    if(metaperceptionPostSelection==null)return;
+    completeLog.metaperception.post={
+      rating:metaperceptionPostSelection,
+      rt_ms:Math.round(performance.now()-metaperceptionPostStart)
+    };
+    checkpoint();
+    showScreen('economicTaskIntroScreen');
+  }
+
   function startRatings(context='pregame'){
     ratingContext=context;
     ratingOrder=shuffle(ids);
@@ -1893,7 +1985,7 @@
       if(CFG.seatingEnabled){showScreen('seatIntroScreen');}
       else{showScreen('questionnaireIntroScreen');}
     }else if(ratingContext==='post_seating'){
-      showScreen('economicTaskIntroScreen');
+      startMetaperceptionPost();
     }
   }
 
@@ -3081,8 +3173,12 @@
   el('questionnaireIntroNextBtn').addEventListener('click',()=>showScreen('questionnaire1Screen'));
   el('seatNextBtn').addEventListener('click',nextSeatTrial);
   el('meetNext').addEventListener('click',()=>{
-    if(CFG.useMemoryTest) startMemoryTest(); else startRatings();
+    if(!metaperceptionPreDone) startMetaperceptionPre();
+    else if(CFG.useMemoryTest) startMemoryTest();
+    else startRatings();
   });
+  el('metaperceptionPreNext').addEventListener('click',saveMetaperceptionPre);
+  el('metaperceptionPostNext').addEventListener('click',saveMetaperceptionPost);
   el('ratingNext').addEventListener('click',saveRatingAndContinue);
   el('feedbackBack').addEventListener('click',previousFeedbackPage);
   el('feedbackNext').addEventListener('click',nextFeedback);
@@ -3101,7 +3197,7 @@
   if (restartBtn) {
     restartBtn.addEventListener('click',()=>{
       state=null;memoryTrials=[];participantRatings={};roundRatings={scored:{},free:{},post_seating:{}};roundMessages={scored:{},free:{},post_seating:{}};feedbackComments={};feedbackPage=1;scoredRoundLength=0;
-      completeLog.participant={};completeLog.identity_mapping={};completeLog.initial_ratings=[];completeLog.feedback_comprehension=[];completeLog.feedback_comments=[];completeLog.feedback_page_views=[];completeLog.game_throws=[];completeLog.postgame_ratings=[];completeLog.post_seating_rating_views=[];completeLog.seating_trials=[];completeLog.seating_page_views=[];completeLog.ultimatum_game={};activeFeedbackPageLogIndex=null;activePostSeatingRatingLogIndex=null;activeSeatingPageLogIndex=null;gameThrowCounter=0;ultimatumSelectedRoles=[];ultimatumDisplayOrder=[];ultimatumOfferPlan=[];
+      completeLog.participant={};completeLog.identity_mapping={};completeLog.initial_ratings=[];completeLog.feedback_comprehension=[];completeLog.feedback_comments=[];completeLog.feedback_page_views=[];completeLog.game_throws=[];completeLog.postgame_ratings=[];completeLog.post_seating_rating_views=[];completeLog.seating_trials=[];completeLog.seating_page_views=[];completeLog.ultimatum_game={};completeLog.metaperception={pre:null,post:null};metaperceptionPreSelection=null;metaperceptionPostSelection=null;metaperceptionPreDone=false;activeFeedbackPageLogIndex=null;activePostSeatingRatingLogIndex=null;activeSeatingPageLogIndex=null;gameThrowCounter=0;ultimatumSelectedRoles=[];ultimatumDisplayOrder=[];ultimatumOfferPlan=[];
       el('nickname').value='';el('selfDescription').value='';
       initializeSession();
       showScreen('profileScreen');
