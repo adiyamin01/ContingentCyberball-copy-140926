@@ -1984,9 +1984,9 @@
     setFeedbackVisibility({identity:false,scale:false,quiz:false,caption:true});
     const cap=el('feedbackCaption');
     cap.className='feedbackCaption show';
-    cap.textContent = rating>5
-      ? `${p.name} likes you more than the average player!`
-      : `${p.name} likes you less than the average player.`;
+    cap.innerHTML = rating>5
+      ? `<span style="display:inline-block;background:${p.color};padding:5px 12px;border-radius:12px;margin-right:6px;color:#202733;font-weight:800;">${p.name}</span> thought you are <u><b>nicer</b></u> than average.`
+      : `<span style="display:inline-block;background:${p.color};padding:5px 12px;border-radius:12px;margin-right:6px;color:#202733;font-weight:800;">${p.name}</span> thought you are <u><b>less</b></u> nice than average.`;
     next.textContent=feedbackIndex===2?(CFG.simpleMode?'Start the game':'Continue to game rules'):'Continue';
   }
 
