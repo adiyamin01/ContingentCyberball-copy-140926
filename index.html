@@ -65,6 +65,43 @@
   .avatar{width:92px;height:92px;border-radius:50%;margin:0 auto 14px;display:grid;place-items:center;font-family:Arial,sans-serif;font-size:42px;border:5px solid #fff;box-shadow:0 8px 20px rgba(20,28,38,.12)}
   .sentence{font-size:17px;line-height:1.38;color:#4b5360;margin-top:10px}
 
+  /* MEET PLAYERS — fixed, compact 3-player layout */
+  #meetScreen{padding:16px}
+  #meetScreen .panel{
+    width:min(900px,96vw);
+    height:min(590px,calc(100vh - 32px));
+    max-height:none;
+    overflow:hidden;
+    padding:28px 30px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+  }
+  #meetScreen .eyebrow{margin-bottom:8px}
+  #meetScreen h2{font-size:clamp(28px,3.2vw,38px);margin-bottom:8px}
+  #meetScreen > .panel > p{font-size:17px;line-height:1.35;margin:4px auto 10px}
+  #meetScreen .playerCards{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:14px;
+    width:100%;
+    max-width:790px;
+    margin:14px auto 18px;
+  }
+  #meetScreen .playerCard{
+    min-height:0;
+    padding:16px 12px;
+    border-radius:18px;
+  }
+  #meetScreen .avatar{
+    width:70px;
+    height:70px;
+    margin:0 auto 8px;
+    border-width:4px;
+  }
+  #meetScreen .playerCard h3{font-size:20px;margin:4px 0}
+  #meetScreen .sentence{font-size:15px;line-height:1.3;margin-top:6px}
+  #meetScreen #meetNext{padding:12px 28px;font-size:17px;align-self:center}
+
   /* MEMORY */
   .feedbackBlock{max-width:700px;margin:0 auto 8px}
   .feedbackBlock .avatar{width:44px;height:44px;margin:0 auto 5px;border-width:3px;box-shadow:0 4px 11px rgba(20,28,38,.10)}
@@ -214,6 +251,28 @@
     #A{left:6%;top:19%}#B{right:6%;top:19%}#C{right:7%;bottom:13%}#ME{left:7%;bottom:13%}
     .scoreBadge{right:-35px;bottom:-17px;font-size:13px;padding:7px 9px}.scoreDelta{right:-40px;top:-20px;font-size:21px}
     .hud{padding:8px 12px}.hud strong{font-size:13px}
+  }
+
+  @media(max-width:760px){
+    #meetScreen{padding:10px}
+    #meetScreen .panel{
+      width:calc(100vw - 20px);
+      height:min(560px,calc(100vh - 20px));
+      padding:18px 10px;
+    }
+    #meetScreen .eyebrow{font-size:11px;margin-bottom:5px}
+    #meetScreen h2{font-size:26px;margin-bottom:5px}
+    #meetScreen > .panel > p{font-size:14px;line-height:1.25;margin:2px auto 8px}
+    #meetScreen .playerCards{
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:7px;
+      margin:10px auto 14px;
+    }
+    #meetScreen .playerCard{padding:10px 5px;border-radius:14px}
+    #meetScreen .avatar{width:50px;height:50px;margin-bottom:5px;border-width:3px}
+    #meetScreen .playerCard h3{font-size:15px;margin:2px 0}
+    #meetScreen .sentence{font-size:11px;line-height:1.23;margin-top:4px}
+    #meetScreen #meetNext{padding:10px 22px;font-size:15px}
   }
 
   /* Questionnaire matrix layout */
@@ -1751,7 +1810,8 @@
       :(isPost
         ?`After this round, how nice does ${p.name} seem to you?`
         :`How nice does ${p.name} seem to you?`);
-    el('ratingIdentity').innerHTML=identityCardHTML(p,true);
+    el('ratingIdentity').innerHTML=identityCardHTML(p,true)
+      +(ratingContext==='pregame' ? `<div class="sentence">“${p.sentence}”</div>` : '');
 
     const niceScale=el('ratingScale');
     niceScale.innerHTML='';
@@ -2036,10 +2096,9 @@
      Six seats evenly spaced around a round table. Distance between two seats
      is the number of steps around the circle: 1 (adjacent), 2, or 3 (opposite).
      ===================================================================== */
-  let seatTrials=[], seatIndex=0, seatResults=[], seatStart=0, seatAnswered=false;
+  let seatTrials=[], seatIndex=0, seatResults=[], seatStart=0, seatAnswered=false, seatCurrentSelection=null;
 
   function trackSeatMouse(e){
-    if(seatAnswered)return;
     const now=performance.now();
     if(now-seatMouseLastSample<16)return; // ~60 Hz max
     seatMouseLastSample=now;
@@ -2167,6 +2226,7 @@
 
   function renderSeatTrial(){
     seatAnswered=false;
+    seatCurrentSelection=null;
     el('seatNextBtn').disabled=true;
     el('seatNextBtn').textContent=(seatIndex===seatTrials.length-1)?'Finish':'Next table';
     el('seatPrompt').textContent='Click the seat you would like to take.';
@@ -2194,6 +2254,7 @@
         node.innerHTML=`<div class="seatName">${p.name}</div>${numHTML}`;
       }else{
         node.className='seat empty';
+        node.dataset.seatIndex=sIdx;
         node.innerHTML=`<div class="seatName">Sit here</div>${numHTML}`;
         node.addEventListener('click',()=>chooseSeat(sIdx,node));
       }
@@ -2207,20 +2268,28 @@
   }
 
   function chooseSeat(seat,node){
-    if(seatAnswered)return;
     seatAnswered=true;
+    seatCurrentSelection=seat;
     const rt=Math.round(performance.now()-seatStart);
     const cfg=seatTrials[seatIndex];
-    endSeatingPageLog(seat);
 
-    document.querySelectorAll('#seatStage .seat.empty').forEach(n=>n.classList.add('locked'));
-    node.className='seat chosen';
+    // Keep every available seat clickable so the participant can change
+    // their choice before pressing Next.
+    document.querySelectorAll('#seatStage .seat.empty').forEach(n=>{
+      const s=Number(n.dataset.seatIndex);
+      n.classList.remove('chosen','locked');
+      n.style.borderColor='';
+      n.style.background='';
+      n.innerHTML=`<div class="seatName">Sit here</div>`+
+        (CFG.seatingShowSeatNumbers?`<div class="seatNum">seat ${s+1}</div>`:'');
+    });
+
+    node.classList.add('chosen');
     node.style.borderColor='#202733';
     node.style.background=selectedColor+'88';
     node.innerHTML=`<div class="seatName">${participantName()}</div>`+
       (CFG.seatingShowSeatNumbers?`<div class="seatNum">seat ${seat+1}</div>`:'');
 
-    el('seatStage').removeEventListener('mousemove',trackSeatMouse);
     const row={trial:seatIndex+1,chosen_seat:seat+1,hesitation_ms:rt,rt_ms:rt,mouse_trajectory:seatMouse.slice(),configuration:{}};
     const dists=[];
     cfg.forEach((s,i)=>{
@@ -2237,15 +2306,34 @@
     const minD=Math.min.apply(null,dists.map(x=>x.d));
     const near=dists.filter(x=>x.d===minD).map(x=>x.role);
     row.nearest=near.length===1?near[0]:'tie:'+near.join('+');
-    seatResults.push(row);
-    completeLog.seating_trials.push(row);
-    checkpoint();
 
-    el('seatPrompt').textContent='Seat taken.';
+    // Keep only the participant's current/final choice for this trial.
+    const resultIdx=seatResults.findIndex(r=>r.trial===row.trial);
+    if(resultIdx>=0) seatResults[resultIdx]=row;
+    else seatResults.push(row);
+
+    const logIdx=completeLog.seating_trials.findIndex(r=>r.trial===row.trial);
+    if(logIdx>=0) completeLog.seating_trials[logIdx]=row;
+    else completeLog.seating_trials.push(row);
+
+    checkpoint();
+    el('seatPrompt').textContent='Seat selected. You can change your choice before continuing.';
     el('seatNextBtn').disabled=false;
   }
 
   function nextSeatTrial(){
+    if(seatCurrentSelection==null)return;
+
+    // Finalize this trial only when Next is pressed, so changing the seat
+    // within the same trial is allowed. The saved row reflects the final choice.
+    const row=seatResults.find(r=>r.trial===seatIndex+1);
+    if(row) row.mouse_trajectory=seatMouse.slice();
+    const logRow=completeLog.seating_trials.find(r=>r.trial===seatIndex+1);
+    if(logRow) logRow.mouse_trajectory=seatMouse.slice();
+    endSeatingPageLog(seatCurrentSelection);
+    el('seatStage').removeEventListener('mousemove',trackSeatMouse);
+    checkpoint();
+
     seatIndex++;
     if(seatIndex>=seatTrials.length){showSeatingSummary();return;}
     renderSeatTrial();
