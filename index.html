@@ -521,8 +521,8 @@
     <h2>Next: An Economic Decision-Making Task</h2>
     <p>You have now had several opportunities to interact with the other players and get to know them.</p>
     <p>You will now take part in a <b>short</b> economic decision-making game with these players.</p>
-    <p>In this game, you will first choose <b>which player you would prefer to play with.</b></p>
-    <p>The player you choose may affect the offer you receive and therefore the <b>additional bonus payment</b> you can earn.</p>
+    <p>In this game, you will first choose <b>two players you would prefer to play with.</b></p>
+    <p>Each of the two players you choose will make one offer, which may affect the <b>additional bonus payment</b> you can earn.</p>
     <p>Please make your choice based on your own preferences and your experience with the players.</p>
     <p>Click Continue to begin.</p>
     <button class="primary" id="economicTaskIntroNextBtn">Continue</button>
@@ -532,9 +532,9 @@
 <section id="ultimatumChoiceScreen" class="screen">
   <div class="panel">
     <h2>Ultimatum Game – Player Choice</h2>
-    <p id="ultimatumChoicePrompt">Please select the player you would <b>like to play the economic game with the most</b>.</p>
+    <p id="ultimatumChoicePrompt">Please select the <b>two players</b> you would most like to play the economic game with.</p>
     <div class="choiceRow" id="ultimatumChoiceButtons" style="justify-content:center;margin:28px auto 18px;"></div>
-    <p id="ultimatumPairText"></p>
+    <p id="ultimatumPairText">Select 2 players.</p>
     <button class="primary" id="ultimatumChoiceContinueBtn" style="display:none">Continue</button>
   </div>
 </section>
@@ -547,10 +547,10 @@
       <h3 id="ultimatumFirstPlayerName"></h3>
     </div>
     <p>This player has proposed the following division of <b>$1.00</b>:</p>
-    <p><b>Player receives: $0.60</b></p>
-    <p><b>You receive: $0.40</b></p>
+    <p><b>Player receives: <span id="ultimatumFirstPlayerShare"></span></b></p>
+    <p><b>You receive: <span id="ultimatumFirstParticipantShare"></span></b></p>
     <p>You may now decide whether to <b>accept or reject</b> this offer.</p>
-    <p>If you <b>accept</b>, the money will be divided as shown above, and you will receive <b>$0.40 as an additional bonus</b>.</p>
+    <p>If you <b>accept</b>, the money will be divided as shown above, and you will receive <b><span id="ultimatumFirstBonus"></span> as an additional bonus</b>.</p>
     <p>If you <b>reject</b>, neither you nor the other player will receive the money from this offer.</p>
     <p><b>What would you like to do?</b></p>
     <button class="primary" id="ultimatumFirstAcceptBtn">Accept the offer</button>
@@ -566,10 +566,10 @@
       <h3 id="ultimatumSecondPlayerName"></h3>
     </div>
     <p>This player has proposed the following division of <b>$1.00</b>:</p>
-    <p><b>Player receives: $0.80</b></p>
-    <p><b>You receive: $0.20</b></p>
+    <p><b>Player receives: <span id="ultimatumSecondPlayerShare"></span></b></p>
+    <p><b>You receive: <span id="ultimatumSecondParticipantShare"></span></b></p>
     <p>You may now decide whether to <b>accept or reject</b> this offer.</p>
-    <p>If you <b>accept</b>, the money will be divided as shown above, and you will receive <b>$0.20 as an additional bonus</b>.</p>
+    <p>If you <b>accept</b>, the money will be divided as shown above, and you will receive <b><span id="ultimatumSecondBonus"></span> as an additional bonus</b>.</p>
     <p>If you <b>reject</b>, neither you nor the other player will receive the money from this offer.</p>
     <p><b>What would you like to do?</b></p>
     <button class="primary" id="ultimatumSecondAcceptBtn">Accept the offer</button>
@@ -1374,9 +1374,9 @@
   let activeSeatingPageLogIndex=null;
   let experimentComplete=false;
   let experimentCompletedAtMs=null;
-  let ultimatumChoiceStage=0;
-  let ultimatumSelectedRoles=[null,null];
-  let ultimatumChoiceStart=0;
+  let ultimatumSelectedRoles=[];
+  let ultimatumDisplayOrder=[];
+  let ultimatumOfferPlan=[];
   let ultimatumOfferStart=0;
 
   function visibleName(role){
@@ -2310,31 +2310,22 @@
   }
 
   // ===================== ULTIMATUM GAME =====================
-  // The participant makes two separate pairwise choices in a fixed order:
-  // first A vs B, then B vs C. Visible identities remain randomized, while
-  // all analytic coding is saved by hidden role A/B/C.
+  // Final structure:
+  // 1) One screen shows all three players in a randomized display order.
+  //    The participant selects two of the three.
+  // 2) Each selected player makes one offer. One offer is 60/40 and the other 80/20.
+  //    Offer-to-player assignment and offer presentation order are randomized/counterbalanced.
+  // 3) Lean logging stores only display order, selected roles (in click order),
+  //    and the two presented offers (role, split, decision, RT).
   function startUltimatumGame(){
-    ultimatumChoiceStage=0;
-    ultimatumSelectedRoles=[null,null];
+    ultimatumSelectedRoles=[];
+    ultimatumDisplayOrder=shuffle(ids);
+    ultimatumOfferPlan=[];
 
     completeLog.ultimatum_game={
-      choice_1:{
-        pair_roles:['A','B'],
-        pair_visible_players:['A','B'].map(role=>visibleName(role)),
-        selected_role:null,
-        selected_visible_player:null,
-        rt_ms:null
-      },
-      choice_2:{
-        pair_roles:['B','C'],
-        pair_visible_players:['B','C'].map(role=>visibleName(role)),
-        selected_role:null,
-        selected_visible_player:null,
-        rt_ms:null
-      },
-      offer_1:null,
-      offer_2:null,
-      total_bonus:0
+      display_order:ultimatumDisplayOrder.slice(),
+      selected:[],
+      offers:[]
     };
 
     renderUltimatumChoice();
@@ -2343,135 +2334,131 @@
   }
 
   function renderUltimatumChoice(){
-    const pairs=[['A','B'],['B','C']];
-    const pair=pairs[ultimatumChoiceStage];
     const wrap=el('ultimatumChoiceButtons');
     wrap.innerHTML='';
-    el('ultimatumChoiceContinueBtn').style.display='none';
 
-    if(ultimatumChoiceStage===0){
-      el('ultimatumChoicePrompt').innerHTML='Please select which player you would <b>prefer to play with</b>.';
-      el('ultimatumPairText').textContent='Choice 1: select between these two players.';
-    }else{
-      el('ultimatumChoicePrompt').innerHTML='Please make one more choice. Select which player you would <b>prefer to play with</b>.';
-      el('ultimatumPairText').textContent='Choice 2: select between these two players.';
-    }
-
-    pair.forEach(role=>{
+    ultimatumDisplayOrder.forEach(role=>{
       const p=identities[role];
+      const selected=ultimatumSelectedRoles.includes(role);
       const btn=document.createElement('button');
       btn.type='button';
       btn.className='primary';
       btn.textContent=p.name;
       btn.style.background=p.color;
       btn.style.color='#202733';
+      btn.style.minWidth='150px';
+      btn.style.border=selected ? '4px solid #202733' : '4px solid transparent';
+      btn.style.boxShadow=selected ? '0 0 0 3px #fff, 0 8px 18px rgba(20,28,38,.18)' : '';
+      btn.setAttribute('aria-pressed',selected ? 'true' : 'false');
       btn.dataset.role=role;
       btn.addEventListener('click',()=>chooseUltimatumPlayer(role));
       wrap.appendChild(btn);
     });
 
-    ultimatumChoiceStart=performance.now();
+    const n=ultimatumSelectedRoles.length;
+    if(n===0){
+      el('ultimatumChoicePrompt').innerHTML='Please select the <b>two players</b> you would most like to play the economic game with.';
+      el('ultimatumPairText').textContent='Select 2 players.';
+    }else if(n===1){
+      el('ultimatumChoicePrompt').innerHTML='Please select <b>one more player</b> you would like to play with.';
+      el('ultimatumPairText').textContent='1 of 2 players selected.';
+    }else{
+      el('ultimatumChoicePrompt').innerHTML='You selected <b>two players</b>.';
+      el('ultimatumPairText').textContent=`You selected ${visibleName(ultimatumSelectedRoles[0])} and ${visibleName(ultimatumSelectedRoles[1])}.`;
+    }
+
+    el('ultimatumChoiceContinueBtn').style.display=n===2 ? 'inline-block' : 'none';
   }
 
   function chooseUltimatumPlayer(role){
-    const pairs=[['A','B'],['B','C']];
-    const pair=pairs[ultimatumChoiceStage];
-    if(!pair.includes(role))return;
+    const existingIndex=ultimatumSelectedRoles.indexOf(role);
 
-    const choiceKey=ultimatumChoiceStage===0?'choice_1':'choice_2';
-    ultimatumSelectedRoles[ultimatumChoiceStage]=role;
-    completeLog.ultimatum_game[choiceKey].selected_role=role;
-    completeLog.ultimatum_game[choiceKey].selected_visible_player=visibleName(role);
-    completeLog.ultimatum_game[choiceKey].rt_ms=Math.round(performance.now()-ultimatumChoiceStart);
-    checkpoint();
-
-    if(ultimatumChoiceStage===0){
-      ultimatumChoiceStage=1;
-      renderUltimatumChoice();
-      return;
+    // Allow participants to change their selection before pressing Continue.
+    if(existingIndex>=0){
+      ultimatumSelectedRoles.splice(existingIndex,1);
+    }else if(ultimatumSelectedRoles.length<2){
+      ultimatumSelectedRoles.push(role);
     }
 
-    const first=ultimatumSelectedRoles[0];
-    const second=ultimatumSelectedRoles[1];
-    el('ultimatumChoiceButtons').innerHTML='';
-    el('ultimatumChoicePrompt').innerHTML='Your choices are complete.';
-    el('ultimatumPairText').textContent=`You selected ${visibleName(first)} in the first choice and ${visibleName(second)} in the second choice.`;
-    el('ultimatumChoiceContinueBtn').style.display='inline-block';
+    // Selected order is the final click order of the two selected players.
+    completeLog.ultimatum_game.selected=ultimatumSelectedRoles.slice();
+    renderUltimatumChoice();
+    checkpoint();
+  }
+
+  function ultimatumSplitDetails(split){
+    return split==='60/40'
+      ? {playerShare:0.60,participantShare:0.40}
+      : {playerShare:0.80,participantShare:0.20};
   }
 
   function beginUltimatumOffers(){
-    const selectedRoles=[...new Set(ultimatumSelectedRoles.filter(Boolean))];
-    const unchosenRoles=ids.filter(role=>!selectedRoles.includes(role));
-    if(!selectedRoles.length || !unchosenRoles.length)return;
+    if(ultimatumSelectedRoles.length!==2)return;
 
-    // The 60/40 offer always comes from a player the participant selected.
-    // The 80/20 offer always comes from a player the participant did NOT select.
-    // If more than one player is eligible in either group, select one at random.
-    const chosenOfferRole=selectedRoles[Math.floor(Math.random()*selectedRoles.length)];
-    const unchosenOfferRole=unchosenRoles[Math.floor(Math.random()*unchosenRoles.length)];
+    const selected=ultimatumSelectedRoles.slice();
 
-    completeLog.ultimatum_game.offer_assignment={
-      selected_roles_unique:selectedRoles.slice(),
-      unchosen_roles:unchosenRoles.slice(),
-      chosen_offer_role:chosenOfferRole,
-      chosen_offer_visible_player:visibleName(chosenOfferRole),
-      unchosen_offer_role:unchosenOfferRole,
-      unchosen_offer_visible_player:visibleName(unchosenOfferRole)
+    // Counterbalance which selected player gets which split.
+    const splitOrder=Math.random()<0.5 ? ['60/40','80/20'] : ['80/20','60/40'];
+    const splitByRole={
+      [selected[0]]:splitOrder[0],
+      [selected[1]]:splitOrder[1]
     };
 
-    el('ultimatumFirstPlayerName').textContent=visibleName(chosenOfferRole);
-    el('ultimatumFirstPlayerAvatar').style.background=identities[chosenOfferRole].color;
-    ultimatumOfferStart=performance.now();
+    // Counterbalance which of the two offers is shown first.
+    const presentationOrder=Math.random()<0.5 ? selected.slice() : [selected[1],selected[0]];
+    ultimatumOfferPlan=presentationOrder.map(role=>({role,split:splitByRole[role]}));
+
+    // Lean log: the order of this array is the actual presentation order.
+    completeLog.ultimatum_game.offers=ultimatumOfferPlan.map(offer=>({
+      role:offer.role,
+      split:offer.split,
+      decision:null,
+      rt_ms:null
+    }));
+
     checkpoint();
-    showScreen('ultimatumFirstOfferScreen');
+    showUltimatumOffer(0);
+  }
+
+  function showUltimatumOffer(index){
+    const offer=ultimatumOfferPlan[index];
+    if(!offer)return;
+
+    const details=ultimatumSplitDetails(offer.split);
+    const prefix=index===0 ? 'ultimatumFirst' : 'ultimatumSecond';
+
+    el(prefix+'PlayerName').textContent=visibleName(offer.role);
+    el(prefix+'PlayerAvatar').style.background=identities[offer.role].color;
+    el(prefix+'PlayerShare').textContent='$'+details.playerShare.toFixed(2);
+    el(prefix+'ParticipantShare').textContent='$'+details.participantShare.toFixed(2);
+    el(prefix+'Bonus').textContent='$'+details.participantShare.toFixed(2);
+
+    ultimatumOfferStart=performance.now();
+    showScreen(index===0 ? 'ultimatumFirstOfferScreen' : 'ultimatumSecondOfferScreen');
+  }
+
+  function saveUltimatumOffer(index,decision){
+    const offer=ultimatumOfferPlan[index];
+    const logRow=completeLog.ultimatum_game.offers[index];
+    if(!offer || !logRow)return;
+
+    logRow.decision=decision;
+    logRow.rt_ms=Math.round(performance.now()-ultimatumOfferStart);
+    checkpoint();
+
+    if(index===0){
+      showUltimatumOffer(1);
+    }else{
+      showScreen('questionnaireIntroScreen');
+    }
   }
 
   function saveUltimatumFirstOffer(decision){
-    const role=completeLog.ultimatum_game.offer_assignment?.chosen_offer_role;
-    if(!role)return;
-    const accepted=decision==='accept';
-    completeLog.ultimatum_game.offer_1={
-      source_category:'selected_player',
-      role,
-      visible_player:visibleName(role),
-      player_share:0.60,
-      participant_share:0.40,
-      decision,
-      accepted,
-      participant_bonus:accepted?0.40:0,
-      rt_ms:Math.round(performance.now()-ultimatumOfferStart)
-    };
-
-    const role2=completeLog.ultimatum_game.offer_assignment?.unchosen_offer_role;
-    if(!role2)return;
-    el('ultimatumSecondPlayerName').textContent=visibleName(role2);
-    el('ultimatumSecondPlayerAvatar').style.background=identities[role2].color;
-    ultimatumOfferStart=performance.now();
-    checkpoint();
-    showScreen('ultimatumSecondOfferScreen');
+    saveUltimatumOffer(0,decision);
   }
 
   function saveUltimatumSecondOffer(decision){
-    const role=completeLog.ultimatum_game.offer_assignment?.unchosen_offer_role;
-    if(!role)return;
-    const accepted=decision==='accept';
-    completeLog.ultimatum_game.offer_2={
-      source_category:'unchosen_player',
-      role,
-      visible_player:visibleName(role),
-      player_share:0.80,
-      participant_share:0.20,
-      decision,
-      accepted,
-      participant_bonus:accepted?0.20:0,
-      rt_ms:Math.round(performance.now()-ultimatumOfferStart)
-    };
-
-    const bonus1=completeLog.ultimatum_game.offer_1?.participant_bonus || 0;
-    const bonus2=completeLog.ultimatum_game.offer_2?.participant_bonus || 0;
-    completeLog.ultimatum_game.total_bonus=Number((bonus1+bonus2).toFixed(2));
-    checkpoint();
-    showScreen('questionnaireIntroScreen');
+    saveUltimatumOffer(1,decision);
   }
 
   // ===================== QUESTIONNAIRE PLACEHOLDER LOGGING =====================
@@ -3026,7 +3013,7 @@
   if (restartBtn) {
     restartBtn.addEventListener('click',()=>{
       state=null;memoryTrials=[];participantRatings={};roundRatings={scored:{},free:{},post_seating:{}};roundMessages={scored:{},free:{},post_seating:{}};feedbackComments={};feedbackPage=1;scoredRoundLength=0;
-      completeLog.participant={};completeLog.identity_mapping={};completeLog.initial_ratings=[];completeLog.feedback_comprehension=[];completeLog.feedback_comments=[];completeLog.feedback_page_views=[];completeLog.game_throws=[];completeLog.postgame_ratings=[];completeLog.post_seating_rating_views=[];completeLog.seating_trials=[];completeLog.seating_page_views=[];completeLog.ultimatum_game={};activeFeedbackPageLogIndex=null;activePostSeatingRatingLogIndex=null;activeSeatingPageLogIndex=null;gameThrowCounter=0;ultimatumChoiceStage=0;ultimatumSelectedRoles=[null,null];
+      completeLog.participant={};completeLog.identity_mapping={};completeLog.initial_ratings=[];completeLog.feedback_comprehension=[];completeLog.feedback_comments=[];completeLog.feedback_page_views=[];completeLog.game_throws=[];completeLog.postgame_ratings=[];completeLog.post_seating_rating_views=[];completeLog.seating_trials=[];completeLog.seating_page_views=[];completeLog.ultimatum_game={};activeFeedbackPageLogIndex=null;activePostSeatingRatingLogIndex=null;activeSeatingPageLogIndex=null;gameThrowCounter=0;ultimatumSelectedRoles=[];ultimatumDisplayOrder=[];ultimatumOfferPlan=[];
       el('nickname').value='';el('selfDescription').value='';
       initializeSession();
       showScreen('profileScreen');
