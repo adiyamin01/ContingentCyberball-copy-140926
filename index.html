@@ -307,6 +307,226 @@
     .returnLikelihoodName{font-size:12px;padding-right:4px}
   }
 
+
+  /* =========================================================
+     RESPONSIVE VIEWPORT FIX
+     Keep the Cyberball and rating screens visible without
+     requiring internal scrolling on normal desktop/mobile sizes.
+     ========================================================= */
+
+  html, body {
+    width: 100%;
+    height: 100%;
+    min-height: 100%;
+  }
+
+  /* Dynamic viewport units behave better on mobile browsers
+     when the address/navigation bars are visible. */
+  .screen {
+    min-height: 100dvh;
+    height: 100dvh;
+    padding: clamp(8px, 2.2vmin, 28px);
+  }
+
+  /* ---- CYBERBALL / BALL-TOSSING SCREEN ---- */
+  #gameScreen {
+    min-height: 100dvh;
+    height: 100dvh;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  #gameWrap {
+    width: 100%;
+    height: 100dvh;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  /* Player size responds to BOTH screen width and height.
+     This prevents the lower players from falling below the viewport. */
+  #gameScreen .player {
+    width: min(136px, 24vw, 18dvh);
+    height: min(136px, 24vw, 18dvh);
+  }
+
+  #gameScreen .player .name {
+    font-size: clamp(15px, 2.5vmin, 22px);
+    max-width: 90%;
+  }
+
+  #gameScreen .player .tag {
+    font-size: clamp(9px, 1.7vmin, 12px);
+  }
+
+  #gameScreen .player .icon {
+    font-size: clamp(25px, 5vmin, 40px);
+  }
+
+  #gameScreen #A { left: 8%; top: 17%; }
+  #gameScreen #B { right: 8%; top: 17%; }
+  #gameScreen #C { right: 9%; bottom: 9%; }
+  #gameScreen #ME { left: 9%; bottom: 9%; }
+
+  #gameScreen .hud {
+    top: max(8px, 2dvh);
+    padding: clamp(6px, 1.2dvh, 10px) clamp(10px, 2vw, 18px);
+  }
+
+  #gameScreen #instruction {
+    top: max(50px, 8dvh);
+    font-size: clamp(15px, 2.4vmin, 20px);
+    padding: 6px 12px;
+  }
+
+  #gameScreen #specialBanner {
+    top: max(88px, 14dvh);
+    font-size: clamp(11px, 1.8vmin, 15px);
+  }
+
+  /* ---- PLAYER RATING SCREEN ---- */
+  #ratingScreen {
+    min-height: 100dvh;
+    height: 100dvh;
+    overflow: hidden;
+    padding: clamp(6px, 1.5vmin, 18px);
+  }
+
+  #ratingScreen .panel {
+    width: min(820px, 97vw);
+    height: auto;
+    max-height: calc(100dvh - 12px);
+    overflow: hidden;
+    padding: clamp(14px, 2.5dvh, 30px) clamp(14px, 3vw, 32px);
+  }
+
+  #ratingScreen h2 {
+    font-size: clamp(24px, 4.2vmin, 38px);
+    margin-bottom: clamp(4px, 1dvh, 10px);
+  }
+
+  #ratingScreen .ratingIdentity {
+    margin: clamp(5px, 1dvh, 12px) auto 3px;
+  }
+
+  #ratingScreen .ratingIdentity .avatar {
+    width: clamp(48px, 9dvh, 76px);
+    height: clamp(48px, 9dvh, 76px);
+    margin-bottom: 5px;
+    border-width: 3px;
+  }
+
+  #ratingScreen .ratingIdentity h3 {
+    font-size: clamp(18px, 3dvh, 23px);
+    margin: 2px 0;
+  }
+
+  #ratingScreen .ratingScale {
+    margin: clamp(8px, 1.4dvh, 16px) auto 5px;
+    gap: clamp(3px, .7vw, 7px);
+  }
+
+  #ratingScreen .rateBtn {
+    padding: clamp(7px, 1.35dvh, 12px) 3px;
+    font-size: clamp(13px, 2dvh, 16px);
+  }
+
+  #ratingScreen .scaleEnds {
+    margin: 0 auto clamp(8px, 1.4dvh, 18px);
+    font-size: clamp(10px, 1.55dvh, 13px);
+  }
+
+  #ratingScreen #ratingConfidenceWrap {
+    margin-top: clamp(8px, 1.5dvh, 16px) !important;
+  }
+
+  #ratingScreen #ratingConfidenceWrap > label {
+    margin-bottom: 4px !important;
+    font-size: clamp(14px, 2dvh, 17px);
+  }
+
+  #ratingScreen .responseBox {
+    margin: 8px auto;
+  }
+
+  #ratingScreen #ratingNext {
+    padding: clamp(9px, 1.6dvh, 13px) 26px;
+    font-size: clamp(15px, 2.2dvh, 18px);
+  }
+
+  /* On narrow phones keep all 10 response buttons on one row.
+     The buttons become smaller instead of forcing extra vertical space. */
+  @media (max-width: 760px) {
+    #ratingScreen .ratingScale {
+      grid-template-columns: repeat(10, minmax(0, 1fr));
+      width: 100%;
+      max-width: 100%;
+    }
+
+    #ratingScreen .rateBtn {
+      border-radius: 8px;
+      padding-left: 0;
+      padding-right: 0;
+      min-width: 0;
+    }
+
+    #gameScreen #A { left: 4%; top: 17%; }
+    #gameScreen #B { right: 4%; top: 17%; }
+    #gameScreen #C { right: 5%; bottom: 8%; }
+    #gameScreen #ME { left: 5%; bottom: 8%; }
+  }
+
+  /* Extra compression for short laptop screens / small phones. */
+  @media (max-height: 680px) {
+    #ratingScreen .panel {
+      padding-top: 10px;
+      padding-bottom: 10px;
+    }
+
+    #ratingScreen h2 {
+      font-size: clamp(21px, 4.6dvh, 29px);
+      margin-bottom: 2px;
+    }
+
+    #ratingScreen .ratingIdentity .avatar {
+      width: 46px;
+      height: 46px;
+    }
+
+    #ratingScreen .ratingScale {
+      margin-top: 6px;
+      margin-bottom: 3px;
+    }
+
+    #ratingScreen .scaleEnds {
+      margin-bottom: 6px;
+    }
+
+    #ratingScreen #ratingConfidenceWrap {
+      margin-top: 6px !important;
+    }
+
+    #gameScreen .player {
+      width: min(92px, 23vw, 16dvh);
+      height: min(92px, 23vw, 16dvh);
+    }
+
+    #gameScreen #A, #gameScreen #B { top: 16%; }
+    #gameScreen #C, #gameScreen #ME { bottom: 6%; }
+  }
+
+  /* If a device is exceptionally small or uses very large accessibility
+     text, retain scrolling as a safety fallback rather than clipping content. */
+  @media (max-height: 500px) {
+    #ratingScreen {
+      overflow: auto;
+    }
+    #ratingScreen .panel {
+      overflow: visible;
+      max-height: none;
+    }
+  }
+
 </style>
 </head>
 <body>
@@ -363,6 +583,7 @@
 
 <section id="metaperceptionPreScreen" class="screen">
   <div class="panel">
+    <div class="eyebrow">Before the task</div>
     <h2>How much do you expect to be liked by this group?</h2>
     <div class="ratingScale" id="metaperceptionPreScale"></div>
     <div class="scaleEnds"><span>1 — Not at all</span><span>10 — Very much</span></div>
@@ -573,6 +794,7 @@
 
 <section id="metaperceptionPostScreen" class="screen">
   <div class="panel">
+    <div class="eyebrow">Before the economic game</div>
     <h2>How much do you feel liked by the group?</h2>
     <div class="ratingScale" id="metaperceptionPostScale"></div>
     <div class="scaleEnds"><span>1 — Not at all</span><span>10 — Very much</span></div>
@@ -649,6 +871,7 @@
 
 <section id="returnLikelihoodScreen" class="screen">
   <div class="panel returnLikelihoodPanel">
+    <div class="eyebrow">Final question</div>
     <h2>Thinking about the game you just played, how likely was each player to <u>return</u> the ball to you?</h2>
     <p class="returnLikelihoodHint">(Please enter a number between 0% and 100% for each player)</p>
     <div class="returnLikelihoodScaleLabels"><span>0</span><span>100</span></div>
@@ -775,7 +998,7 @@
     participant:{}, identity_mapping:{}, initial_ratings:[], feedback_comprehension:[],
     feedback_comments:[], feedback_page_views:[], game_throws:[], postgame_ratings:[],
     ultimatum_game:{},
-    metaperception:{expect_pre:null,feel_post:null},
+    metaperception:{pre:null,post:null},
     return_likelihood:{}
   };
   let ratingStart=0, feedbackAttemptStart=0, gameChoiceStart=0;
