@@ -774,7 +774,7 @@
     version:'Cyberball Return Game — Reworked V6 + complete logging',
     participant:{}, identity_mapping:{}, initial_ratings:[], feedback_comprehension:[],
     feedback_comments:[], feedback_page_views:[], game_throws:[], postgame_ratings:[],
-    post_seating_rating_views:[], seating_trials:[], seating_page_views:[],
+    post_seating_rating_views:[], seating_trials:[],
     ultimatum_game:{},
     metaperception:{pre:null,post:null},
     return_likelihood:{}
@@ -783,7 +783,6 @@
   let gameThrowCounter=0;
   let activeFeedbackPageLogIndex=null;
   let activePostSeatingRatingLogIndex=null;
-  let activeSeatingPageLogIndex=null;
   let experimentComplete=false;
   let experimentCompletedAtMs=null;
   let ultimatumSelectedRoles=[];
@@ -834,7 +833,6 @@
       PostSeating_Ratings: JSON.stringify(completeLog.postgame_ratings.filter(x=>x.context==='post_seating')),
       PostSeating_Rating_Views: JSON.stringify(completeLog.post_seating_rating_views),
       Seating_Trials: JSON.stringify(completeLog.seating_trials),
-      Seating_Page_Views: JSON.stringify(completeLog.seating_page_views),
       Ultimatum_Game: JSON.stringify(completeLog.ultimatum_game || {}),
       Metaperception: JSON.stringify(completeLog.metaperception || {}),
       Return_Likelihood: JSON.stringify(completeLog.return_likelihood || {}),
@@ -898,29 +896,6 @@
       row.confidence_rating=confidenceRating;
     }
     activePostSeatingRatingLogIndex=null;
-  }
-
-  function beginSeatingPageLog(cfg){
-    const configuration={};
-    cfg.forEach((seat,i)=>{
-      const role=ids[i], p=identities[role];
-      configuration[role]={visible_player:p.name,seat:seat+1};
-    });
-    completeLog.seating_page_views.push({
-      trial:seatIndex+1, entered_at_ms:experimentMs(), duration_ms:null,
-      chosen_seat:null, configuration
-    });
-    activeSeatingPageLogIndex=completeLog.seating_page_views.length-1;
-  }
-
-  function endSeatingPageLog(chosenSeat){
-    if(activeSeatingPageLogIndex==null)return;
-    const row=completeLog.seating_page_views[activeSeatingPageLogIndex];
-    if(row && row.duration_ms==null){
-      row.duration_ms=experimentMs()-row.entered_at_ms;
-      row.chosen_seat=chosenSeat+1;
-    }
-    activeSeatingPageLogIndex=null;
   }
 
   function participantName(){
@@ -1518,7 +1493,7 @@
      Six seats evenly spaced around a round table. Distance between two seats
      is the number of steps around the circle: 1 (adjacent), 2, or 3 (opposite).
      ===================================================================== */
-  let seatTrials=[], seatIndex=0, seatResults=[], seatStart=0, seatAnswered=false, seatCurrentSelection=null;
+  let seatTrials=[], seatIndex=0, seatResults=[], seatStart=0, seatAnswered=false, seatCurrentSelection=null, seatChoiceHistory=[];
 
   function seatDistance(a,b){
     const n=CFG.seatingSeats, d=Math.abs(a-b);
@@ -1636,6 +1611,7 @@
   function renderSeatTrial(){
     seatAnswered=false;
     seatCurrentSelection=null;
+    seatChoiceHistory=[];
     el('seatNextBtn').disabled=true;
     el('seatNextBtn').textContent=(seatIndex===seatTrials.length-1)?'Finish':'Next table';
     el('seatPrompt').textContent='Click the seat you would like to take.';
@@ -1646,7 +1622,6 @@
     stage.querySelectorAll('.seat').forEach(n=>n.remove());
     const size=stage.getBoundingClientRect().width||440;
     const cfg=seatTrials[seatIndex];          // index i -> seat of ids[i]
-    beginSeatingPageLog(cfg);
     const occupant={};
     cfg.forEach((seat,i)=>{occupant[seat]=i;});
 
@@ -1678,6 +1653,10 @@
     const rt=Math.round(performance.now()-seatStart);
     const cfg=seatTrials[seatIndex];
 
+    // Preserve every seat click in order. The final chosen_seat/rt_ms below
+    // still represent the participant's final choice for this table.
+    seatChoiceHistory.push({seat:seat+1,rt_ms:rt});
+
     // Keep every available seat clickable so the participant can change
     // their choice before pressing Next.
     document.querySelectorAll('#seatStage .seat.empty').forEach(n=>{
@@ -1695,7 +1674,7 @@
     node.innerHTML=`<div class="seatName">${participantName()}</div>`+
       (CFG.seatingShowSeatNumbers?`<div class="seatNum">seat ${seat+1}</div>`:'');
 
-    const row={trial:seatIndex+1,chosen_seat:seat+1,hesitation_ms:rt,rt_ms:rt,configuration:{}};
+    const row={trial:seatIndex+1,choices:seatChoiceHistory.map(x=>({...x})),chosen_seat:seat+1,hesitation_ms:rt,rt_ms:rt,configuration:{}};
     const dists=[];
     cfg.forEach((s,i)=>{
       const role=ids[i];
@@ -1712,7 +1691,7 @@
     const near=dists.filter(x=>x.d===minD).map(x=>x.role);
     row.nearest=near.length===1?near[0]:'tie:'+near.join('+');
 
-    // Keep only the participant's current/final choice for this trial.
+    // Keep one row per trial. It contains the full click history plus the current/final choice.
     const resultIdx=seatResults.findIndex(r=>r.trial===row.trial);
     if(resultIdx>=0) seatResults[resultIdx]=row;
     else seatResults.push(row);
@@ -1731,7 +1710,6 @@
 
     // Finalize this trial only when Next is pressed, so changing the seat
     // within the same trial is allowed. The saved row reflects the final choice.
-    endSeatingPageLog(seatCurrentSelection);
     checkpoint();
 
     seatIndex++;
@@ -2572,7 +2550,7 @@
   if (restartBtn) {
     restartBtn.addEventListener('click',()=>{
       state=null;memoryTrials=[];participantRatings={};roundRatings={scored:{},free:{},post_seating:{}};roundMessages={scored:{},free:{},post_seating:{}};feedbackComments={};feedbackPage=1;scoredRoundLength=0;
-      completeLog.participant={};completeLog.identity_mapping={};completeLog.initial_ratings=[];completeLog.feedback_comprehension=[];completeLog.feedback_comments=[];completeLog.feedback_page_views=[];completeLog.game_throws=[];completeLog.postgame_ratings=[];completeLog.post_seating_rating_views=[];completeLog.seating_trials=[];completeLog.seating_page_views=[];completeLog.ultimatum_game={};completeLog.metaperception={pre:null,post:null};completeLog.return_likelihood={};returnLikelihoodSelections={};returnLikelihoodTouched={};metaperceptionPreSelection=null;metaperceptionPostSelection=null;metaperceptionPreDone=false;activeFeedbackPageLogIndex=null;activePostSeatingRatingLogIndex=null;activeSeatingPageLogIndex=null;gameThrowCounter=0;ultimatumSelectedRoles=[];ultimatumDisplayOrder=[];ultimatumOfferPlan=[];
+      completeLog.participant={};completeLog.identity_mapping={};completeLog.initial_ratings=[];completeLog.feedback_comprehension=[];completeLog.feedback_comments=[];completeLog.feedback_page_views=[];completeLog.game_throws=[];completeLog.postgame_ratings=[];completeLog.post_seating_rating_views=[];completeLog.seating_trials=[];completeLog.ultimatum_game={};completeLog.metaperception={pre:null,post:null};completeLog.return_likelihood={};returnLikelihoodSelections={};returnLikelihoodTouched={};metaperceptionPreSelection=null;metaperceptionPostSelection=null;metaperceptionPreDone=false;activeFeedbackPageLogIndex=null;activePostSeatingRatingLogIndex=null;gameThrowCounter=0;ultimatumSelectedRoles=[];ultimatumDisplayOrder=[];ultimatumOfferPlan=[];
       el('nickname').value='';el('selfDescription').value='';
       initializeSession();
       showScreen('profileScreen');
