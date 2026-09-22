@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
@@ -259,8 +260,8 @@
     .panel{padding:28px 18px}.profileGrid{grid-template-columns:1fr}.field.full{grid-column:auto}
     .playerCards{grid-template-columns:1fr}.memoryOptions{grid-template-columns:1fr}.ratingScale{grid-template-columns:repeat(5,1fr)}
     .fbScale,.fbMarkers{gap:4px}.fbCell{padding:10px 2px;font-size:14px}.fbMarker{font-size:10px}.feedbackCaption{font-size:19px}
-    .player{width:100px;height:100px}.player .icon{font-size:29px}.player .name{font-size:18px;max-width:84px}
-    #A{left:11%;top:24%}#B{right:11%;top:24%}#C{right:12%;bottom:22%}#ME{left:12%;bottom:22%}
+    .player{width:108px;height:108px}.player .icon{font-size:31px}.player .name{font-size:18px}
+    #A{left:6%;top:19%}#B{right:6%;top:19%}#C{right:7%;bottom:13%}#ME{left:7%;bottom:13%}
     .scoreBadge{right:-35px;bottom:-17px;font-size:13px;padding:7px 9px}.scoreDelta{right:-40px;top:-20px;font-size:21px}
     .hud{padding:8px 12px}.hud strong{font-size:13px}
   }
@@ -305,194 +306,6 @@
     .returnLikelihoodScaleLabels{margin-left:100px}
     .returnLikelihoodRow{grid-template-columns:90px 1fr 36px;gap:7px}
     .returnLikelihoodName{font-size:12px;padding-right:4px}
-  }
-
-
-  /* =========================================================
-     RESPONSIVE VIEWPORT FIT — DISPLAY ONLY
-     Keeps each task inside the visible browser/iframe height.
-     ========================================================= */
-  html,body{height:100%;}
-  body{min-height:0;height:100dvh;overflow:hidden;}
-  .screen{
-    min-height:0;
-    height:100dvh;
-    max-height:100dvh;
-    padding:clamp(8px,2.2vh,28px);
-    overflow:hidden;
-  }
-  .panel{
-    max-height:calc(100dvh - 16px);
-  }
-
-
-  /* Final screen: compact so the Qualtrics Next button below the iframe
-     can remain visible / be reached immediately. Display only. */
-  body.endMode{height:auto !important;min-height:0 !important;overflow:visible !important;}
-  body.endMode #endScreen{
-    min-height:260px !important;
-    height:260px !important;
-    max-height:260px !important;
-    padding:8px 7px !important;
-    overflow:hidden !important;
-    align-items:center !important;
-    justify-content:center !important;
-  }
-  body.endMode #endScreen .panel{
-    width:min(760px,96vw) !important;
-    max-height:none !important;
-    padding:18px 16px !important;
-    margin:auto !important;
-    text-align:center !important;
-  }
-  body.endMode #endScreen h2{
-    margin:0 0 6px !important;
-    text-align:center !important;
-  }
-  body.endMode #endScreen p{
-    margin:4px auto !important;
-    line-height:1.32 !important;
-    text-align:center !important;
-  }
-  body.endMode #endScreen .panel,
-  body.endMode #endScreen #endText{
-    text-align:center !important;
-  }
-  body.endMode #endScreen .panel{
-    display:flex !important;
-    flex-direction:column !important;
-    align-items:center !important;
-    justify-content:center !important;
-  }
-
-  /* The three small headings the user asked to hide. */
-  #metaperceptionPreScreen .eyebrow,
-  #metaperceptionPostScreen .eyebrow{display:none !important;}
-
-  /* Rating screens: keep text/button sizes, reduce only vertical whitespace. */
-  #ratingScreen{padding:8px;}
-  #ratingScreen .panel{
-    width:min(820px,calc(100vw - 16px));
-    max-height:calc(100dvh - 16px);
-    overflow:hidden;
-    padding:clamp(12px,2.2vh,26px) 30px;
-  }
-  #ratingScreen h2{margin-bottom:4px;}
-  #ratingScreen .ratingIdentity{margin:5px auto 2px;}
-  #ratingScreen .ratingIdentity .avatar{margin-bottom:4px;}
-  #ratingScreen .ratingIdentity h3{margin:2px 0 3px;}
-  #ratingScreen .ratingIdentity .sentence{margin-top:3px;}
-  #ratingScreen .ratingScale{margin:7px auto 3px;}
-  #ratingScreen .scaleEnds{margin-bottom:9px;}
-  #ratingScreen #ratingConfidenceWrap{margin-top:7px !important;}
-  #ratingScreen #ratingConfidenceWrap > label{margin-bottom:4px !important;}
-  #ratingScreen .responseBox{margin:7px auto;}
-  #ratingScreen .responseBox label{margin-bottom:4px;}
-  #ratingScreen .messageHint{margin-top:3px;}
-
-  /* Cyberball: exactly one viewport high; no 620px minimum on short phones. */
-  #gameScreen{height:100dvh;min-height:0;max-height:100dvh;overflow:hidden;}
-  #gameWrap{width:100vw;height:100dvh;min-height:0;max-height:100dvh;overflow:hidden;}
-
-  /* Compact vertical spacing on shorter desktop/laptop displays, without changing type size. */
-  @media (max-height:760px) and (min-width:761px){
-    .panel{padding-top:24px;padding-bottom:24px;}
-    h1{margin-bottom:9px;}
-    h2{margin-bottom:8px;}
-    p{margin:6px auto;line-height:1.38;}
-    .profileGrid{margin:14px auto 16px;gap:14px;}
-    .ruleCard{margin:14px auto 16px;padding-top:17px;padding-bottom:17px;}
-    .specialDemo{margin:14px auto;padding:17px;}
-    .responseBox{margin:14px auto;}
-    .statsGrid{margin:14px auto;}
-  }
-
-  @media (max-width:760px){
-    .screen{padding:7px;}
-    .panel{
-      width:calc(100vw - 14px);
-      max-height:calc(100dvh - 14px);
-      padding:18px 14px;
-    }
-    h1{margin-bottom:9px;}
-    h2{margin-bottom:7px;}
-    p{margin:5px auto;line-height:1.34;}
-
-    /* Post-seating rating + confidence: preserve font sizes, shorten vertical controls/spaces. */
-    #ratingScreen{padding:5px;}
-    #ratingScreen .panel{
-      width:calc(100vw - 10px);
-      max-height:calc(100dvh - 10px);
-      padding:2px 12px;
-    }
-    #ratingScreen .ratingIdentity{margin:0 auto;}
-    #ratingScreen .ratingIdentity .avatar{margin-bottom:0;}
-    #ratingScreen .ratingIdentity h3{margin:0;}
-    #ratingScreen .responseBox label{margin-bottom:0;}
-    #ratingScreen .ratingScale{gap:4px;margin:0 auto;}
-    #ratingScreen .scaleEnds{margin-bottom:0;}
-    #ratingScreen #ratingConfidenceWrap{margin-top:0 !important;}
-    #ratingScreen #ratingConfidenceWrap > label{margin-bottom:0 !important;}
-    #ratingScreen .responseBox{margin:1px auto;}
-    #ratingScreen .messageHint{margin-top:0;}
-
-  }
-
-  @media (max-width:420px) and (max-height:700px){
-    #ratingScreen .panel{padding-top:2px;padding-bottom:2px;}
-    #ratingScreen h2{margin-bottom:0;}
-    #ratingScreen .ratingScale{margin-top:3px;}
-
-  }
-
-
-  /* Extra short-screen fit for the economic offer and retained rule screens. */
-  @media (max-width:760px){
-    #ultimatumFirstOfferScreen .panel,
-    #ultimatumSecondOfferScreen .panel{padding:10px 8px;}
-    #ultimatumFirstOfferScreen h2,
-    #ultimatumSecondOfferScreen h2{margin-bottom:3px;}
-    #ultimatumFirstOfferScreen .ratingIdentity,
-    #ultimatumSecondOfferScreen .ratingIdentity{margin:3px auto 1px;}
-    #ultimatumFirstOfferScreen .ratingIdentity .avatar,
-    #ultimatumSecondOfferScreen .ratingIdentity .avatar{margin-bottom:3px;}
-    #ultimatumFirstOfferScreen .ratingIdentity h3,
-    #ultimatumSecondOfferScreen .ratingIdentity h3{margin:2px 0;}
-    #ultimatumFirstOfferScreen p,
-    #ultimatumSecondOfferScreen p{margin:3px auto;line-height:1.22;}
-    #ultimatumFirstOfferScreen .ultimatumDecisionBtn,
-    #ultimatumSecondOfferScreen .ultimatumDecisionBtn{padding:10px 18px;}
-
-    #rule1Screen .panel,#rule2Screen .panel,#rule3Screen .panel,#phase2Screen .panel{padding:10px 10px;}
-    #rule1Screen p,#rule2Screen p,#rule3Screen p,#phase2Screen p{margin:3px auto;line-height:1.22;}
-    #rule1Screen .ruleCard,#rule2Screen .ruleCard,#rule3Screen .ruleCard{margin:6px auto;padding:9px 12px;gap:10px;}
-    #rule3Screen .specialDemo,#phase2Screen .specialDemo{margin:6px auto;padding:9px;}
-    #rule3Screen .demoStar,#phase2Screen .demoStar{width:42px;height:42px;margin-bottom:6px;}
-    #phase2Screen .statsGrid{margin:7px auto;}
-    #phase2Screen .stat{padding:10px;}
-  }
-
-
-  @media (max-height:800px) and (min-width:761px){
-    #rule1Screen .panel,#rule2Screen .panel,#rule3Screen .panel,#phase2Screen .panel{padding-top:14px;padding-bottom:14px;}
-    #rule1Screen p,#rule2Screen p,#rule3Screen p,#phase2Screen p{margin:4px auto;line-height:1.25;}
-    #rule1Screen .ruleCard,#rule2Screen .ruleCard,#rule3Screen .ruleCard{margin:8px auto;padding:12px 18px;}
-    #rule3Screen .specialDemo,#phase2Screen .specialDemo{margin:8px auto;padding:12px;}
-    #rule3Screen .demoStar,#phase2Screen .demoStar{width:46px;height:46px;margin-bottom:6px;}
-    #phase2Screen .statsGrid{margin:8px auto;}
-    #phase2Screen .stat{padding:12px;}
-  }
-
-  @media (max-width:760px) and (max-height:660px){
-    #economicTaskIntroScreen .panel{padding:9px 8px;}
-    #economicTaskIntroScreen h2{margin-bottom:3px;}
-    #economicTaskIntroScreen p{margin:3px auto;line-height:1.20;}
-    #economicTaskIntroScreen .primary{margin-top:3px;}
-
-    #rule1Screen h1,#rule2Screen h1,#rule3Screen h1,#phase2Screen h2{margin-bottom:4px;}
-    #rule1Screen .ruleCard,#rule2Screen .ruleCard,#rule3Screen .ruleCard{padding:7px 9px;margin:4px auto;}
-    #rule3Screen .specialDemo,#phase2Screen .specialDemo{padding:7px;margin:4px auto;}
-    #rule3Screen .demoStar,#phase2Screen .demoStar{width:36px;height:36px;margin-bottom:4px;}
   }
 
 </style>
@@ -856,7 +669,7 @@
     <p id="endText"> This part of the study is now complete.<br>
       Next, we have a few questions about you.<br><br>
       Please click the blue button below to continue to the next section.
-    </p>
+    </p></p>
   </div>
 </section>
 
@@ -1364,7 +1177,6 @@
     confidenceSelection=null;
     ratingStart=performance.now();
     const isPost=ratingContext!=='pregame';
-    el('ratingEyebrow').style.display=(ratingContext==='post_seating')?'none':'';
     const roundLabel=ratingContext==='scored'
       ?'After Round 1'
       :(ratingContext==='free'?'After Free Game':'After Seating Task');
@@ -2153,16 +1965,7 @@
       type:'CyberballComplete',
       completed_at_ms:experimentCompletedAtMs
     },'*');
-    document.body.classList.add('endMode');
     showScreen('endScreen');
-    window.scrollTo(0,0);
-
-    // Ask the Qualtrics parent page to shrink the iframe itself on the final screen,
-    // so the Qualtrics Next button below it can remain visible.
-    window.parent.postMessage({
-      type:'CyberballResize',
-      height:260
-    },'*');
   }
 
   function saveUltimatumOffer(index,decision){
