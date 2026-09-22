@@ -330,19 +330,30 @@
      can remain visible / be reached immediately. Display only. */
   body.endMode{height:auto !important;min-height:0 !important;overflow:visible !important;}
   body.endMode #endScreen{
-    min-height:0 !important;
-    height:auto !important;
-    max-height:none !important;
+    min-height:260px !important;
+    height:260px !important;
+    max-height:260px !important;
     padding:8px 7px !important;
-    overflow:visible !important;
-    align-items:flex-start;
+    overflow:hidden !important;
+    align-items:center !important;
+    justify-content:center !important;
   }
   body.endMode #endScreen .panel{
+    width:min(760px,96vw) !important;
     max-height:none !important;
     padding:18px 16px !important;
+    margin:auto !important;
+    text-align:center !important;
   }
-  body.endMode #endScreen h2{margin-bottom:6px;}
-  body.endMode #endScreen p{margin:4px auto;line-height:1.32;}
+  body.endMode #endScreen h2{
+    margin:0 0 6px !important;
+    text-align:center !important;
+  }
+  body.endMode #endScreen p{
+    margin:4px auto !important;
+    line-height:1.32 !important;
+    text-align:center !important;
+  }
 
   /* The three small headings the user asked to hide. */
   #metaperceptionPreScreen .eyebrow,
@@ -2135,6 +2146,13 @@
     document.body.classList.add('endMode');
     showScreen('endScreen');
     window.scrollTo(0,0);
+
+    // Ask the Qualtrics parent page to shrink the iframe itself on the final screen,
+    // so the Qualtrics Next button below it can remain visible.
+    window.parent.postMessage({
+      type:'CyberballResize',
+      height:260
+    },'*');
   }
 
   function saveUltimatumOffer(index,decision){
