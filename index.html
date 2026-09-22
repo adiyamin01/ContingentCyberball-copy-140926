@@ -308,216 +308,190 @@
   }
 
 
+  /* Hide the small upper labels only on the requested measures */
+  #metaperceptionPreScreen .eyebrow,
+  #metaperceptionPostScreen .eyebrow {
+    display:none !important;
+  }
+
+
   /* =========================================================
-     RESPONSIVE VIEWPORT FIX
-     Keep the Cyberball and rating screens visible without
-     requiring internal scrolling on normal desktop/mobile sizes.
+     QUALTRICS VISIBLE-VIEWPORT FIT
+     --screen-fit-height is calculated from the space actually
+     visible below the active screen's top edge.
      ========================================================= */
 
-  html, body {
-    width: 100%;
-    height: 100%;
-    min-height: 100%;
+  .screen.active {
+    min-height: var(--screen-fit-height, auto);
+    height: var(--screen-fit-height, auto);
+    padding: clamp(6px, 1.6vmin, 18px);
   }
 
-  /* Dynamic viewport units behave better on mobile browsers
-     when the address/navigation bars are visible. */
-  .screen {
-    min-height: 100dvh;
-    height: 100dvh;
-    padding: clamp(8px, 2.2vmin, 28px);
-  }
-
-  /* ---- CYBERBALL / BALL-TOSSING SCREEN ---- */
+  /* ---------- CYBERBALL ---------- */
   #gameScreen {
-    min-height: 100dvh;
-    height: 100dvh;
-    padding: 0;
+    min-height: var(--screen-fit-height, 560px);
+    height: var(--screen-fit-height, 560px);
+    padding: 0 !important;
     overflow: hidden;
   }
 
   #gameWrap {
-    width: 100%;
-    height: 100dvh;
-    min-height: 0;
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 0 !important;
     overflow: hidden;
+    position: relative;
   }
 
-  /* Player size responds to BOTH screen width and height.
-     This prevents the lower players from falling below the viewport. */
   #gameScreen .player {
-    width: min(136px, 24vw, 18dvh);
-    height: min(136px, 24vw, 18dvh);
+    width: var(--game-player-size, 112px);
+    height: var(--game-player-size, 112px);
   }
 
   #gameScreen .player .name {
-    font-size: clamp(15px, 2.5vmin, 22px);
+    font-size: clamp(15px, 2.3vmin, 21px);
     max-width: 90%;
   }
 
   #gameScreen .player .tag {
-    font-size: clamp(9px, 1.7vmin, 12px);
+    font-size: clamp(9px, 1.5vmin, 12px);
   }
 
   #gameScreen .player .icon {
-    font-size: clamp(25px, 5vmin, 40px);
+    font-size: clamp(24px, 4.5vmin, 38px);
   }
 
-  #gameScreen #A { left: 8%; top: 17%; }
-  #gameScreen #B { right: 8%; top: 17%; }
-  #gameScreen #C { right: 9%; bottom: 9%; }
-  #gameScreen #ME { left: 9%; bottom: 9%; }
+  #gameScreen #A { left: 7%; top: 17%; }
+  #gameScreen #B { right: 7%; top: 17%; }
+  #gameScreen #C { right: 8%; bottom: 8%; }
+  #gameScreen #ME { left: 8%; bottom: 8%; }
 
   #gameScreen .hud {
-    top: max(8px, 2dvh);
-    padding: clamp(6px, 1.2dvh, 10px) clamp(10px, 2vw, 18px);
+    top: 8px;
+    padding: 7px 14px;
   }
 
   #gameScreen #instruction {
-    top: max(50px, 8dvh);
-    font-size: clamp(15px, 2.4vmin, 20px);
+    top: 54px;
+    font-size: clamp(14px, 2vmin, 19px);
     padding: 6px 12px;
   }
 
   #gameScreen #specialBanner {
-    top: max(88px, 14dvh);
-    font-size: clamp(11px, 1.8vmin, 15px);
+    top: 96px;
+    font-size: clamp(11px, 1.6vmin, 14px);
   }
 
-  /* ---- PLAYER RATING SCREEN ---- */
+  /* The holder indication no longer increases the apparent size
+     of the current player. It is drawn inside the same circle. */
+  #gameScreen .player.holder {
+    outline: none !important;
+    box-shadow:
+      inset 0 0 0 5px #202733,
+      0 13px 30px rgba(20,28,38,.15);
+  }
+
+  /* ---------- RATINGS ---------- */
   #ratingScreen {
-    min-height: 100dvh;
-    height: 100dvh;
+    min-height: var(--screen-fit-height, auto);
+    height: var(--screen-fit-height, auto);
     overflow: hidden;
-    padding: clamp(6px, 1.5vmin, 18px);
+    padding: 6px;
   }
 
   #ratingScreen .panel {
-    width: min(820px, 97vw);
-    height: auto;
-    max-height: calc(100dvh - 12px);
+    width: min(820px, 98%);
+    max-height: calc(var(--screen-fit-height, 700px) - 12px);
     overflow: hidden;
-    padding: clamp(14px, 2.5dvh, 30px) clamp(14px, 3vw, 32px);
+    padding: clamp(10px, 2vh, 24px) clamp(12px, 2.6vw, 28px);
   }
 
   #ratingScreen h2 {
-    font-size: clamp(24px, 4.2vmin, 38px);
-    margin-bottom: clamp(4px, 1dvh, 10px);
+    font-size: clamp(22px, 3.8vmin, 36px);
+    margin: 0 0 5px;
   }
 
   #ratingScreen .ratingIdentity {
-    margin: clamp(5px, 1dvh, 12px) auto 3px;
+    margin: 5px auto 2px;
   }
 
   #ratingScreen .ratingIdentity .avatar {
-    width: clamp(48px, 9dvh, 76px);
-    height: clamp(48px, 9dvh, 76px);
-    margin-bottom: 5px;
+    width: clamp(46px, 8vh, 70px);
+    height: clamp(46px, 8vh, 70px);
+    margin: 0 auto 4px;
     border-width: 3px;
   }
 
   #ratingScreen .ratingIdentity h3 {
-    font-size: clamp(18px, 3dvh, 23px);
+    font-size: clamp(17px, 2.6vh, 22px);
     margin: 2px 0;
   }
 
   #ratingScreen .ratingScale {
-    margin: clamp(8px, 1.4dvh, 16px) auto 5px;
-    gap: clamp(3px, .7vw, 7px);
+    grid-template-columns: repeat(10, minmax(0, 1fr)) !important;
+    gap: clamp(3px, .6vw, 7px);
+    width: 100%;
+    max-width: 700px;
+    margin: 7px auto 4px;
   }
 
   #ratingScreen .rateBtn {
-    padding: clamp(7px, 1.35dvh, 12px) 3px;
-    font-size: clamp(13px, 2dvh, 16px);
+    min-width: 0;
+    padding: clamp(6px, 1.15vh, 11px) 1px;
+    border-radius: 9px;
+    font-size: clamp(12px, 1.8vh, 16px);
   }
 
   #ratingScreen .scaleEnds {
-    margin: 0 auto clamp(8px, 1.4dvh, 18px);
-    font-size: clamp(10px, 1.55dvh, 13px);
+    margin: 0 auto 7px;
+    font-size: clamp(10px, 1.45vh, 13px);
   }
 
   #ratingScreen #ratingConfidenceWrap {
-    margin-top: clamp(8px, 1.5dvh, 16px) !important;
+    margin-top: 7px !important;
   }
 
   #ratingScreen #ratingConfidenceWrap > label {
-    margin-bottom: 4px !important;
-    font-size: clamp(14px, 2dvh, 17px);
+    margin-bottom: 3px !important;
+    font-size: clamp(13px, 1.9vh, 16px);
   }
 
   #ratingScreen .responseBox {
-    margin: 8px auto;
+    margin: 6px auto;
   }
 
   #ratingScreen #ratingNext {
-    padding: clamp(9px, 1.6dvh, 13px) 26px;
-    font-size: clamp(15px, 2.2dvh, 18px);
+    padding: 9px 24px;
+    font-size: clamp(14px, 2vh, 17px);
   }
 
-  /* On narrow phones keep all 10 response buttons on one row.
-     The buttons become smaller instead of forcing extra vertical space. */
+  /* Small/narrow phone adjustments */
   @media (max-width: 760px) {
-    #ratingScreen .ratingScale {
-      grid-template-columns: repeat(10, minmax(0, 1fr));
-      width: 100%;
-      max-width: 100%;
+    #gameScreen #A { left: 3%; top: 18%; }
+    #gameScreen #B { right: 3%; top: 18%; }
+    #gameScreen #C { right: 4%; bottom: 7%; }
+    #gameScreen #ME { left: 4%; bottom: 7%; }
+
+    #ratingScreen .panel {
+      padding-left: 8px;
+      padding-right: 8px;
     }
 
     #ratingScreen .rateBtn {
-      border-radius: 8px;
-      padding-left: 0;
-      padding-right: 0;
-      min-width: 0;
+      font-size: 12px;
     }
-
-    #gameScreen #A { left: 4%; top: 17%; }
-    #gameScreen #B { right: 4%; top: 17%; }
-    #gameScreen #C { right: 5%; bottom: 8%; }
-    #gameScreen #ME { left: 5%; bottom: 8%; }
   }
 
-  /* Extra compression for short laptop screens / small phones. */
-  @media (max-height: 680px) {
-    #ratingScreen .panel {
-      padding-top: 10px;
-      padding-bottom: 10px;
-    }
-
-    #ratingScreen h2 {
-      font-size: clamp(21px, 4.6dvh, 29px);
-      margin-bottom: 2px;
-    }
-
-    #ratingScreen .ratingIdentity .avatar {
-      width: 46px;
-      height: 46px;
-    }
-
-    #ratingScreen .ratingScale {
-      margin-top: 6px;
-      margin-bottom: 3px;
-    }
-
-    #ratingScreen .scaleEnds {
-      margin-bottom: 6px;
-    }
-
-    #ratingScreen #ratingConfidenceWrap {
-      margin-top: 6px !important;
-    }
-
-    #gameScreen .player {
-      width: min(92px, 23vw, 16dvh);
-      height: min(92px, 23vw, 16dvh);
-    }
-
-    #gameScreen #A, #gameScreen #B { top: 16%; }
-    #gameScreen #C, #gameScreen #ME { bottom: 6%; }
+  /* Very short visible area: shrink rather than create a normal scroll.
+     Only at extreme heights do we allow a safety scroll. */
+  @media (max-height: 520px) {
+    #ratingScreen h2 { font-size: 20px; }
+    #ratingScreen .ratingIdentity .avatar { width: 42px; height: 42px; }
+    #ratingScreen .rateBtn { padding-top: 5px; padding-bottom: 5px; }
+    #ratingScreen #ratingConfidenceWrap { margin-top: 4px !important; }
   }
 
-  /* If a device is exceptionally small or uses very large accessibility
-     text, retain scrolling as a safety fallback rather than clipping content. */
-  @media (max-height: 500px) {
+  @media (max-height: 390px) {
     #ratingScreen {
       overflow: auto;
     }
@@ -998,7 +972,7 @@
     participant:{}, identity_mapping:{}, initial_ratings:[], feedback_comprehension:[],
     feedback_comments:[], feedback_page_views:[], game_throws:[], postgame_ratings:[],
     ultimatum_game:{},
-    metaperception:{pre:null,post:null},
+    metaperception:{"expect (pre)":null,"feel (post)":null},
     return_likelihood:{}
   };
   let ratingStart=0, feedbackAttemptStart=0, gameChoiceStart=0;
@@ -1102,10 +1076,42 @@
     return (el('nickname').value.trim()||'You').slice(0,18);
   }
 
+
+  function fitActiveScreenToVisibleViewport(){
+    const active=document.querySelector('.screen.active');
+    if(!active)return;
+
+    const viewportH=(window.visualViewport && window.visualViewport.height)
+      ? window.visualViewport.height
+      : window.innerHeight;
+
+    const rect=active.getBoundingClientRect();
+    const top=Math.max(0,rect.top);
+    const available=Math.max(280,Math.floor(viewportH-top-6));
+
+    active.style.setProperty('--screen-fit-height',available+'px');
+
+    if(active.id==='gameScreen'){
+      const w=Math.max(280,active.getBoundingClientRect().width || window.innerWidth);
+      const playerSize=Math.round(Math.max(68,Math.min(136,available*0.18,w*0.20)));
+      active.style.setProperty('--game-player-size',playerSize+'px');
+    }
+  }
+
+  window.addEventListener('resize',fitActiveScreenToVisibleViewport);
+  window.addEventListener('orientationchange',()=>setTimeout(fitActiveScreenToVisibleViewport,80));
+  if(window.visualViewport){
+    window.visualViewport.addEventListener('resize',fitActiveScreenToVisibleViewport);
+  }
+
   function showScreen(id){
     if(id==='seatIntroScreen'){el('seatIntroLegend').innerHTML=seatLegendHTML();}
     document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
     el(id).classList.add('active');
+    requestAnimationFrame(()=>{
+      fitActiveScreenToVisibleViewport();
+      setTimeout(fitActiveScreenToVisibleViewport,60);
+    });
   }
 
   function initializeSession(){
@@ -1342,7 +1348,7 @@
 
   function saveMetaperceptionPre(){
     if(metaperceptionPreSelection==null)return;
-    completeLog.metaperception.pre={
+    completeLog.metaperception["expect (pre)"]={
       rating:metaperceptionPreSelection,
       rt_ms:Math.round(performance.now()-metaperceptionPreStart)
     };
@@ -1366,7 +1372,7 @@
 
   function saveMetaperceptionPost(){
     if(metaperceptionPostSelection==null)return;
-    completeLog.metaperception.post={
+    completeLog.metaperception["feel (post)"]={
       rating:metaperceptionPostSelection,
       rt_ms:Math.round(performance.now()-metaperceptionPostStart)
     };
@@ -1390,6 +1396,7 @@
   }
 
   function renderRating(){
+    el('ratingEyebrow').style.display = ratingContext === 'post_seating' ? 'none' : '';
     const role=ratingOrder[ratingIndex];
     const p=identities[role];
     ratingSelection=null;
@@ -2744,7 +2751,7 @@
   if (restartBtn) {
     restartBtn.addEventListener('click',()=>{
       state=null;memoryTrials=[];participantRatings={};roundRatings={scored:{},free:{},post_seating:{}};roundMessages={scored:{},free:{},post_seating:{}};feedbackComments={};feedbackPage=1;scoredRoundLength=0;
-      completeLog.participant={};completeLog.identity_mapping={};completeLog.initial_ratings=[];completeLog.feedback_comprehension=[];completeLog.feedback_comments=[];completeLog.feedback_page_views=[];completeLog.game_throws=[];completeLog.postgame_ratings=[];completeLog.ultimatum_game={};completeLog.metaperception={pre:null,post:null};completeLog.return_likelihood={};returnLikelihoodSelections={};returnLikelihoodTouched={};metaperceptionPreSelection=null;metaperceptionPostSelection=null;metaperceptionPreDone=false;activeFeedbackPageLogIndex=null;gameThrowCounter=0;ultimatumSelectedRoles=[];ultimatumDisplayOrder=[];ultimatumOfferPlan=[];
+      completeLog.participant={};completeLog.identity_mapping={};completeLog.initial_ratings=[];completeLog.feedback_comprehension=[];completeLog.feedback_comments=[];completeLog.feedback_page_views=[];completeLog.game_throws=[];completeLog.postgame_ratings=[];completeLog.ultimatum_game={};completeLog.metaperception={"expect (pre)":null,"feel (post)":null};completeLog.return_likelihood={};returnLikelihoodSelections={};returnLikelihoodTouched={};metaperceptionPreSelection=null;metaperceptionPostSelection=null;metaperceptionPreDone=false;activeFeedbackPageLogIndex=null;gameThrowCounter=0;ultimatumSelectedRoles=[];ultimatumDisplayOrder=[];ultimatumOfferPlan=[];
       el('nickname').value='';el('selfDescription').value='';
       initializeSession();
       showScreen('profileScreen');
@@ -2753,6 +2760,7 @@
 
   markRequiredFields();
   initializeSession();
+  requestAnimationFrame(fitActiveScreenToVisibleViewport);
 })();
 </script>
 
