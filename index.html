@@ -44,6 +44,18 @@
   .secondary{background:#eef0f3;color:#202733;margin-right:8px}
   .primary:hover,.secondary:hover{transform:translateY(-1px)}
   .primary:disabled{opacity:.42;cursor:not-allowed;transform:none}
+  .ultimatumDecisionBtn{
+    border:1px solid var(--line);
+    border-radius:999px;
+    padding:14px 30px;
+    font-weight:700;
+    font-size:18px;
+    background:#fff;
+    color:#202733;
+    box-shadow:none;
+    margin:0 5px;
+  }
+  .ultimatumDecisionBtn:hover{border-color:#8b93a1;background:#fbfbfa;transform:translateY(-1px)}
 
   /* PROFILE */
   .profileGrid{display:grid;grid-template-columns:1fr 1fr;gap:22px;text-align:left;margin:24px auto 28px;max-width:680px}
@@ -275,61 +287,24 @@
     #meetScreen #meetNext{padding:10px 22px;font-size:15px}
   }
 
-  /* Questionnaire matrix layout */
-  .questionnaire-instructions{
-    text-align:left;
-    margin:0 0 22px;
-    line-height:1.55;
-  }
-  .questionnaire-matrix{
-    width:100%;
-    border-collapse:collapse;
-    margin-top:18px;
-    table-layout:fixed;
-  }
-  .questionnaire-matrix th,
-  .questionnaire-matrix td{
-    padding:12px 8px;
-    text-align:center;
-    vertical-align:middle;
-    border-bottom:1px solid #ddd;
-  }
-  .questionnaire-matrix th:first-child,
-  .questionnaire-matrix td:first-child{
-    width:32%;
-    text-align:left;
-  }
-  .questionnaire-matrix th:not(:first-child),
-  .questionnaire-matrix td:not(:first-child){
-    width:13.6%;
-  }
-  .questionnaire-matrix th{
-    font-weight:500;
-    font-size:14px;
-  }
-  .questionnaire-matrix .question-text{
-    line-height:1.4;
-  }
-  .questionnaire-matrix input[type="radio"]{
-    width:18px;
-    height:18px;
-    cursor:pointer;
-  }
-  .questionnaire-item{
-    text-align:left;
-    margin:18px 0;
-  }
-  .questionnaire-item label{
-    display:block;
-    margin:8px 0;
-  }
-  .questionnaire-item input[type="text"],
-  .questionnaire-item input[type="number"],
-  .questionnaire-item select,
-  .questionnaire-item textarea{
-    width:100%;
-    box-sizing:border-box;
-    margin-top:8px;
+
+
+  /* RETURN-LIKELIHOOD QUESTION */
+  .returnLikelihoodPanel{width:min(980px,96vw);text-align:left}
+  .returnLikelihoodPanel h2{font-size:24px;line-height:1.35;margin-bottom:6px}
+  .returnLikelihoodHint{font-size:18px;font-weight:700;color:#4b4f56;margin:0 0 28px;max-width:none}
+  .returnLikelihoodScaleLabels{display:flex;justify-content:space-between;margin:0 4px 2px 162px;font-family:Arial,sans-serif;font-size:12px;color:#555}
+  .returnLikelihoodRows{border-top:1px solid #d9dde3;margin:0 0 24px}
+  .returnLikelihoodRow{display:grid;grid-template-columns:150px 1fr 42px;align-items:center;gap:10px;min-height:62px;border-bottom:1px solid #d9dde3;padding:8px 0}
+  .returnLikelihoodName{font-family:Arial,sans-serif;font-size:14px;font-weight:800;width:82px;justify-self:end;text-align:left;padding-right:0}
+  .returnLikelihoodRange{width:100%;accent-color:#1976d2;cursor:pointer}
+  .returnLikelihoodValue{font-family:Arial,sans-serif;font-size:14px;color:#6c7480;text-align:left}
+  .returnLikelihoodActions{text-align:center;margin-top:18px}
+  @media(max-width:760px){
+    .returnLikelihoodPanel{padding:26px 18px}
+    .returnLikelihoodScaleLabels{margin-left:100px}
+    .returnLikelihoodRow{grid-template-columns:90px 1fr 36px;gap:7px}
+    .returnLikelihoodName{font-size:12px;padding-right:4px}
   }
 
 </style>
@@ -520,6 +495,18 @@
   </div>
 </section>
 
+<section id="ballTaskIntroScreen" class="screen">
+  <div class="panel">
+    <div class="eyebrow">Ball-tossing task</div>
+    <h2>Ball-Tossing Task</h2>
+    <p>You will now play a ball-tossing game with the same three players.</p>
+    <p>Whenever you receive the ball, choose one of the other players to throw it to by clicking on that player.</p>
+    <p>The game will continue automatically until the task is complete.</p>
+    <p>There are no right or wrong choices. Please respond naturally based on how you would like to play.</p>
+    <button class="primary" id="ballTaskIntroNextBtn">Start task</button>
+  </div>
+</section>
+
 <section id="gameScreen" class="screen">
   <div id="gameWrap">
     <div class="hud"><strong id="progressText">Balls/Throws Returned: 0 / 30</strong></div>
@@ -632,8 +619,8 @@
     <p>If you <b>accept</b>, the money will be divided as shown above, and you will receive <b><span id="ultimatumFirstBonus"></span> as an additional bonus</b>.</p>
     <p>If you <b>reject</b>, neither you nor the other player will receive the money from this offer.</p>
     <p><b>What would you like to do?</b></p>
-    <button class="primary" id="ultimatumFirstAcceptBtn">Accept the offer</button>
-    <button class="secondary" id="ultimatumFirstRejectBtn">Reject the offer</button>
+    <button type="button" class="ultimatumDecisionBtn" id="ultimatumFirstAcceptBtn">Accept the offer</button>
+    <button type="button" class="ultimatumDecisionBtn" id="ultimatumFirstRejectBtn">Reject the offer</button>
   </div>
 </section>
 
@@ -651,8 +638,8 @@
     <p>If you <b>accept</b>, the money will be divided as shown above, and you will receive <b><span id="ultimatumSecondBonus"></span> as an additional bonus</b>.</p>
     <p>If you <b>reject</b>, neither you nor the other player will receive the money from this offer.</p>
     <p><b>What would you like to do?</b></p>
-    <button class="primary" id="ultimatumSecondAcceptBtn">Accept the offer</button>
-    <button class="secondary" id="ultimatumSecondRejectBtn">Reject the offer</button>
+    <button type="button" class="ultimatumDecisionBtn" id="ultimatumSecondAcceptBtn">Accept the offer</button>
+    <button type="button" class="ultimatumDecisionBtn" id="ultimatumSecondRejectBtn">Reject the offer</button>
   </div>
 </section>
 
@@ -661,672 +648,17 @@
      Fill in the item text where indicated.
      ===================================================== -->
 
-<section id="questionnaireIntroScreen" class="screen">
-  <div class="panel">
-    <p>In the next section, you will be asked to complete several questionnaires related to emotions, thoughts, and behaviors.</p>
-    <p>Please read the instructions for each questionnaire carefully and respond according to the given guidelines.</p>
-    <button class="primary" id="questionnaireIntroNextBtn">Continue</button>
-  </div>
-</section>
 
-<section id="questionnaire1Screen" class="screen questionnaireScreen" data-questionnaire="SPIN">
-  <div class="panel">
-
-    <div class="questionnaireQuestions" id="SPINQuestions">
-      <div class="questionnaire-instructions">
-        Please indicate how much each of the following problems has bothered you during the past week.
-      </div>
-
-      <!-- SPIN CODING:
-         0 = Not at all
-         1 = A Little Bit
-         2 = Somewhat
-         3 = Very Much
-         4 = Extremely
-         Saved as SPIN_1 ... SPIN_17.
-         Total SPIN score can therefore be computed by summing the 17 item values. -->
-      <table class="questionnaire-matrix">
-        <thead>
-          <tr>
-            <th></th>
-            <!-- EDIT RESPONSE LABELS IF NEEDED -->
-            <th>Not at all</th><th>A Little Bit</th><th>Somewhat</th><th>Very Much</th><th>Extremely</th>
-          </tr>
-        </thead>
-        <tbody>
-          <!-- COPY THIS <tr> BLOCK FOR AS MANY SPIN ITEMS AS YOU NEED -->
-          <tr>
-            <td class="question-text">1. I am afraid of people in authority.</td>
-            <td><input type="radio" name="SPIN_1" value="0"></td>
-            <td><input type="radio" name="SPIN_1" value="1"></td>
-            <td><input type="radio" name="SPIN_1" value="2"></td>
-            <td><input type="radio" name="SPIN_1" value="3"></td>
-            <td><input type="radio" name="SPIN_1" value="4"></td>
-          </tr>
-
-          <tr>
-            <td class="question-text">2. I am bothered by blushing in front of people.</td>
-            <td><input type="radio" name="SPIN_2" value="0"></td>
-            <td><input type="radio" name="SPIN_2" value="1"></td>
-            <td><input type="radio" name="SPIN_2" value="2"></td>
-            <td><input type="radio" name="SPIN_2" value="3"></td>
-            <td><input type="radio" name="SPIN_2" value="4"></td>
-          </tr>
-
-          <tr>
-            <td class="question-text">3. Parties and social events scare me.</td>
-            <td><input type="radio" name="SPIN_3" value="0"></td>
-            <td><input type="radio" name="SPIN_3" value="1"></td>
-            <td><input type="radio" name="SPIN_3" value="2"></td>
-            <td><input type="radio" name="SPIN_3" value="3"></td>
-            <td><input type="radio" name="SPIN_3" value="4"></td>
-          </tr>
-          
-          <tr>
-            <td class="question-text">4. I avoid talking to people I don’t know.</td>
-            <td><input type="radio" name="SPIN_4" value="0"></td>
-            <td><input type="radio" name="SPIN_4" value="1"></td>
-            <td><input type="radio" name="SPIN_4" value="2"></td>
-            <td><input type="radio" name="SPIN_4" value="3"></td>
-            <td><input type="radio" name="SPIN_4" value="4"></td>
-          </tr>
-          
-          <tr>
-            <td class="question-text">5. Being criticized scares me a lot.</td>
-            <td><input type="radio" name="SPIN_5" value="0"></td>
-            <td><input type="radio" name="SPIN_5" value="1"></td>
-            <td><input type="radio" name="SPIN_5" value="2"></td>
-            <td><input type="radio" name="SPIN_5" value="3"></td>
-            <td><input type="radio" name="SPIN_5" value="4"></td>
-          </tr>
-          
-          <tr>
-            <td class="question-text">6. I avoid doing things or speaking to people for fear of embarrassment.</td>
-            <td><input type="radio" name="SPIN_6" value="0"></td>
-            <td><input type="radio" name="SPIN_6" value="1"></td>
-            <td><input type="radio" name="SPIN_6" value="2"></td>
-            <td><input type="radio" name="SPIN_6" value="3"></td>
-            <td><input type="radio" name="SPIN_6" value="4"></td>
-          </tr>
-          
-          <tr>
-            <td class="question-text">7. Sweating in front of people causes me distress.</td>
-            <td><input type="radio" name="SPIN_7" value="0"></td>
-            <td><input type="radio" name="SPIN_7" value="1"></td>
-            <td><input type="radio" name="SPIN_7" value="2"></td>
-            <td><input type="radio" name="SPIN_7" value="3"></td>
-            <td><input type="radio" name="SPIN_7" value="4"></td>
-          </tr>
-          
-          <tr>
-            <td class="question-text">8. I avoid going to parties.</td>
-            <td><input type="radio" name="SPIN_8" value="0"></td>
-            <td><input type="radio" name="SPIN_8" value="1"></td>
-            <td><input type="radio" name="SPIN_8" value="2"></td>
-            <td><input type="radio" name="SPIN_8" value="3"></td>
-            <td><input type="radio" name="SPIN_8" value="4"></td>
-          </tr>
-          
-          <tr>
-            <td class="question-text">9. I avoid activities in which I am the center of attention.</td>
-            <td><input type="radio" name="SPIN_9" value="0"></td>
-            <td><input type="radio" name="SPIN_9" value="1"></td>
-            <td><input type="radio" name="SPIN_9" value="2"></td>
-            <td><input type="radio" name="SPIN_9" value="3"></td>
-            <td><input type="radio" name="SPIN_9" value="4"></td>
-          </tr>
-          
-          <tr>
-            <td class="question-text">10. Talking to strangers scares me.</td>
-            <td><input type="radio" name="SPIN_10" value="0"></td>
-            <td><input type="radio" name="SPIN_10" value="1"></td>
-            <td><input type="radio" name="SPIN_10" value="2"></td>
-            <td><input type="radio" name="SPIN_10" value="3"></td>
-            <td><input type="radio" name="SPIN_10" value="4"></td>
-          </tr>
-          
-          <tr>
-            <td class="question-text">11. I avoid having to give speeches.</td>
-            <td><input type="radio" name="SPIN_11" value="0"></td>
-            <td><input type="radio" name="SPIN_11" value="1"></td>
-            <td><input type="radio" name="SPIN_11" value="2"></td>
-            <td><input type="radio" name="SPIN_11" value="3"></td>
-            <td><input type="radio" name="SPIN_11" value="4"></td>
-          </tr>
-          
-          <tr>
-            <td class="question-text">12. I would do anything to avoid being criticized.</td>
-            <td><input type="radio" name="SPIN_12" value="0"></td>
-            <td><input type="radio" name="SPIN_12" value="1"></td>
-            <td><input type="radio" name="SPIN_12" value="2"></td>
-            <td><input type="radio" name="SPIN_12" value="3"></td>
-            <td><input type="radio" name="SPIN_12" value="4"></td>
-          </tr>
-          
-          <tr>
-            <td class="question-text">13. Heart palpitations bother me when I am around people.</td>
-            <td><input type="radio" name="SPIN_13" value="0"></td>
-            <td><input type="radio" name="SPIN_13" value="1"></td>
-            <td><input type="radio" name="SPIN_13" value="2"></td>
-            <td><input type="radio" name="SPIN_13" value="3"></td>
-            <td><input type="radio" name="SPIN_13" value="4"></td>
-          </tr>
-          
-          <tr>
-            <td class="question-text">14. I am afraid of doing things when people might be watching.</td>
-            <td><input type="radio" name="SPIN_14" value="0"></td>
-            <td><input type="radio" name="SPIN_14" value="1"></td>
-            <td><input type="radio" name="SPIN_14" value="2"></td>
-            <td><input type="radio" name="SPIN_14" value="3"></td>
-            <td><input type="radio" name="SPIN_14" value="4"></td>
-          </tr>
-          
-          <tr>
-            <td class="question-text">15. Being embarrassed or looking stupid are among my worst fears.</td>
-            <td><input type="radio" name="SPIN_15" value="0"></td>
-            <td><input type="radio" name="SPIN_15" value="1"></td>
-            <td><input type="radio" name="SPIN_15" value="2"></td>
-            <td><input type="radio" name="SPIN_15" value="3"></td>
-            <td><input type="radio" name="SPIN_15" value="4"></td>
-          </tr>
-          
-          <tr>
-            <td class="question-text">16. I avoid speaking to anyone in authority.</td>
-            <td><input type="radio" name="SPIN_16" value="0"></td>
-            <td><input type="radio" name="SPIN_16" value="1"></td>
-            <td><input type="radio" name="SPIN_16" value="2"></td>
-            <td><input type="radio" name="SPIN_16" value="3"></td>
-            <td><input type="radio" name="SPIN_16" value="4"></td>
-          </tr>
-          
-          <tr>
-            <td class="question-text">17. Trembling or shaking in front of others is distressing to me.</td>
-            <td><input type="radio" name="SPIN_17" value="0"></td>
-            <td><input type="radio" name="SPIN_17" value="1"></td>
-            <td><input type="radio" name="SPIN_17" value="2"></td>
-            <td><input type="radio" name="SPIN_17" value="3"></td>
-            <td><input type="radio" name="SPIN_17" value="4"></td>
-          </tr>
-        </tbody>
-      </table>
+<section id="returnLikelihoodScreen" class="screen">
+  <div class="panel returnLikelihoodPanel">
+    <div class="eyebrow">Final question</div>
+    <h2>Thinking about the game you just played, how likely was each player to <u>return</u> the ball to you?</h2>
+    <p class="returnLikelihoodHint">(Please enter a number between 0% and 100% for each player)</p>
+    <div class="returnLikelihoodScaleLabels"><span>0</span><span>100</span></div>
+    <div class="returnLikelihoodRows" id="returnLikelihoodRows"></div>
+    <div class="returnLikelihoodActions">
+      <button class="primary" id="returnLikelihoodNext" disabled>Continue</button>
     </div>
-
-    <button class="primary questionnaireNext" data-current="SPIN" data-next="questionnaire2Screen">Continue</button>
-  </div>
-</section>
-
-<section id="questionnaire2Screen"
-         class="screen questionnaireScreen"
-         data-questionnaire="NPI">
-
-  <div class="panel">
-
-
-    <div class="questionnaireQuestions" id="NPIQuestions">
-
-      <div class="questionnaire-instructions">
-        <p>
-          Read each pair of statements below and
-          <strong>select the one that comes closest to describing your feelings and beliefs about yourself.</strong>
-          You may feel that neither statement describes you well, but pick the one that comes closest.
-          <em>Please complete all pairs.</em>
-        </p>
-      </div>
-
-
-      <!-- NPI 1 -->
-      <div class="questionnaire-item">
-
-        <p><strong>1.</strong></p>
-
-        <label>
-          <input type="radio"
-                 name="NPI_1"
-                 value="A">
-          I really like to be the center of attention
-        </label>
-
-        <label>
-          <input type="radio"
-                 name="NPI_1"
-                 value="B">
-          It makes me uncomfortable to be the center of attention
-        </label>
-
-      </div>
-
-
-      <!-- NPI 2 -->
-      <div class="questionnaire-item">
-
-        <p><strong>2.</strong></p>
-
-        <label>
-          <input type="radio"
-                 name="NPI_2"
-                 value="A">
-          I am no better or no worse than most people
-        </label>
-
-        <label>
-          <input type="radio"
-                 name="NPI_2"
-                 value="B">
-          I think I am a special person
-        </label>
-
-      </div>
-
-
-      <!-- NPI 3 -->
-      <div class="questionnaire-item">
-
-        <p><strong>3.</strong></p>
-
-        <label>
-          <input type="radio"
-                 name="NPI_3"
-                 value="A">
-          Everybody likes to hear my stories
-        </label>
-
-        <label>
-          <input type="radio"
-                 name="NPI_3"
-                 value="B">
-          Sometimes I tell good stories
-        </label>
-
-      </div>
-
- <!-- NPI 4 -->
-      <div class="questionnaire-item">
-
-        <p><strong>4.</strong></p>
-
-        <label>
-          <input type="radio"
-                 name="NPI_4"
-                 value="A">
-          I usually get the respect that I deserve
-        </label>
-
-        <label>
-          <input type="radio"
-                 name="NPI_4"
-                 value="B">
-          I insist upon getting the respect that is due me
-        </label>
-
-      </div>
- <!-- NPI 5 -->
-      <div class="questionnaire-item">
-
-        <p><strong>5.</strong></p>
-
-        <label>
-          <input type="radio"
-                 name="NPI_5"
-                 value="A">
-          I don't mind following orders
-        </label>
-
-        <label>
-          <input type="radio"
-                 name="NPI_5"
-                 value="B">
-          I like having authority over people
-        </label>
-
-      </div>
- <!-- NPI 6 -->
-      <div class="questionnaire-item">
-
-        <p><strong>6.</strong></p>
-
-        <label>
-          <input type="radio"
-                 name="NPI_6"
-                 value="A">
-          I am going to be a great person
-        </label>
-
-        <label>
-          <input type="radio"
-                 name="NPI_6"
-                 value="B">
-          I hope I am going to be successful
-        </label>
-
-      </div>
- <!-- NPI 7 -->
-      <div class="questionnaire-item">
-
-        <p><strong>7.</strong></p>
-
-        <label>
-          <input type="radio"
-                 name="NPI_7"
-                 value="A">
-          People sometimes believe what I tell them
-        </label>
-
-        <label>
-          <input type="radio"
-                 name="NPI_7"
-                 value="B">
-          I can make anybody believe anything I want them to
-        </label>
-
-      </div>
- <!-- NPI 8 -->
-      <div class="questionnaire-item">
-
-        <p><strong>8.</strong></p>
-
-        <label>
-          <input type="radio"
-                 name="NPI_8"
-                 value="A">
-          I expect a great deal from other people
-        </label>
-
-        <label>
-          <input type="radio"
-                 name="NPI_8"
-                 value="B">
-          I like to do things for other people
-        </label>
-
-      </div>
- <!-- NPI 9 -->
-      <div class="questionnaire-item">
-
-        <p><strong>9.</strong></p>
-
-        <label>
-          <input type="radio"
-                 name="NPI_9"
-                 value="A">
-          I like to be the center of attention
-        </label>
-
-        <label>
-          <input type="radio"
-                 name="NPI_9"
-                 value="B">
-          I prefer to blend in with the crowd
-        </label>
-
-      </div>
- <!-- NPI 10 -->
-      <div class="questionnaire-item">
-
-        <p><strong>10.</strong></p>
-
-        <label>
-          <input type="radio"
-                 name="NPI_10"
-                 value="A">
-          I am much like everybody else
-        </label>
-
-        <label>
-          <input type="radio"
-                 name="NPI_10"
-                 value="B">
-          I am an extraordinary person
-        </label>
-
-      </div>
- <!-- NPI 11 -->
-      <div class="questionnaire-item">
-
-        <p><strong>11.</strong></p>
-
-        <label>
-          <input type="radio"
-                 name="NPI_11"
-                 value="A">
-          I always know what I am doing
-        </label>
-
-        <label>
-          <input type="radio"
-                 name="NPI_11"
-                 value="B">
-          Sometimes I am not sure of what I am doing
-        </label>
-
-      </div>
- <!-- NPI 12 -->
-      <div class="questionnaire-item">
-
-        <p><strong>12.</strong></p>
-
-        <label>
-          <input type="radio"
-                 name="NPI_12"
-                 value="A">
-          I don't like it when I find myself manipulating people
-        </label>
-
-        <label>
-          <input type="radio"
-                 name="NPI_12"
-                 value="B">
-          I find it easy to manipulate people
-        </label>
-
-      </div>
- <!-- NPI 13 -->
-      <div class="questionnaire-item">
-
-        <p><strong>13.</strong></p>
-
-        <label>
-          <input type="radio"
-                 name="NPI_13"
-                 value="A">
-          Being an authority doesn't mean that much to me
-        </label>
-
-        <label>
-          <input type="radio"
-                 name="NPI_13"
-                 value="B">
-          People always seem to recognize my authority
-        </label>
-
-      </div>
-<!-- NPI 14 -->
-      <div class="questionnaire-item">
-
-        <p><strong>14.</strong></p>
-
-        <label>
-          <input type="radio"
-                 name="NPI_14"
-                 value="A">
-          I know that I am good because everybody keeps telling me so
-        </label>
-
-        <label>
-          <input type="radio"
-                 name="NPI_14"
-                 value="B">
-          When people compliment me I sometimes get embarrassed
-        </label>
-
-      </div>
- <!-- NPI 15 -->
-      <div class="questionnaire-item">
-
-        <p><strong>15.</strong></p>
-
-        <label>
-          <input type="radio"
-                 name="NPI_15"
-                 value="A">
-          I try not to be a show off
-        </label>
-
-        <label>
-          <input type="radio"
-                 name="NPI_15"
-                 value="B">
-          I am apt to show off if I get the chance
-        </label>
-
-      </div>
- <!-- NPI 16 -->
-      <div class="questionnaire-item">
-
-        <p><strong>16.</strong></p>
-
-        <label>
-          <input type="radio"
-                 name="NPI_16"
-                 value="A">
-          I am more capable than other people
-        </label>
-
-        <label>
-          <input type="radio"
-                 name="NPI_16"
-                 value="B">
-          There is a lot that I can learn from other people
-        </label>
-
-      </div>
-     
-    </div>
-
-
-    <button
-      class="primary questionnaireNext"
-      data-current="NPI"
-      data-next="questionnaire3Screen">
-      Continue
-    </button>
-
-  </div>
-  
-</section>
-  
-<section id="questionnaire3Screen" class="screen questionnaireScreen" data-questionnaire="Q3">
-  <div class="panel">
-
-    <div class="questionnaireQuestions" id="Q3Questions">
-      <div class="questionnaire-instructions">
-        <p>
-          Below is a short list of events.<br>
-          Please indicate which of the following events have happened to you in relation to
-          <u>friends, colleagues, or peers</u> in your lifetime.
-        </p>
-        <p>
-          <strong>Note:</strong> Please do not include events that occurred with family members
-          or romantic partners.
-        </p>
-      </div>
-
-      <table class="questionnaire-matrix">
-        <thead>
-          <tr>
-            <th></th>
-            <th>Never</th>
-            <th>Once</th>
-            <th>2 or 3 times</th>
-            <th>More than 3 times</th>
-            <th>Multiple times</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td class="question-text">
-              Has anyone ever spread harmful information, lies, or rumors about you?
-              (For example: gossip or sharing your personal information)
-            </td>
-            <td><input type="radio" name="Q3_1" value="1"></td>
-            <td><input type="radio" name="Q3_1" value="2"></td>
-            <td><input type="radio" name="Q3_1" value="3"></td>
-            <td><input type="radio" name="Q3_1" value="4"></td>
-            <td><input type="radio" name="Q3_1" value="5"></td>
-          </tr>
-
-          <tr>
-            <td class="question-text">
-              Have you ever been left out, excluded, ignored, or ostracized?
-            </td>
-            <td><input type="radio" name="Q3_2" value="1"></td>
-            <td><input type="radio" name="Q3_2" value="2"></td>
-            <td><input type="radio" name="Q3_2" value="3"></td>
-            <td><input type="radio" name="Q3_2" value="4"></td>
-            <td><input type="radio" name="Q3_2" value="5"></td>
-          </tr>
-
-          <tr>
-            <td class="question-text">
-              Has anyone ever bullied you, mocked you, laughed at you, or humiliated you?
-            </td>
-            <td><input type="radio" name="Q3_3" value="1"></td>
-            <td><input type="radio" name="Q3_3" value="2"></td>
-            <td><input type="radio" name="Q3_3" value="3"></td>
-            <td><input type="radio" name="Q3_3" value="4"></td>
-            <td><input type="radio" name="Q3_3" value="5"></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <button class="primary questionnaireNext" data-current="Q3" data-next="questionnaire4Screen">Continue</button>
-  </div>
-</section>
-
-<section id="questionnaire4Screen" class="screen questionnaireScreen" data-questionnaire="Demographic">
-  <div class="panel">
-    <h2>Demographic Information</h2>
-
-    <div class="questionnaireQuestions" id="DemographicQuestions">
-
-      <div class="questionnaire-item">
-        <label for="Demographic_Age"><strong>1. Age</strong></label>
-        <input type="number" id="Demographic_Age" name="Age" min="18" max="120" step="1">
-      </div>
-
-      <div class="questionnaire-item">
-        <p><strong>2. Gender</strong></p>
-        <label><input type="radio" name="Gender" value="Man"> Man</label>
-        <label><input type="radio" name="Gender" value="Woman"> Woman</label>
-        <label><input type="radio" name="Gender" value="Other"> Other</label>
-      </div>
-
-      <div class="questionnaire-item">
-        <label for="Demographic_Education"><strong>3. Years of education</strong></label>
-        <input type="number" id="Demographic_Education" name="Years_of_Education" min="0" max="40" step="1">
-      </div>
-
-      <div class="questionnaire-item">
-        <label for="Demographic_Relationship"><strong>4. Relationship status</strong></label>
-        <select id="Demographic_Relationship" name="Relationship_Status">
-          <option value="">Select...</option>
-          <option value="Single">Single</option>
-          <option value="In_a_relationship">In a relationship</option>
-          <option value="Married">Married</option>
-          <option value="Separated">Separated</option>
-          <option value="Divorced">Divorced</option>
-          <option value="Widowed">Widowed</option>
-          <option value="Other">Other</option>
-        </select>
-      </div>
-
-    </div>
-
-    <button class="primary questionnaireNext"
-            data-current="Demographic"
-            data-next="COMPLETE">
-      Finish
-    </button>
   </div>
 </section>
 
@@ -1445,11 +777,10 @@
     post_seating_rating_views:[], seating_trials:[], seating_page_views:[],
     ultimatum_game:{},
     metaperception:{pre:null,post:null},
-    questionnaires:{SPIN:{},NPI:{},Q3:{},Demographic:{}}
+    return_likelihood:{}
   };
   let ratingStart=0, feedbackAttemptStart=0, gameChoiceStart=0;
-  let gameThrowCounter=0, seatMouse=[];
-  let seatMouseLastSample=-Infinity;
+  let gameThrowCounter=0;
   let activeFeedbackPageLogIndex=null;
   let activePostSeatingRatingLogIndex=null;
   let activeSeatingPageLogIndex=null;
@@ -1464,6 +795,9 @@
   let metaperceptionPreStart=0;
   let metaperceptionPostStart=0;
   let metaperceptionPreDone=false;
+  let returnLikelihoodSelections={};
+  let returnLikelihoodTouched={};
+  let returnLikelihoodStart=0;
 
   function visibleName(role){
     return role==='ME' ? participantName() : (identities[role]?.name || role);
@@ -1505,10 +839,7 @@
       Seating_Page_Views: JSON.stringify(completeLog.seating_page_views),
       Ultimatum_Game: JSON.stringify(completeLog.ultimatum_game || {}),
       Metaperception: JSON.stringify(completeLog.metaperception || {}),
-      SPIN: JSON.stringify(completeLog.questionnaires.SPIN || {}),
-      NPI: JSON.stringify(completeLog.questionnaires.NPI || {}),
-      Q3: JSON.stringify(completeLog.questionnaires.Q3 || {}),
-      Demographic: JSON.stringify(completeLog.questionnaires.Demographic || {}),
+      Return_Likelihood: JSON.stringify(completeLog.return_likelihood || {}),
       Experiment_Complete: experimentComplete ? '1' : '0',
       Experiment_Completed_At_ms: experimentCompletedAtMs==null ? '' : String(experimentCompletedAtMs)
     };
@@ -1798,9 +1129,9 @@
     el('memoryResultButtons').innerHTML='';
     const b=document.createElement('button');
     b.className='primary';b.type='button';
-    b.textContent=passed?'Rate the players':'Review players';
+    b.textContent=passed?'Continue':'Review players';
     b.addEventListener('click',()=>{
-      if(passed)startRatings(); else showScreen('meetScreen');
+      if(passed)startRatings('pregame'); else showScreen('meetScreen');
     });
     el('memoryResultButtons').appendChild(b);
   }
@@ -1844,7 +1175,7 @@
     };
     metaperceptionPreDone=true;
     checkpoint();
-    if(CFG.useMemoryTest) startMemoryTest(); else startRatings();
+    if(CFG.useMemoryTest) startMemoryTest(); else startRatings('pregame');
   }
 
   function startMetaperceptionPost(){
@@ -2191,19 +1522,6 @@
      ===================================================================== */
   let seatTrials=[], seatIndex=0, seatResults=[], seatStart=0, seatAnswered=false, seatCurrentSelection=null;
 
-  function trackSeatMouse(e){
-    const now=performance.now();
-    if(now-seatMouseLastSample<16)return; // ~60 Hz max
-    seatMouseLastSample=now;
-    const r=el('seatStage').getBoundingClientRect();
-    if(!r.width||!r.height)return;
-    seatMouse.push({
-      t:Math.round(now-seatStart),
-      x:+Math.max(0,Math.min(1,(e.clientX-r.left)/r.width)).toFixed(4),
-      y:+Math.max(0,Math.min(1,(e.clientY-r.top)/r.height)).toFixed(4)
-    });
-  }
-
   function seatDistance(a,b){
     const n=CFG.seatingSeats, d=Math.abs(a-b);
     return Math.min(d,n-d);
@@ -2353,11 +1671,7 @@
       }
       stage.appendChild(node);
     }
-    seatMouse=[];
-    seatMouseLastSample=-Infinity;
     seatStart=performance.now();
-    stage.removeEventListener('mousemove',trackSeatMouse);
-    stage.addEventListener('mousemove',trackSeatMouse);
   }
 
   function chooseSeat(seat,node){
@@ -2383,7 +1697,7 @@
     node.innerHTML=`<div class="seatName">${participantName()}</div>`+
       (CFG.seatingShowSeatNumbers?`<div class="seatNum">seat ${seat+1}</div>`:'');
 
-    const row={trial:seatIndex+1,chosen_seat:seat+1,hesitation_ms:rt,rt_ms:rt,mouse_trajectory:seatMouse.slice(),configuration:{}};
+    const row={trial:seatIndex+1,chosen_seat:seat+1,hesitation_ms:rt,rt_ms:rt,configuration:{}};
     const dists=[];
     cfg.forEach((s,i)=>{
       const role=ids[i];
@@ -2419,12 +1733,7 @@
 
     // Finalize this trial only when Next is pressed, so changing the seat
     // within the same trial is allowed. The saved row reflects the final choice.
-    const row=seatResults.find(r=>r.trial===seatIndex+1);
-    if(row) row.mouse_trajectory=seatMouse.slice();
-    const logRow=completeLog.seating_trials.find(r=>r.trial===seatIndex+1);
-    if(logRow) logRow.mouse_trajectory=seatMouse.slice();
     endSeatingPageLog(seatCurrentSelection);
-    el('seatStage').removeEventListener('mousemove',trackSeatMouse);
     checkpoint();
 
     seatIndex++;
@@ -2616,6 +1925,96 @@
 
     ultimatumOfferStart=performance.now();
     showScreen(index===0 ? 'ultimatumFirstOfferScreen' : 'ultimatumSecondOfferScreen');
+    // Neither Accept nor Reject is a default choice.
+    requestAnimationFrame(()=>{
+      const active=document.activeElement;
+      if(active && typeof active.blur==='function')active.blur();
+    });
+  }
+
+
+  function returnLikelihoodRolesInDisplayOrder(){
+    return displayNames.map(name=>ids.find(role=>identities[role]?.name===name)).filter(Boolean);
+  }
+
+  function startReturnLikelihood(){
+    returnLikelihoodSelections={};
+    returnLikelihoodTouched={};
+    returnLikelihoodStart=performance.now();
+    const rows=el('returnLikelihoodRows');
+    rows.innerHTML='';
+
+    returnLikelihoodRolesInDisplayOrder().forEach(role=>{
+      const p=identities[role];
+      returnLikelihoodSelections[role]=0;
+      returnLikelihoodTouched[role]=false;
+
+      const row=document.createElement('div');
+      row.className='returnLikelihoodRow';
+
+      const label=document.createElement('div');
+      label.className='returnLikelihoodName';
+      label.textContent=p.name;
+      label.style.color=p.color;
+
+      const slider=document.createElement('input');
+      slider.type='range';
+      slider.className='returnLikelihoodRange';
+      slider.min='0';
+      slider.max='100';
+      slider.step='1';
+      slider.value='0';
+      slider.setAttribute('aria-label',`${p.name}: likelihood of returning the ball`);
+
+      const value=document.createElement('div');
+      value.className='returnLikelihoodValue';
+      value.textContent='0';
+
+      const markTouched=()=>{
+        returnLikelihoodSelections[role]=Number(slider.value);
+        returnLikelihoodTouched[role]=true;
+        value.textContent=slider.value;
+        const allTouched=returnLikelihoodRolesInDisplayOrder().every(r=>returnLikelihoodTouched[r]);
+        el('returnLikelihoodNext').disabled=!allTouched;
+      };
+      slider.addEventListener('input',markTouched);
+      slider.addEventListener('change',markTouched);
+
+      row.appendChild(label);
+      row.appendChild(slider);
+      row.appendChild(value);
+      rows.appendChild(row);
+    });
+
+    el('returnLikelihoodNext').disabled=true;
+    showScreen('returnLikelihoodScreen');
+  }
+
+  function saveReturnLikelihood(){
+    const roles=returnLikelihoodRolesInDisplayOrder();
+    if(!roles.every(role=>returnLikelihoodTouched[role]))return;
+
+    const byRole={};
+    roles.forEach(role=>{
+      byRole[role]={
+        visible_player:identities[role].name,
+        likelihood_percent:returnLikelihoodSelections[role]
+      };
+    });
+    completeLog.return_likelihood={
+      responses:byRole,
+      rt_ms:Math.round(performance.now()-returnLikelihoodStart)
+    };
+    checkpoint();
+
+    experimentComplete=true;
+    experimentCompletedAtMs=experimentMs();
+    sendCompleteLog();
+    window.parent.postMessage({
+      type:'CyberballComplete',
+      completed_at_ms:experimentCompletedAtMs
+    },'*');
+    showScreen('endScreen');
   }
 
   function saveUltimatumOffer(index,decision){
@@ -2630,7 +2029,7 @@
     if(index===0){
       showUltimatumOffer(1);
     }else{
-      showScreen('questionnaireIntroScreen');
+      startReturnLikelihood();
     }
   }
 
@@ -2642,55 +2041,6 @@
     saveUltimatumOffer(1,decision);
   }
 
-  // ===================== QUESTIONNAIRE PLACEHOLDER LOGGING =====================
-  // Add normal <input>, <select>, and/or <textarea> elements inside each questionnaire.
-  // IMPORTANT: give every question a unique name (for example name="SPIN_1").
-  // The code below automatically saves those answers into that questionnaire's Qualtrics column.
-  function collectQuestionnaire(name){
-    const screen=document.querySelector(`.questionnaireScreen[data-questionnaire="${name}"]`);
-    const answers={};
-    if(!screen)return answers;
-    screen.querySelectorAll('input, select, textarea').forEach((field,index)=>{
-      const key=field.name || field.id || `Q${index+1}`;
-      if(field.type==='radio'){
-        if(field.checked)answers[key]=field.value;
-      }else if(field.type==='checkbox'){
-        if(!Array.isArray(answers[key]))answers[key]=[];
-        if(field.checked)answers[key].push(field.value);
-      }else{
-        answers[key]=field.value;
-      }
-    });
-    completeLog.questionnaires[name]=answers;
-    checkpoint();
-    return answers;
-  }
-
-  document.querySelectorAll('.questionnaireNext').forEach(btn=>{
-    btn.addEventListener('click',()=>{
-      const currentScreen=btn.closest('.questionnaireScreen');
-      if(!validateRequiredFields(currentScreen))return;
-
-      collectQuestionnaire(btn.dataset.current);
-
-      if(btn.dataset.next==='COMPLETE'){
-        experimentComplete=true;
-        experimentCompletedAtMs=experimentMs();
-        
-        sendCompleteLog();
-        
-        window.parent.postMessage({
-          type:'CyberballComplete',
-          completed_at_ms:experimentCompletedAtMs
-        },'*');
-      showScreen('endScreen');
-      return;
-    }
-
-      showScreen(btn.dataset.next);
-    });
-  });
-
   function finishFeedbackPlayer(){
     const role=feedbackOrder[feedbackIndex];
     feedbackComments[role]=el('feedbackPlayerComment').value.trim().slice(0,500);
@@ -2699,8 +2049,7 @@
     feedbackIndex++;
     feedbackPage=1;
     if(feedbackIndex<feedbackOrder.length){renderFeedback();return;}
-    if(CFG.simpleMode){beginGamePhase('free');return;}
-    showScreen('rule1Screen');
+    showScreen('ballTaskIntroScreen');
   }
 
   function nextFeedback(){
@@ -3139,9 +2488,10 @@
     if(state.phase==='scored'){
       scoredRoundLength=state.totalReceived;
       el('phase1FinalScore').textContent=state.scores.ME;
-      startRatings('scored');
+      showScreen('phase2Screen');
     }else{
-      startRatings('free');
+      if(CFG.seatingEnabled){showScreen('seatIntroScreen');}
+      else{showScreen('postSeatingImpressionsIntroScreen');}
     }
   }
 
@@ -3181,6 +2531,10 @@
     showScreen('meetScreen');
   });
   el('seatStartBtn').addEventListener('click',startSeatingTask);
+  el('ballTaskIntroNextBtn').addEventListener('click',()=>{
+    if(CFG.simpleMode) startFreeGame();
+    else showScreen('rule1Screen');
+  });
   el('postSeatingImpressionsIntroNextBtn').addEventListener('click',()=>startRatings('post_seating'));
   el('economicTaskIntroNextBtn').addEventListener('click',startUltimatumGame);
   el('ultimatumChoiceContinueBtn').addEventListener('click',beginUltimatumOffers);
@@ -3188,12 +2542,12 @@
   el('ultimatumFirstRejectBtn').addEventListener('click',()=>saveUltimatumFirstOffer('reject'));
   el('ultimatumSecondAcceptBtn').addEventListener('click',()=>saveUltimatumSecondOffer('accept'));
   el('ultimatumSecondRejectBtn').addEventListener('click',()=>saveUltimatumSecondOffer('reject'));
-  el('questionnaireIntroNextBtn').addEventListener('click',()=>showScreen('questionnaire1Screen'));
+  el('returnLikelihoodNext').addEventListener('click',saveReturnLikelihood);
   el('seatNextBtn').addEventListener('click',nextSeatTrial);
   el('meetNext').addEventListener('click',()=>{
     if(!metaperceptionPreDone) startMetaperceptionPre();
     else if(CFG.useMemoryTest) startMemoryTest();
-    else startRatings();
+    else startRatings('pregame');
   });
   el('metaperceptionPreNext').addEventListener('click',saveMetaperceptionPre);
   el('metaperceptionPostNext').addEventListener('click',saveMetaperceptionPost);
@@ -3215,7 +2569,7 @@
   if (restartBtn) {
     restartBtn.addEventListener('click',()=>{
       state=null;memoryTrials=[];participantRatings={};roundRatings={scored:{},free:{},post_seating:{}};roundMessages={scored:{},free:{},post_seating:{}};feedbackComments={};feedbackPage=1;scoredRoundLength=0;
-      completeLog.participant={};completeLog.identity_mapping={};completeLog.initial_ratings=[];completeLog.feedback_comprehension=[];completeLog.feedback_comments=[];completeLog.feedback_page_views=[];completeLog.game_throws=[];completeLog.postgame_ratings=[];completeLog.post_seating_rating_views=[];completeLog.seating_trials=[];completeLog.seating_page_views=[];completeLog.ultimatum_game={};completeLog.metaperception={pre:null,post:null};metaperceptionPreSelection=null;metaperceptionPostSelection=null;metaperceptionPreDone=false;activeFeedbackPageLogIndex=null;activePostSeatingRatingLogIndex=null;activeSeatingPageLogIndex=null;gameThrowCounter=0;ultimatumSelectedRoles=[];ultimatumDisplayOrder=[];ultimatumOfferPlan=[];
+      completeLog.participant={};completeLog.identity_mapping={};completeLog.initial_ratings=[];completeLog.feedback_comprehension=[];completeLog.feedback_comments=[];completeLog.feedback_page_views=[];completeLog.game_throws=[];completeLog.postgame_ratings=[];completeLog.post_seating_rating_views=[];completeLog.seating_trials=[];completeLog.seating_page_views=[];completeLog.ultimatum_game={};completeLog.metaperception={pre:null,post:null};completeLog.return_likelihood={};returnLikelihoodSelections={};returnLikelihoodTouched={};metaperceptionPreSelection=null;metaperceptionPostSelection=null;metaperceptionPreDone=false;activeFeedbackPageLogIndex=null;activePostSeatingRatingLogIndex=null;activeSeatingPageLogIndex=null;gameThrowCounter=0;ultimatumSelectedRoles=[];ultimatumDisplayOrder=[];ultimatumOfferPlan=[];
       el('nickname').value='';el('selfDescription').value='';
       initializeSession();
       showScreen('profileScreen');
