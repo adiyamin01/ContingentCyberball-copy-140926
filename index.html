@@ -308,345 +308,151 @@
   }
 
 
-  /* Hide the small upper labels only on the requested measures */
+  /* =========================================================
+     RESPONSIVE VIEWPORT FIT — DISPLAY ONLY
+     Keeps each task inside the visible browser/iframe height.
+     ========================================================= */
+  html,body{height:100%;}
+  body{min-height:0;height:100dvh;overflow:hidden;}
+  .screen{
+    min-height:0;
+    height:100dvh;
+    max-height:100dvh;
+    padding:clamp(8px,2.2vh,28px);
+    overflow:hidden;
+  }
+  .panel{
+    max-height:calc(100dvh - 16px);
+  }
+
+  /* The three small headings the user asked to hide. */
   #metaperceptionPreScreen .eyebrow,
-  #metaperceptionPostScreen .eyebrow {
-    display:none !important;
+  #metaperceptionPostScreen .eyebrow{display:none !important;}
+
+  /* Rating screens: keep text/button sizes, reduce only vertical whitespace. */
+  #ratingScreen{padding:8px;}
+  #ratingScreen .panel{
+    width:min(820px,calc(100vw - 16px));
+    max-height:calc(100dvh - 16px);
+    overflow:hidden;
+    padding:clamp(12px,2.2vh,26px) 30px;
+  }
+  #ratingScreen h2{margin-bottom:4px;}
+  #ratingScreen .ratingIdentity{margin:5px auto 2px;}
+  #ratingScreen .ratingIdentity .avatar{margin-bottom:4px;}
+  #ratingScreen .ratingIdentity h3{margin:2px 0 3px;}
+  #ratingScreen .ratingIdentity .sentence{margin-top:3px;}
+  #ratingScreen .ratingScale{margin:7px auto 3px;}
+  #ratingScreen .scaleEnds{margin-bottom:9px;}
+  #ratingScreen #ratingConfidenceWrap{margin-top:7px !important;}
+  #ratingScreen #ratingConfidenceWrap > label{margin-bottom:4px !important;}
+  #ratingScreen .responseBox{margin:7px auto;}
+  #ratingScreen .responseBox label{margin-bottom:4px;}
+  #ratingScreen .messageHint{margin-top:3px;}
+
+  /* Cyberball: exactly one viewport high; no 620px minimum on short phones. */
+  #gameScreen{height:100dvh;min-height:0;max-height:100dvh;overflow:hidden;}
+  #gameWrap{width:100vw;height:100dvh;min-height:0;max-height:100dvh;overflow:hidden;}
+
+  /* Compact vertical spacing on shorter desktop/laptop displays, without changing type size. */
+  @media (max-height:760px) and (min-width:761px){
+    .panel{padding-top:24px;padding-bottom:24px;}
+    h1{margin-bottom:9px;}
+    h2{margin-bottom:8px;}
+    p{margin:6px auto;line-height:1.38;}
+    .profileGrid{margin:14px auto 16px;gap:14px;}
+    .ruleCard{margin:14px auto 16px;padding-top:17px;padding-bottom:17px;}
+    .specialDemo{margin:14px auto;padding:17px;}
+    .responseBox{margin:14px auto;}
+    .statsGrid{margin:14px auto;}
   }
 
-
-  /* =========================================================
-     QUALTRICS VISIBLE-VIEWPORT FIT
-     --screen-fit-height is calculated from the space actually
-     visible below the active screen's top edge.
-     ========================================================= */
-
-  .screen.active {
-    min-height: var(--screen-fit-height, auto);
-    height: var(--screen-fit-height, auto);
-    padding: clamp(6px, 1.6vmin, 18px);
-  }
-
-  /* ---------- CYBERBALL ---------- */
-  #gameScreen {
-    min-height: var(--screen-fit-height, 560px);
-    height: var(--screen-fit-height, 560px);
-    padding: 0 !important;
-    overflow: hidden;
-  }
-
-  #gameWrap {
-    width: 100% !important;
-    height: 100% !important;
-    min-height: 0 !important;
-    overflow: hidden;
-    position: relative;
-  }
-
-  #gameScreen .player {
-    width: var(--game-player-size, 112px);
-    height: var(--game-player-size, 112px);
-  }
-
-  #gameScreen .player .name {
-    font-size: clamp(15px, 2.3vmin, 21px);
-    max-width: 90%;
-  }
-
-  #gameScreen .player .tag {
-    font-size: clamp(9px, 1.5vmin, 12px);
-  }
-
-  #gameScreen .player .icon {
-    font-size: clamp(24px, 4.5vmin, 38px);
-  }
-
-
-  #gameScreen .hud {
-    top: 8px;
-    padding: 7px 14px;
-  }
-
-  #gameScreen #instruction {
-    top: 54px;
-    font-size: clamp(14px, 2vmin, 19px);
-    padding: 6px 12px;
-  }
-
-  #gameScreen #specialBanner {
-    top: 96px;
-    font-size: clamp(11px, 1.6vmin, 14px);
-  }
-
-  /* The holder indication no longer increases the apparent size
-     of the current player. It is drawn inside the same circle. */
-  #gameScreen .player.holder {
-    outline: none !important;
-    box-shadow:
-      inset 0 0 0 5px #202733,
-      0 13px 30px rgba(20,28,38,.15);
-  }
-
-  /* ---------- RATINGS ---------- */
-  #ratingScreen {
-    min-height: var(--screen-fit-height, auto);
-    height: var(--screen-fit-height, auto);
-    overflow: hidden;
-    padding: 6px;
-  }
-
-  #ratingScreen .panel {
-    width: min(820px, 98%);
-    max-height: calc(var(--screen-fit-height, 700px) - 12px);
-    overflow: hidden;
-    padding: clamp(10px, 2vh, 24px) clamp(12px, 2.6vw, 28px);
-  }
-
-  #ratingScreen h2 {
-    font-size: clamp(22px, 3.8vmin, 36px);
-    margin: 0 0 5px;
-  }
-
-  #ratingScreen .ratingIdentity {
-    margin: 5px auto 2px;
-  }
-
-  #ratingScreen .ratingIdentity .avatar {
-    width: clamp(46px, 8vh, 70px);
-    height: clamp(46px, 8vh, 70px);
-    margin: 0 auto 4px;
-    border-width: 3px;
-  }
-
-  #ratingScreen .ratingIdentity h3 {
-    font-size: clamp(17px, 2.6vh, 22px);
-    margin: 2px 0;
-  }
-
-  #ratingScreen .ratingScale {
-    grid-template-columns: repeat(10, minmax(0, 1fr)) !important;
-    gap: clamp(3px, .6vw, 7px);
-    width: 100%;
-    max-width: 700px;
-    margin: 7px auto 4px;
-  }
-
-  #ratingScreen .rateBtn {
-    min-width: 0;
-    padding: clamp(6px, 1.15vh, 11px) 1px;
-    border-radius: 9px;
-    font-size: clamp(12px, 1.8vh, 16px);
-  }
-
-  #ratingScreen .scaleEnds {
-    margin: 0 auto 7px;
-    font-size: clamp(10px, 1.45vh, 13px);
-  }
-
-  #ratingScreen #ratingConfidenceWrap {
-    margin-top: 7px !important;
-  }
-
-  #ratingScreen #ratingConfidenceWrap > label {
-    margin-bottom: 3px !important;
-    font-size: clamp(13px, 1.9vh, 16px);
-  }
-
-  #ratingScreen .responseBox {
-    margin: 6px auto;
-  }
-
-  #ratingScreen #ratingNext {
-    padding: 9px 24px;
-    font-size: clamp(14px, 2vh, 17px);
-  }
-
-  /* Small/narrow phone adjustments */
-  @media (max-width: 760px) {
-
-    #ratingScreen .panel {
-      padding-left: 8px;
-      padding-right: 8px;
+  @media (max-width:760px){
+    .screen{padding:7px;}
+    .panel{
+      width:calc(100vw - 14px);
+      max-height:calc(100dvh - 14px);
+      padding:18px 14px;
     }
+    h1{margin-bottom:9px;}
+    h2{margin-bottom:7px;}
+    p{margin:5px auto;line-height:1.34;}
 
-    #ratingScreen .rateBtn {
-      font-size: 12px;
+    /* Post-seating rating + confidence: preserve font sizes, shorten vertical controls/spaces. */
+    #ratingScreen{padding:5px;}
+    #ratingScreen .panel{
+      width:calc(100vw - 10px);
+      max-height:calc(100dvh - 10px);
+      padding:2px 12px;
     }
+    #ratingScreen .ratingIdentity{margin:0 auto;}
+    #ratingScreen .ratingIdentity .avatar{margin-bottom:0;}
+    #ratingScreen .ratingIdentity h3{margin:0;}
+    #ratingScreen .responseBox label{margin-bottom:0;}
+    #ratingScreen .ratingScale{gap:4px;margin:0 auto;}
+    #ratingScreen .scaleEnds{margin-bottom:0;}
+    #ratingScreen #ratingConfidenceWrap{margin-top:0 !important;}
+    #ratingScreen #ratingConfidenceWrap > label{margin-bottom:0 !important;}
+    #ratingScreen .responseBox{margin:1px auto;}
+    #ratingScreen .messageHint{margin-top:0;}
+
   }
 
-  /* Very short visible area: shrink rather than create a normal scroll.
-     Only at extreme heights do we allow a safety scroll. */
-  @media (max-height: 520px) {
-    #ratingScreen h2 { font-size: 20px; }
-    #ratingScreen .ratingIdentity .avatar { width: 42px; height: 42px; }
-    #ratingScreen .rateBtn { padding-top: 5px; padding-bottom: 5px; }
-    #ratingScreen #ratingConfidenceWrap { margin-top: 4px !important; }
-  }
+  @media (max-width:420px) and (max-height:700px){
+    #ratingScreen .panel{padding-top:2px;padding-bottom:2px;}
+    #ratingScreen h2{margin-bottom:0;}
+    #ratingScreen .ratingScale{margin-top:3px;}
 
-  @media (max-height: 390px) {
-    #ratingScreen {
-      overflow: auto;
-    }
-    #ratingScreen .panel {
-      overflow: visible;
-      max-height: none;
-    }
-  }
-
-
-
-
-  /* =========================================================
-     CYBERBALL — ORIGINAL LOOK, CENTERED & PROPORTIONAL
-     Keeps the same four-corner arrangement and randomization,
-     but uses a tighter, symmetric layout that fits the viewport.
-     ========================================================= */
-
-  #gameScreen {
-    height: min(66vh, 600px) !important;
-    min-height: 390px !important;
-    overflow: hidden !important;
-  }
-
-  #gameWrap {
-    height: 100% !important;
-    min-height: 0 !important;
-    overflow: hidden !important;
-  }
-
-  #gameScreen .player {
-    width: clamp(82px, 12vmin, 112px) !important;
-    height: clamp(82px, 12vmin, 112px) !important;
-  }
-
-  /* Participant occupies the fourth corner symmetrically.
-     Explicit auto values prevent old top/right values from lingering. */
-  #gameScreen #ME {
-    left: 22% !important;
-    right: auto !important;
-    top: auto !important;
-    bottom: 12% !important;
-  }
-
-  /* Holder stays the same overall size as every other player. */
-  #gameScreen .player.holder {
-    outline: none !important;
-    box-shadow:
-      inset 0 0 0 5px #202733,
-      0 13px 30px rgba(20,28,38,.15) !important;
-  }
-
-  #gameScreen .hud {
-    top: 7px !important;
-  }
-
-  #gameScreen #instruction {
-    top: 50px !important;
-  }
-
-  #gameScreen #specialBanner {
-    top: 90px !important;
-  }
-
-  @media (max-width: 760px) {
-    #gameScreen {
-      height: min(62vh, 520px) !important;
-      min-height: 360px !important;
-    }
-
-    #gameScreen .player {
-      width: clamp(76px, 22vmin, 96px) !important;
-      height: clamp(76px, 22vmin, 96px) !important;
-    }
-
-    #gameScreen #ME {
-      left: 9% !important;
-      right: auto !important;
-      top: auto !important;
-      bottom: 12% !important;
-    }
-  }
-
-  @media (max-height: 650px) {
-    #gameScreen {
-      height: min(60vh, 470px) !important;
-      min-height: 330px !important;
-    }
   }
 
 
-  /* =========================================================
-     PROPORTIONAL BALL — ORIGINAL CYBERBALL RATIO
-     Original: player 136px, ball 34px -> ball = 25% of player
-     ========================================================= */
+  /* Extra short-screen fit for the economic offer and retained rule screens. */
+  @media (max-width:760px){
+    #ultimatumFirstOfferScreen .panel,
+    #ultimatumSecondOfferScreen .panel{padding:10px 8px;}
+    #ultimatumFirstOfferScreen h2,
+    #ultimatumSecondOfferScreen h2{margin-bottom:3px;}
+    #ultimatumFirstOfferScreen .ratingIdentity,
+    #ultimatumSecondOfferScreen .ratingIdentity{margin:3px auto 1px;}
+    #ultimatumFirstOfferScreen .ratingIdentity .avatar,
+    #ultimatumSecondOfferScreen .ratingIdentity .avatar{margin-bottom:3px;}
+    #ultimatumFirstOfferScreen .ratingIdentity h3,
+    #ultimatumSecondOfferScreen .ratingIdentity h3{margin:2px 0;}
+    #ultimatumFirstOfferScreen p,
+    #ultimatumSecondOfferScreen p{margin:3px auto;line-height:1.22;}
+    #ultimatumFirstOfferScreen .ultimatumDecisionBtn,
+    #ultimatumSecondOfferScreen .ultimatumDecisionBtn{padding:10px 18px;}
 
-  #gameScreen {
-    --player-size: clamp(82px, 12vmin, 112px);
+    #rule1Screen .panel,#rule2Screen .panel,#rule3Screen .panel,#phase2Screen .panel{padding:10px 10px;}
+    #rule1Screen p,#rule2Screen p,#rule3Screen p,#phase2Screen p{margin:3px auto;line-height:1.22;}
+    #rule1Screen .ruleCard,#rule2Screen .ruleCard,#rule3Screen .ruleCard{margin:6px auto;padding:9px 12px;gap:10px;}
+    #rule3Screen .specialDemo,#phase2Screen .specialDemo{margin:6px auto;padding:9px;}
+    #rule3Screen .demoStar,#phase2Screen .demoStar{width:42px;height:42px;margin-bottom:6px;}
+    #phase2Screen .statsGrid{margin:7px auto;}
+    #phase2Screen .stat{padding:10px;}
   }
 
-  #gameScreen .player {
-    width: var(--player-size) !important;
-    height: var(--player-size) !important;
+
+  @media (max-height:800px) and (min-width:761px){
+    #rule1Screen .panel,#rule2Screen .panel,#rule3Screen .panel,#phase2Screen .panel{padding-top:14px;padding-bottom:14px;}
+    #rule1Screen p,#rule2Screen p,#rule3Screen p,#phase2Screen p{margin:4px auto;line-height:1.25;}
+    #rule1Screen .ruleCard,#rule2Screen .ruleCard,#rule3Screen .ruleCard{margin:8px auto;padding:12px 18px;}
+    #rule3Screen .specialDemo,#phase2Screen .specialDemo{margin:8px auto;padding:12px;}
+    #rule3Screen .demoStar,#phase2Screen .demoStar{width:46px;height:46px;margin-bottom:6px;}
+    #phase2Screen .statsGrid{margin:8px auto;}
+    #phase2Screen .stat{padding:12px;}
   }
 
-  #gameScreen #ball {
-    width: calc(var(--player-size) * 0.25) !important;
-    height: calc(var(--player-size) * 0.25) !important;
-    position: absolute;
-    border-radius: 50%;
-    background: #232a35;
-    box-shadow: 0 7px 14px rgba(20,28,38,.25);
-    z-index: 12;
-    transition:
-      left .68s cubic-bezier(.22,.7,.24,1),
-      top .68s cubic-bezier(.22,.7,.24,1),
-      transform .68s ease;
-    pointer-events: none;
-  }
+  @media (max-width:760px) and (max-height:660px){
+    #economicTaskIntroScreen .panel{padding:9px 8px;}
+    #economicTaskIntroScreen h2{margin-bottom:3px;}
+    #economicTaskIntroScreen p{margin:3px auto;line-height:1.20;}
+    #economicTaskIntroScreen .primary{margin-top:3px;}
 
-  #gameScreen #ball::after {
-    content: "";
-    position: absolute;
-    width: 29.4%;
-    height: 29.4%;
-    border: 2px solid rgba(255,255,255,.7);
-    border-radius: 50%;
-    left: 17.6%;
-    top: 14.7%;
-  }
-
-  #gameScreen #ball.star {
-    border-radius: 0;
-    clip-path: polygon(
-      50% 0%,
-      61% 35%,
-      98% 35%,
-      68% 56%,
-      79% 94%,
-      50% 72%,
-      21% 94%,
-      32% 56%,
-      2% 35%,
-      39% 35%
-    );
-    transform: scale(1.2);
-    background: #202733;
-  }
-
-  #gameScreen #ball.star::after {
-    display: none;
-  }
-
-  @media (max-width: 760px) {
-    #gameScreen {
-      --player-size: clamp(76px, 22vmin, 96px);
-    }
-  }
-
-  @media (max-height: 650px) {
-    #gameScreen {
-      --player-size: clamp(72px, 16vmin, 96px);
-    }
+    #rule1Screen h1,#rule2Screen h1,#rule3Screen h1,#phase2Screen h2{margin-bottom:4px;}
+    #rule1Screen .ruleCard,#rule2Screen .ruleCard,#rule3Screen .ruleCard{padding:7px 9px;margin:4px auto;}
+    #rule3Screen .specialDemo,#phase2Screen .specialDemo{padding:7px;margin:4px auto;}
+    #rule3Screen .demoStar,#phase2Screen .demoStar{width:36px;height:36px;margin-bottom:4px;}
   }
 
 </style>
@@ -1120,7 +926,7 @@
     participant:{}, identity_mapping:{}, initial_ratings:[], feedback_comprehension:[],
     feedback_comments:[], feedback_page_views:[], game_throws:[], postgame_ratings:[],
     ultimatum_game:{},
-    metaperception:{"expect (pre)":null,"feel (post)":null},
+    metaperception:{expect:null,feel:null},
     return_likelihood:{}
   };
   let ratingStart=0, feedbackAttemptStart=0, gameChoiceStart=0;
@@ -1224,42 +1030,10 @@
     return (el('nickname').value.trim()||'You').slice(0,18);
   }
 
-
-  function fitActiveScreenToVisibleViewport(){
-    const active=document.querySelector('.screen.active');
-    if(!active)return;
-
-    const viewportH=(window.visualViewport && window.visualViewport.height)
-      ? window.visualViewport.height
-      : window.innerHeight;
-
-    const rect=active.getBoundingClientRect();
-    const top=Math.max(0,rect.top);
-    const available=Math.max(280,Math.floor(viewportH-top-6));
-
-    active.style.setProperty('--screen-fit-height',available+'px');
-
-    if(active.id==='gameScreen'){
-      const w=Math.max(280,active.getBoundingClientRect().width || window.innerWidth);
-      const playerSize=Math.round(Math.max(68,Math.min(136,available*0.18,w*0.20)));
-      active.style.setProperty('--game-player-size',playerSize+'px');
-    }
-  }
-
-  window.addEventListener('resize',fitActiveScreenToVisibleViewport);
-  window.addEventListener('orientationchange',()=>setTimeout(fitActiveScreenToVisibleViewport,80));
-  if(window.visualViewport){
-    window.visualViewport.addEventListener('resize',fitActiveScreenToVisibleViewport);
-  }
-
   function showScreen(id){
     if(id==='seatIntroScreen'){el('seatIntroLegend').innerHTML=seatLegendHTML();}
     document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
     el(id).classList.add('active');
-    requestAnimationFrame(()=>{
-      fitActiveScreenToVisibleViewport();
-      setTimeout(fitActiveScreenToVisibleViewport,60);
-    });
   }
 
   function initializeSession(){
@@ -1356,13 +1130,13 @@
   function applyGamePositions(){
     const mobile=window.innerWidth<=760;
     const slotStyles=mobile ? {
-      topLeft:{left:'9%',right:'auto',top:'20%',bottom:'auto'},
-      topRight:{left:'auto',right:'9%',top:'20%',bottom:'auto'},
-      bottomRight:{left:'auto',right:'9%',top:'auto',bottom:'12%'}
+      topLeft:{left:'6%',right:'auto',top:'19%',bottom:'auto'},
+      topRight:{left:'auto',right:'6%',top:'19%',bottom:'auto'},
+      bottomRight:{left:'auto',right:'7%',top:'auto',bottom:'13%'}
     } : {
-      topLeft:{left:'22%',right:'auto',top:'20%',bottom:'auto'},
-      topRight:{left:'auto',right:'22%',top:'20%',bottom:'auto'},
-      bottomRight:{left:'auto',right:'22%',top:'auto',bottom:'12%'}
+      topLeft:{left:'15%',right:'auto',top:'18%',bottom:'auto'},
+      topRight:{left:'auto',right:'15%',top:'18%',bottom:'auto'},
+      bottomRight:{left:'auto',right:'16%',top:'auto',bottom:'12%'}
     };
 
     ids.forEach(role=>{
@@ -1496,7 +1270,7 @@
 
   function saveMetaperceptionPre(){
     if(metaperceptionPreSelection==null)return;
-    completeLog.metaperception["expect (pre)"]={
+    completeLog.metaperception.expect={
       rating:metaperceptionPreSelection,
       rt_ms:Math.round(performance.now()-metaperceptionPreStart)
     };
@@ -1520,7 +1294,7 @@
 
   function saveMetaperceptionPost(){
     if(metaperceptionPostSelection==null)return;
-    completeLog.metaperception["feel (post)"]={
+    completeLog.metaperception.feel={
       rating:metaperceptionPostSelection,
       rt_ms:Math.round(performance.now()-metaperceptionPostStart)
     };
@@ -1544,13 +1318,13 @@
   }
 
   function renderRating(){
-    el('ratingEyebrow').style.display = ratingContext === 'post_seating' ? 'none' : '';
     const role=ratingOrder[ratingIndex];
     const p=identities[role];
     ratingSelection=null;
     confidenceSelection=null;
     ratingStart=performance.now();
     const isPost=ratingContext!=='pregame';
+    el('ratingEyebrow').style.display=(ratingContext==='post_seating')?'none':'';
     const roundLabel=ratingContext==='scored'
       ?'After Round 1'
       :(ratingContext==='free'?'After Free Game':'After Seating Task');
@@ -2899,7 +2673,7 @@
   if (restartBtn) {
     restartBtn.addEventListener('click',()=>{
       state=null;memoryTrials=[];participantRatings={};roundRatings={scored:{},free:{},post_seating:{}};roundMessages={scored:{},free:{},post_seating:{}};feedbackComments={};feedbackPage=1;scoredRoundLength=0;
-      completeLog.participant={};completeLog.identity_mapping={};completeLog.initial_ratings=[];completeLog.feedback_comprehension=[];completeLog.feedback_comments=[];completeLog.feedback_page_views=[];completeLog.game_throws=[];completeLog.postgame_ratings=[];completeLog.ultimatum_game={};completeLog.metaperception={"expect (pre)":null,"feel (post)":null};completeLog.return_likelihood={};returnLikelihoodSelections={};returnLikelihoodTouched={};metaperceptionPreSelection=null;metaperceptionPostSelection=null;metaperceptionPreDone=false;activeFeedbackPageLogIndex=null;gameThrowCounter=0;ultimatumSelectedRoles=[];ultimatumDisplayOrder=[];ultimatumOfferPlan=[];
+      completeLog.participant={};completeLog.identity_mapping={};completeLog.initial_ratings=[];completeLog.feedback_comprehension=[];completeLog.feedback_comments=[];completeLog.feedback_page_views=[];completeLog.game_throws=[];completeLog.postgame_ratings=[];completeLog.ultimatum_game={};completeLog.metaperception={expect:null,feel:null};completeLog.return_likelihood={};returnLikelihoodSelections={};returnLikelihoodTouched={};metaperceptionPreSelection=null;metaperceptionPostSelection=null;metaperceptionPreDone=false;activeFeedbackPageLogIndex=null;gameThrowCounter=0;ultimatumSelectedRoles=[];ultimatumDisplayOrder=[];ultimatumOfferPlan=[];
       el('nickname').value='';el('selfDescription').value='';
       initializeSession();
       showScreen('profileScreen');
@@ -2908,7 +2682,6 @@
 
   markRequiredFields();
   initializeSession();
-  requestAnimationFrame(fitActiveScreenToVisibleViewport);
 })();
 </script>
 
