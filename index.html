@@ -819,7 +819,6 @@
 
     // Send each experiment section as its own Qualtrics Embedded Data column.
     // Repeated records stay as JSON inside their section column.
-    const participantChoices=completeLog.game_throws.filter(x=>x.from_role==='ME');
     const feedbackData={
       comprehension:completeLog.feedback_comprehension,
       comments:completeLog.feedback_comments
@@ -831,7 +830,6 @@
       Feedback_Comprehension: JSON.stringify(feedbackData),
       Feedback_Page_Views: JSON.stringify(completeLog.feedback_page_views),
       Game_Throws: JSON.stringify(completeLog.game_throws),
-      Game_Choices: JSON.stringify(participantChoices),
       PostGame_Ratings: JSON.stringify(completeLog.postgame_ratings),
       PostSeating_Ratings: JSON.stringify(completeLog.postgame_ratings.filter(x=>x.context==='post_seating')),
       PostSeating_Rating_Views: JSON.stringify(completeLog.post_seating_rating_views),
