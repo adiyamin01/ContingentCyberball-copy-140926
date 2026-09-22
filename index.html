@@ -665,9 +665,7 @@
 <section id="endScreen" class="screen">
   <div class="panel">
     <h2>Thank you</h2>
-    <p id="endText">This part of the study is now complete.<br>
-      Next, we have a few questions about you.<br><br>
-      Please click the blue button below to continue to the next section.</p>
+    <p id="endText">You have completed the study.</p>
   </div>
 </section>
 
@@ -2170,15 +2168,20 @@
 
   async function toss(from,to){
     gameThrowCounter++;
-    completeLog.game_throws.push({
+
+    // Keep the throw log intentionally compact.
+    // Every throw stores only sender/receiver role.
+    // Participant throws also store reaction time from receiving the ball
+    // until choosing the next player.
+    const throwLog={
       throw:gameThrowCounter,
-      from_role:from,from_player:visibleName(from),
-      to_role:to,to_player:visibleName(to),
-      participant_choice:from==='ME',
-      hesitation_ms:from==='ME' ? Math.round(performance.now()-gameChoiceStart) : null,
-      timestamp_ms:Math.round(performance.now()-experimentStart),
-      phase:state?.phase || null
-    });
+      from_role:from,
+      to_role:to
+    };
+    if(from==='ME'){
+      throwLog.rt_ms=Math.round(performance.now()-gameChoiceStart);
+    }
+    completeLog.game_throws.push(throwLog);
     checkpoint();
     setHolder(from);await sleep(110);
     el(from).classList.add('senderPulse');
