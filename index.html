@@ -574,7 +574,6 @@
 
 <section id="metaperceptionPostScreen" class="screen">
   <div class="panel">
-    <div class="eyebrow">Before the economic game</div>
     <h2>How much do you feel liked by the group?</h2>
     <div class="ratingScale" id="metaperceptionPostScale"></div>
     <div class="scaleEnds"><span>1 — Not at all</span><span>10 — Very much</span></div>
@@ -651,7 +650,6 @@
 
 <section id="returnLikelihoodScreen" class="screen">
   <div class="panel returnLikelihoodPanel">
-    <div class="eyebrow">Final question</div>
     <h2>Thinking about the game you just played, how likely was each player to <u>return</u> the ball to you?</h2>
     <p class="returnLikelihoodHint">(Please enter a number between 0% and 100% for each player)</p>
     <div class="returnLikelihoodScaleLabels"><span>0</span><span>100</span></div>
@@ -777,7 +775,6 @@
     version:'Cyberball Return Game — Reworked V6 + complete logging',
     participant:{}, identity_mapping:{}, initial_ratings:[], feedback_comprehension:[],
     feedback_comments:[], feedback_page_views:[], game_throws:[], postgame_ratings:[],
-    post_seating_rating_views:[], seating_trials:[],
     ultimatum_game:{},
     metaperception:{pre:null,post:null},
     return_likelihood:{}
@@ -785,7 +782,6 @@
   let ratingStart=0, feedbackAttemptStart=0, gameChoiceStart=0;
   let gameThrowCounter=0;
   let activeFeedbackPageLogIndex=null;
-  let activePostSeatingRatingLogIndex=null;
   let experimentComplete=false;
   let experimentCompletedAtMs=null;
   let ultimatumSelectedRoles=[];
@@ -834,8 +830,6 @@
       Game_Throws: JSON.stringify(completeLog.game_throws),
       PostGame_Ratings: JSON.stringify(completeLog.postgame_ratings),
       PostSeating_Ratings: JSON.stringify(completeLog.postgame_ratings.filter(x=>x.context==='post_seating')),
-      PostSeating_Rating_Views: JSON.stringify(completeLog.post_seating_rating_views),
-      Seating_Trials: JSON.stringify(completeLog.seating_trials),
       Ultimatum_Game: JSON.stringify(completeLog.ultimatum_game || {}),
       Metaperception: JSON.stringify(completeLog.metaperception || {}),
       Return_Likelihood: JSON.stringify(completeLog.return_likelihood || {}),
@@ -844,7 +838,7 @@
     };
 
     for(let i=1;i<=CFG.seatingTrials;i++){
-      const trial=completeLog.seating_trials.find(x=>x.trial===i) || null;
+      const trial=seatResults.find(x=>x.trial===i) || null;
       fields['Table_'+i]=trial ? JSON.stringify(trial) : '';
     }
 
@@ -881,25 +875,6 @@
     activeFeedbackPageLogIndex=null;
   }
 
-  function beginPostSeatingRatingLog(role,p){
-    const row={
-      player_index:ratingIndex+1, role, visible_player:p.name, context:'post_seating',
-      entered_at_ms:experimentMs(), duration_ms:null, rating:null, confidence_rating:null
-    };
-    completeLog.post_seating_rating_views.push(row);
-    activePostSeatingRatingLogIndex=completeLog.post_seating_rating_views.length-1;
-  }
-
-  function endPostSeatingRatingLog(rating,confidenceRating=null){
-    if(activePostSeatingRatingLogIndex==null)return;
-    const row=completeLog.post_seating_rating_views[activePostSeatingRatingLogIndex];
-    if(row && row.duration_ms==null){
-      row.duration_ms=experimentMs()-row.entered_at_ms;
-      row.rating=rating;
-      row.confidence_rating=confidenceRating;
-    }
-    activePostSeatingRatingLogIndex=null;
-  }
 
   function participantName(){
     return (el('nickname').value.trim()||'You').slice(0,18);
@@ -1259,7 +1234,6 @@
     }else{
       el('ratingNext').textContent='Continue';
     }
-    if(ratingContext==='post_seating') beginPostSeatingRatingLog(role,p);
   }
 
   function saveRatingAndContinue(){
@@ -1280,7 +1254,6 @@
       const record={context:ratingContext,role,visible_player:p.name,rating:ratingSelection,hesitation_ms:rt,message};
       if(ratingContext==='post_seating')record.confidence_rating=confidenceSelection;
       completeLog.postgame_ratings.push(record);
-      if(ratingContext==='post_seating')endPostSeatingRatingLog(ratingSelection,confidenceSelection);
     }
     checkpoint();
     ratingIndex++;
@@ -1698,10 +1671,6 @@
     const resultIdx=seatResults.findIndex(r=>r.trial===row.trial);
     if(resultIdx>=0) seatResults[resultIdx]=row;
     else seatResults.push(row);
-
-    const logIdx=completeLog.seating_trials.findIndex(r=>r.trial===row.trial);
-    if(logIdx>=0) completeLog.seating_trials[logIdx]=row;
-    else completeLog.seating_trials.push(row);
 
     checkpoint();
     el('seatPrompt').textContent='Seat selected. You can change your choice before continuing.';
@@ -2553,7 +2522,7 @@
   if (restartBtn) {
     restartBtn.addEventListener('click',()=>{
       state=null;memoryTrials=[];participantRatings={};roundRatings={scored:{},free:{},post_seating:{}};roundMessages={scored:{},free:{},post_seating:{}};feedbackComments={};feedbackPage=1;scoredRoundLength=0;
-      completeLog.participant={};completeLog.identity_mapping={};completeLog.initial_ratings=[];completeLog.feedback_comprehension=[];completeLog.feedback_comments=[];completeLog.feedback_page_views=[];completeLog.game_throws=[];completeLog.postgame_ratings=[];completeLog.post_seating_rating_views=[];completeLog.seating_trials=[];completeLog.ultimatum_game={};completeLog.metaperception={pre:null,post:null};completeLog.return_likelihood={};returnLikelihoodSelections={};returnLikelihoodTouched={};metaperceptionPreSelection=null;metaperceptionPostSelection=null;metaperceptionPreDone=false;activeFeedbackPageLogIndex=null;activePostSeatingRatingLogIndex=null;gameThrowCounter=0;ultimatumSelectedRoles=[];ultimatumDisplayOrder=[];ultimatumOfferPlan=[];
+      completeLog.participant={};completeLog.identity_mapping={};completeLog.initial_ratings=[];completeLog.feedback_comprehension=[];completeLog.feedback_comments=[];completeLog.feedback_page_views=[];completeLog.game_throws=[];completeLog.postgame_ratings=[];completeLog.ultimatum_game={};completeLog.metaperception={pre:null,post:null};completeLog.return_likelihood={};returnLikelihoodSelections={};returnLikelihoodTouched={};metaperceptionPreSelection=null;metaperceptionPostSelection=null;metaperceptionPreDone=false;activeFeedbackPageLogIndex=null;gameThrowCounter=0;ultimatumSelectedRoles=[];ultimatumDisplayOrder=[];ultimatumOfferPlan=[];
       el('nickname').value='';el('selfDescription').value='';
       initializeSession();
       showScreen('profileScreen');
