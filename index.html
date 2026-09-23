@@ -800,13 +800,13 @@
     // Set to true to show per-player icons alongside colors (code retained below).
     useIcons:false,
     // SIMPLE MODE: no rules, no points, no special/star throws. The round ends
-    // at the earlier of 30 DIRECT returns or maxTrials participant choices.
+    // at the earlier of 30 DIRECT returns or maxTotalThrows total throws between all players.
     // A direct return means the same player the participant threw to returns
     // the ball directly to the participant. Other incoming balls do not count as direct returns.
     // Set to false to restore the two-phase points game (code retained below).
     simpleMode:true,
     directReturnTarget:30,
-    maxTrials:250, // Safety cap: end the game after this many participant choices even if 30 direct returns were not reached.
+    maxTotalThrows:250, // Safety cap: end the game after this many total throws between all players even if 30 direct returns were not reached.
     // ---- Seating task (runs after the post-game ratings) ----
     seatingEnabled:true,
     seatingTrials:30,   // 30 tables: three adjacent players, balanced around the circle and within the trio
@@ -2474,8 +2474,8 @@
     await toss('ME',recipient);
 
     if(CFG.simpleMode){
-      // Count each participant choice as one trial. The game ends at the earlier of
-      // 30 direct returns or CFG.maxTrials completed participant trials.
+      // Count each participant choice separately for logging/summary purposes.
+      // The safety cap itself is based on TOTAL throws between all players.
       state.throwsMade++;
     }
 
@@ -2501,7 +2501,7 @@
         if(CFG.simpleMode){
           state.directReturns++;
           updateHud();
-          if(state.directReturns>=CFG.directReturnTarget || state.throwsMade>=CFG.maxTrials){
+          if(state.directReturns>=CFG.directReturnTarget || gameThrowCounter>=CFG.maxTotalThrows){
             await sleep(300);
             finishCurrentPhase();
             return;
@@ -2513,7 +2513,7 @@
         if(CFG.simpleMode){
           state.directReturns++;
           updateHud();
-          if(state.directReturns>=CFG.directReturnTarget || state.throwsMade>=CFG.maxTrials){
+          if(state.directReturns>=CFG.directReturnTarget || gameThrowCounter>=CFG.maxTotalThrows){
             await sleep(300);
             finishCurrentPhase();
             return;
@@ -2536,7 +2536,7 @@
     }else{
       if(state.phase==='free' && state.pendingEnd){await sleep(300);finishCurrentPhase();return;}
       await routeBotsUntilNextIncoming(recipient);
-      if(CFG.simpleMode && state.throwsMade>=CFG.maxTrials){
+      if(CFG.simpleMode && gameThrowCounter>=CFG.maxTotalThrows){
         await sleep(300);
         finishCurrentPhase();
         return;
