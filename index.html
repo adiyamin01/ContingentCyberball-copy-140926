@@ -77,8 +77,11 @@
   .avatar{width:92px;height:92px;border-radius:50%;margin:0 auto 14px;display:grid;place-items:center;font-family:Arial,sans-serif;font-size:42px;border:5px solid #fff;box-shadow:0 8px 20px rgba(20,28,38,.12)}
   .sentence{font-size:17px;line-height:1.38;color:#4b5360;margin-top:10px}
 
-  /* MEET PLAYERS — larger boxes and text on desktop */
-  #meetScreen{padding:16px}
+  /* MEET PLAYERS — larger boxes and larger player content */
+  #meetScreen{
+    padding:16px;
+  }
+
   #meetScreen .panel{
     width:min(1180px,98vw);
     height:min(680px,calc(100vh - 24px));
@@ -89,30 +92,67 @@
     flex-direction:column;
     justify-content:center;
   }
-  #meetScreen .eyebrow{font-size:16px;margin-bottom:10px}
-  #meetScreen h2{font-size:clamp(36px,4vw,50px);margin-bottom:10px}
-  #meetScreen > .panel > p{font-size:24px;line-height:1.45;margin:6px auto 14px}
+
+  #meetScreen .eyebrow{
+    font-size:16px;
+    margin-bottom:10px;
+  }
+
+  #meetScreen h2{
+    font-size:clamp(36px,4vw,50px);
+    margin-bottom:10px;
+  }
+
+  #meetScreen > .panel > p{
+    font-size:24px;
+    line-height:1.45;
+    margin:6px auto 14px;
+  }
+
   #meetScreen .playerCards{
+    display:grid;
     grid-template-columns:repeat(3,minmax(0,1fr));
     gap:22px;
     width:100%;
     max-width:1080px;
     margin:18px auto 22px;
   }
+
   #meetScreen .playerCard{
     min-height:300px;
-    padding:30px 26px;
+    padding:26px 24px;
     border-radius:22px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
   }
+
   #meetScreen .avatar{
-    width:86px;
-    height:86px;
-    margin:0 auto 12px;
-    border-width:4px;
+    width:110px;
+    height:110px;
+    margin:0 auto 15px;
+    border-width:5px;
   }
-  #meetScreen .playerCard h3{font-size:34px;margin:8px 0}
-  #meetScreen .sentence{font-size:24px;line-height:1.5;margin-top:10px}
-  #meetScreen #meetNext{padding:13px 30px;font-size:20px;align-self:center}
+
+  #meetScreen .playerCard h3{
+    font-size:38px;
+    margin:8px 0 10px;
+  }
+
+  #meetScreen .sentence{
+    font-size:27px;
+    line-height:1.5;
+    margin-top:0;
+    max-width:100%;
+    text-align:center;
+  }
+
+  #meetScreen #meetNext{
+    padding:13px 30px;
+    font-size:20px;
+    align-self:center;
+  }
 
   /* MEMORY */
   .feedbackBlock{max-width:700px;margin:0 auto 8px}
