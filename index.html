@@ -77,7 +77,7 @@
   .avatar{width:92px;height:92px;border-radius:50%;margin:0 auto 14px;display:grid;place-items:center;font-family:Arial,sans-serif;font-size:42px;border:5px solid #fff;box-shadow:0 8px 20px rgba(20,28,38,.12)}
   .sentence{font-size:17px;line-height:1.38;color:#4b5360;margin-top:10px}
 
-  /* MEET PLAYERS — larger boxes and larger player content */
+  /* MEET PLAYERS — larger cards, top-aligned identity, readable text */
   #meetScreen{
     padding:16px;
   }
@@ -105,7 +105,7 @@
 
   #meetScreen > .panel > p{
     font-size:24px;
-    line-height:1.45;
+    line-height:1.4;
     margin:6px auto 14px;
   }
 
@@ -120,32 +120,38 @@
 
   #meetScreen .playerCard{
     min-height:300px;
-    padding:26px 24px;
+    padding:24px 24px 28px;
     border-radius:22px;
     display:flex;
     flex-direction:column;
     align-items:center;
-    justify-content:center;
+    justify-content:flex-start;
   }
 
   #meetScreen .avatar{
-    width:110px;
-    height:110px;
-    margin:0 auto 15px;
+    width:100px;
+    height:100px;
+    margin:0 auto 10px;
     border-width:5px;
+    flex:0 0 auto;
   }
 
   #meetScreen .playerCard h3{
-    font-size:38px;
-    margin:8px 0 10px;
+    font-size:34px;
+    line-height:1.1;
+    margin:4px 0 12px;
+    flex:0 0 auto;
   }
 
   #meetScreen .sentence{
-    font-size:27px;
-    line-height:1.5;
+    font-size:24px;
+    line-height:1.4;
     margin-top:0;
-    max-width:100%;
+    width:100%;
+    max-width:320px;
     text-align:center;
+    overflow-wrap:break-word;
+    word-break:normal;
   }
 
   #meetScreen #meetNext{
@@ -306,25 +312,79 @@
   }
 
   @media(max-width:760px){
-    #meetScreen{padding:10px}
+    #meetScreen{
+      padding:10px;
+    }
+
     #meetScreen .panel{
       width:calc(100vw - 20px);
-      height:min(560px,calc(100vh - 20px));
-      padding:18px 10px;
+      height:min(680px,calc(100vh - 20px));
+      padding:22px 14px;
     }
-    #meetScreen .eyebrow{font-size:11px;margin-bottom:5px}
-    #meetScreen h2{font-size:26px;margin-bottom:5px}
-    #meetScreen > .panel > p{font-size:14px;line-height:1.25;margin:2px auto 8px}
+
+    #meetScreen .eyebrow{
+      font-size:15px;
+      margin-bottom:7px;
+    }
+
+    #meetScreen h2{
+      font-size:34px;
+      margin-bottom:7px;
+    }
+
+    #meetScreen > .panel > p{
+      font-size:20px;
+      line-height:1.35;
+      margin:3px auto 10px;
+    }
+
     #meetScreen .playerCards{
       grid-template-columns:repeat(3,minmax(0,1fr));
-      gap:7px;
-      margin:10px auto 14px;
+      gap:9px;
+      width:100%;
+      margin:12px auto 16px;
     }
-    #meetScreen .playerCard{padding:10px 5px;border-radius:14px}
-    #meetScreen .avatar{width:50px;height:50px;margin-bottom:5px;border-width:3px}
-    #meetScreen .playerCard h3{font-size:15px;margin:2px 0}
-    #meetScreen .sentence{font-size:11px;line-height:1.23;margin-top:4px}
-    #meetScreen #meetNext{padding:10px 22px;font-size:15px}
+
+    #meetScreen .playerCard{
+      min-height:300px;
+      padding:18px 10px 22px;
+      border-radius:18px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:flex-start;
+    }
+
+    #meetScreen .avatar{
+      width:82px;
+      height:82px;
+      margin:0 auto 8px;
+      border-width:4px;
+      flex:0 0 auto;
+    }
+
+    #meetScreen .playerCard h3{
+      font-size:28px;
+      line-height:1.1;
+      margin:3px 0 10px;
+      flex:0 0 auto;
+    }
+
+    #meetScreen .sentence{
+      font-size:20px;
+      line-height:1.35;
+      margin-top:0;
+      width:100%;
+      max-width:100%;
+      text-align:center;
+      overflow-wrap:break-word;
+      word-break:normal;
+    }
+
+    #meetScreen #meetNext{
+      padding:12px 26px;
+      font-size:19px;
+    }
   }
 
 
