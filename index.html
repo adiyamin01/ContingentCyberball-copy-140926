@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
@@ -676,9 +677,9 @@
 <script>
 (() => {
   const CFG = {
-    // Hidden experimental roles. The FIRST N=30 counted incoming throws use the
-    // original fixed 16/10/4 composition. After N, sender selection becomes
-    // probabilistic using the same 16:10:4 weights until the round ends.
+    // Legacy 16/10/4 incoming composition. This is retained for the old
+    // non-simple points-game logic only. In simpleMode, spontaneous throws to
+    // the participant are balanced separately across A/B/C.
     targetToMe: { A:16, B:10, C:4 },
     initialFixedN: 30,
     scoredTarget: 50,
@@ -701,11 +702,13 @@
     // Set to true to show per-player icons alongside colors (code retained below).
     useIcons:false,
     // SIMPLE MODE: no rules, no points, no special/star throws. The round ends
-    // only after 30 DIRECT returns: the same player the participant threw to
-    // returns the ball directly to the participant. Other incoming balls do not count.
+    // at the earlier of 30 DIRECT returns or maxTrials participant choices.
+    // A direct return means the same player the participant threw to returns
+    // the ball directly to the participant. Other incoming balls do not count as direct returns.
     // Set to false to restore the two-phase points game (code retained below).
     simpleMode:true,
     directReturnTarget:30,
+    maxTrials:250, // Safety cap: end the game after this many participant choices even if 30 direct returns were not reached.
     // ---- Seating task (runs after the post-game ratings) ----
     seatingEnabled:true,
     seatingTrials:30,   // 30 tables: three adjacent players, balanced around the circle and within the trio
@@ -2074,6 +2077,9 @@
       directReturns:0,
       scores:{ME:0,A:0,B:0,C:0},
       lastChoice:null,
+      // Track spontaneous bot-to-participant throws separately from direct returns.
+      // These counts are used only to keep spontaneous A/B/C -> ME throws balanced.
+      spontaneousToUserCounts:{A:0,B:0,C:0},
       // Track bot-to-bot destinations so each bot distributes its passes as
       // evenly as possible between the other two bots.
       botRouteCounts:{
@@ -2178,6 +2184,15 @@
     return next;
   }
 
+  function balancedToUser(){
+    // Choose only among the player(s) with the fewest SPONTANEOUS throws to ME.
+    // Direct returns after the participant's own throw are intentionally excluded.
+    const counts=state.spontaneousToUserCounts;
+    const minCount=Math.min(...ids.map(id=>counts[id]||0));
+    const candidates=ids.filter(id=>(counts[id]||0)===minCount);
+    return candidates[Math.floor(Math.random()*candidates.length)];
+  }
+
   function showInstruction(on,allowedRoles=null){
     el('instruction').classList.toggle('show',on);
     ids.forEach(id=>{
@@ -2270,9 +2285,24 @@
     return isSpecial;
   }
 
-  async function incomingToUser(sender){
-    const isSpecial=consumeIncoming(sender);
-    if(isSpecial===null)return false;
+  async function incomingToUser(sender,isSpontaneous=false){
+    let isSpecial=false;
+
+    if(CFG.simpleMode){
+      // In simpleMode, direct returns and spontaneous throws are kept separate.
+      // Every arrival is still logged as received, but ONLY spontaneous throws
+      // update spontaneousToUserCounts. The old 16/10/4 quota is not consumed.
+      state.received[sender]++;
+      state.totalReceived++;
+      if(isSpontaneous){
+        state.spontaneousToUserCounts[sender]++;
+      }
+      updateHud();
+    }else{
+      isSpecial=consumeIncoming(sender);
+      if(isSpecial===null)return false;
+    }
+
     setSpecialVisual(isSpecial,sender);
     await toss(sender,'ME');
     if(isSpecial && state.phase==='free') showInstruction(true,[sender]);
@@ -2290,7 +2320,9 @@
       const next=balancedOther(h);await toss(h,next);h=next;
     }
 
-    const sender=weightedRemaining();
+    // In simpleMode, spontaneous throws to the participant are balanced across
+    // A/B/C. The old weighted 16/10/4 sender logic is retained only for legacy mode.
+    const sender=CFG.simpleMode?balancedToUser():weightedRemaining();
     if(!sender){finishCurrentPhase();return;}
 
     // Reach the scheduled sender using only the same balanced bot-to-bot rule,
@@ -2308,7 +2340,7 @@
       state.botRouteCounts[h][sender]=(state.botRouteCounts[h][sender]||0)+1;
       await toss(h,sender);h=sender;
     }
-    await incomingToUser(sender);
+    await incomingToUser(sender,CFG.simpleMode);
   }
 
   async function handleUserChoice(recipient){
@@ -2344,8 +2376,8 @@
     await toss('ME',recipient);
 
     if(CFG.simpleMode){
-      // Keep the participant's number of throws internally for the log,
-      // but do NOT use it as the stopping rule.
+      // Count each participant choice as one trial. The game ends at the earlier of
+      // 30 direct returns or CFG.maxTrials completed participant trials.
       state.throwsMade++;
     }
 
@@ -2363,14 +2395,15 @@
 
     if(giveBack){
       // Ordinary +1 return scoring is suppressed for any response that began as a special throw.
-      if(state.probabilityMode || state.remaining[recipient]>0){
-        const incomingPromise=incomingToUser(recipient);
+      if(CFG.simpleMode || state.probabilityMode || state.remaining[recipient]>0){
+        // This is a DIRECT RETURN, so it must not count as a spontaneous throw.
+        const incomingPromise=incomingToUser(recipient,false);
         if(state.phase==='scored' && !wasSpecial)changeUserScore(+1);
         await incomingPromise;
         if(CFG.simpleMode){
           state.directReturns++;
           updateHud();
-          if(state.directReturns>=CFG.directReturnTarget){
+          if(state.directReturns>=CFG.directReturnTarget || state.throwsMade>=CFG.maxTrials){
             await sleep(300);
             finishCurrentPhase();
             return;
@@ -2382,7 +2415,7 @@
         if(CFG.simpleMode){
           state.directReturns++;
           updateHud();
-          if(state.directReturns>=CFG.directReturnTarget){
+          if(state.directReturns>=CFG.directReturnTarget || state.throwsMade>=CFG.maxTrials){
             await sleep(300);
             finishCurrentPhase();
             return;
@@ -2405,6 +2438,11 @@
     }else{
       if(state.phase==='free' && state.pendingEnd){await sleep(300);finishCurrentPhase();return;}
       await routeBotsUntilNextIncoming(recipient);
+      if(CFG.simpleMode && state.throwsMade>=CFG.maxTrials){
+        await sleep(300);
+        finishCurrentPhase();
+        return;
+      }
     }
   }
 
@@ -2426,8 +2464,9 @@
     const startHolder=ids[Math.floor(Math.random()*ids.length)];
     placeBall(startHolder,true);setHolder(startHolder);
     await sleep(500);
-    const first=weightedRemaining();
-    await incomingToUser(first);
+    // The initial incoming throw is spontaneous too, so balance it in simpleMode.
+    const first=CFG.simpleMode?balancedToUser():weightedRemaining();
+    await incomingToUser(first,CFG.simpleMode);
   }
 
   function startScoredGame(){
